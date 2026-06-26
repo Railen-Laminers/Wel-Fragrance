@@ -1,12 +1,13 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { bgImages, modelImages, productImages } from './assets/images'
 
 function App() {
   return (
-    <>
-      Hell world
-    </>
+    <div style={{ padding: '2rem' }}>
+      <h1>Image assets ready</h1>
+      <p>Background image: {bgImages.wel ? 'loaded' : 'missing'}</p>
+      <p>Models count: {Object.keys(modelImages).length}</p>
+      <p>Products count: {Object.keys(productImages).length}</p>
+    </div>
   )
 }
 
