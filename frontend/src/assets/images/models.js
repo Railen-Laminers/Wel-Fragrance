@@ -1,10 +1,9 @@
-import dsc09312 from '../Models/DSC09312.jpg'
-import dsc09323 from '../Models/DSC09323.jpg'
-import dsc09348 from '../Models/DSC09348.jpg'
-import dsc09358 from '../Models/DSC09358.jpg'
-import dsc09368 from '../Models/DSC09368.jpg'
-import dsc09372 from '../Models/DSC09372.jpg'
-import dsc09388 from '../Models/DSC09388.jpg'
+import dsc09312 from '../Models/DSC09312.jpg' // 1
+import dsc09323 from '../Models/DSC09323.jpg' // 2
+import dsc09348 from '../Models/DSC09348.jpg' // 3
+import dsc09358 from '../Models/DSC09358.jpg' // 4
+import dsc09372 from '../Models/DSC09372.jpg' // 5
+import dsc09388 from '../Models/DSC09388.jpg' // 6
 import dsc09406 from '../Models/DSC09406.jpg'
 import dsc09413 from '../Models/DSC09413.jpg'
 import dsc09428 from '../Models/DSC09428.jpg'
@@ -37,7 +36,6 @@ export const modelImages = {
   dsc09323,
   dsc09348,
   dsc09358,
-  dsc09368,
   dsc09372,
   dsc09388,
   dsc09406,
@@ -73,7 +71,6 @@ export {
   dsc09323,
   dsc09348,
   dsc09358,
-  dsc09368,
   dsc09372,
   dsc09388,
   dsc09406,
