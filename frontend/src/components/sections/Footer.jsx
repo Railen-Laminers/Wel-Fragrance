@@ -1,78 +1,120 @@
 import React from 'react';
+import { FaInstagram, FaFacebookF, FaTwitter } from 'react-icons/fa';
 import Container from '../common/Container';
 import navLogo from '/navLogo.png';
 
 const Footer = () => {
-    const links = ["About", "Products", "Models", "Contact"];
+    const exploreLinks = ['About', 'Products', 'Models', 'Contact'];
+    const supportLinks = ['FAQ', 'Shipping', 'Returns'];
 
     return (
-        <Container background="var(--black)" style={{ padding: "64px 0 32px" }}>
-            <div style={{ paddingBottom: 48, borderBottom: "1px solid rgba(184,169,154,0.1)" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 40 }}>
-                    <div>
-                        {/* ✅ Replaced "WEL" text with navLogo */}
-                        <div style={{ marginBottom: 20 }}>
-                            <img
-                                src={navLogo}
-                                alt="Wel Fragrance"
-                                style={{ height: 32, width: 'auto', objectFit: 'contain' }}
-                            />
-                        </div>
-                        <p className="sans" style={{ fontSize: 13, fontWeight: 300, lineHeight: 1.9, color: "var(--stone)", maxWidth: 280, marginBottom: 28 }}>
-                            A maison de parfum devoted to the beauty of restraint. Crafted for those who know that true luxury whispers.
-                        </p>
-                        <div style={{ display: "flex", gap: 16 }}>
-                            {["IG", "FB", "X"].map((label, i) => (
-                                <a key={i} href="#" style={{
-                                    width: 36, height: 36, border: "1px solid rgba(184,169,154,0.2)",
-                                    display: "flex", alignItems: "center", justifyContent: "center",
-                                    textDecoration: "none", transition: "border-color 0.3s",
-                                    color: "var(--stone)", fontSize: 12, letterSpacing: "0.1em",
-                                }}
-                                    onMouseEnter={e => e.currentTarget.style.borderColor = "var(--stone)"}
-                                    onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(184,169,154,0.2)"}
-                                >{label}</a>
-                            ))}
-                        </div>
+        <Container
+            background="#0E0D0B"
+            className="py-12 md:py-16 lg:py-20"
+        >
+            {/* ─── Main Grid ─── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 pb-12 border-b border-[rgba(184,169,154,0.1)]">
+                {/* Brand Column */}
+                <div>
+                    <div className="mb-5">
+                        <img
+                            src={navLogo}
+                            alt="Wel Fragrance"
+                            className="h-8 md:h-10 w-auto object-contain"
+                        />
                     </div>
+                    <p className="sans text-sm font-light leading-relaxed text-stone max-w-xs mb-6">
+                        A maison de parfum devoted to the beauty of restraint. Crafted for
+                        those who know that true luxury whispers.
+                    </p>
+                    <div className="flex gap-4">
+                        <a
+                            href="https://instagram.com/Wel_FragranceCollection"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-9 h-9 border border-[rgba(184,169,154,0.2)] flex items-center justify-center rounded-full text-stone hover:text-ivory hover:border-ivory transition-colors duration-300"
+                            aria-label="Instagram"
+                        >
+                            <FaInstagram />
+                        </a>
+                        <a
+                            href="#"
+                            className="w-9 h-9 border border-[rgba(184,169,154,0.2)] flex items-center justify-center rounded-full text-stone hover:text-ivory hover:border-ivory transition-colors duration-300"
+                            aria-label="Facebook"
+                        >
+                            <FaFacebookF />
+                        </a>
+                        <a
+                            href="#"
+                            className="w-9 h-9 border border-[rgba(184,169,154,0.2)] flex items-center justify-center rounded-full text-stone hover:text-ivory hover:border-ivory transition-colors duration-300"
+                            aria-label="Twitter"
+                        >
+                            <FaTwitter />
+                        </a>
+                    </div>
+                </div>
 
-                    {[
-                        { title: "Explore", links },
-                        { title: "Service", links: ["Shipping", "Returns", "FAQ", "Contact"] },
-                        { title: "Legal", links: ["Privacy", "Terms", "Cookies"] },
-                    ].map(col => (
-                        <div key={col.title}>
-                            <div className="sans" style={{ fontSize: 10, letterSpacing: "0.25em", color: "var(--stone)", textTransform: "uppercase", marginBottom: 20 }}>{col.title}</div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                                {col.links.map(l => (
-                                    <a key={l} href={l === "Contact" ? "#contact" : "#"} className="sans" style={{
-                                        fontSize: 13, fontWeight: 300, color: "rgba(184,169,154,0.6)",
-                                        textDecoration: "none", transition: "color 0.3s",
-                                    }}
-                                        onMouseEnter={e => e.target.style.color = "var(--ivory)"}
-                                        onMouseLeave={e => e.target.style.color = "rgba(184,169,154,0.6)"}
-                                    >{l}</a>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
+                {/* Explore – matches Nav links exactly */}
+                <div>
+                    <div className="sans text-[10px] tracking-[0.25em] text-stone uppercase mb-4">
+                        Explore
+                    </div>
+                    <div className="flex flex-col gap-3">
+                        {exploreLinks.map((link) => (
+                            <a
+                                key={link}
+                                href={`#${link.toLowerCase()}`}
+                                className="sans text-sm font-light text-[rgba(184,169,154,0.6)] no-underline transition-colors duration-300 hover:text-ivory"
+                            >
+                                {link}
+                            </a>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Support */}
+                <div>
+                    <div className="sans text-[10px] tracking-[0.25em] text-stone uppercase mb-4">
+                        Support
+                    </div>
+                    <div className="flex flex-col gap-3">
+                        {supportLinks.map((link) => (
+                            <a
+                                key={link}
+                                href="#"
+                                className="sans text-sm font-light text-[rgba(184,169,154,0.6)] no-underline transition-colors duration-300 hover:text-ivory"
+                            >
+                                {link}
+                            </a>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: 32, flexWrap: "wrap", gap: 12 }}>
-                <p className="sans" style={{ fontSize: 11, color: "var(--mid)", letterSpacing: "0.06em" }}>
+            {/* ─── Bottom Bar ─── */}
+            <div className="flex flex-col sm:flex-row justify-between items-center pt-8 gap-4">
+                <p className="sans text-[11px] text-mid tracking-[0.06em]">
                     © 2025 Wel Fragrance. All rights reserved.
                 </p>
-                <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-                    {["Privacy Policy", "Terms of Service", "Cookie Settings"].map(l => (
-                        <a key={l} href="#" className="sans" style={{
-                            fontSize: 11, color: "var(--mid)", textDecoration: "none",
-                            transition: "color 0.3s", letterSpacing: "0.04em",
-                        }}
-                            onMouseEnter={e => e.target.style.color = "var(--stone)"}
-                            onMouseLeave={e => e.target.style.color = "var(--mid)"}
-                        >{l}</a>
-                    ))}
+                <div className="flex flex-wrap gap-4 md:gap-6 justify-center">
+                    <a
+                        href="#"
+                        className="sans text-[11px] text-mid no-underline transition-colors duration-300 tracking-[0.04em] hover:text-stone"
+                    >
+                        Privacy Policy
+                    </a>
+                    <a
+                        href="#"
+                        className="sans text-[11px] text-mid no-underline transition-colors duration-300 tracking-[0.04em] hover:text-stone"
+                    >
+                        Terms of Service
+                    </a>
+                    <a
+                        href="#"
+                        className="sans text-[11px] text-mid no-underline transition-colors duration-300 tracking-[0.04em] hover:text-stone"
+                    >
+                        Cookie Settings
+                    </a>
                 </div>
             </div>
         </Container>

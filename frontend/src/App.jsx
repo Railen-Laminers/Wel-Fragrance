@@ -1,10 +1,12 @@
+// src/App.jsx
 import React, { useEffect } from 'react';
 import Lenis from '@studio-freight/lenis';
 import FontLoader from './components/common/FontLoader';
 import Nav from './components/sections/Nav';
 import Hero from './components/sections/Hero';
 import About from './components/sections/About';
-import ProductsModels from './components/sections/ProductsModels';
+import Products from './components/sections/Products';        // new
+import WhyChooseUs from './components/sections/WhyChooseUs'; // new
 import Contact from './components/sections/Contact';
 import Footer from './components/sections/Footer';
 
@@ -39,7 +41,10 @@ export default function App() {
           <About />
         </div>
 
-        <ProductsModels />
+        {/* New sections */}
+        <Products />
+        <WhyChooseUs />
+
         <Contact />
         <Footer />
       </div>

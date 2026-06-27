@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IconMenu, IconClose } from '../common/Icons';
-import navLogo from '/navLogo.png';
+import webLogo from '/webLogo.png';
 
 const Nav = () => {
     const [scrolled, setScrolled] = useState(false);
@@ -56,7 +56,7 @@ const Nav = () => {
                     {/* Logo – left */}
                     <div style={{ height: 40, display: "flex", alignItems: "center" }}>
                         <img
-                            src={navLogo}
+                            src={webLogo}
                             alt="Wel Fragrance"
                             style={{ height: "100%", width: "auto", objectFit: "contain" }}
                         />
@@ -106,7 +106,7 @@ const Nav = () => {
 
                         <div style={{ marginBottom: 64 }}>
                             <img
-                                src={navLogo}
+                                src={webLogo}
                                 alt="Wel Fragrance"
                                 style={{ height: 36, width: 'auto', objectFit: 'contain' }}
                             />
