@@ -11,6 +11,7 @@ const About = () => {
           flex items-center py-16 md:py-28
           lg:h-screen lg:max-h-[1000px] lg:min-h-[600px]
           bg-white dark:bg-dark-teal
+          overflow-hidden   // <-- FIX: clips the overflowing video
         `}
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-20 items-center w-full">
