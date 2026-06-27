@@ -3,38 +3,45 @@
 @tailwind utilities;
 
 @layer base {
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
     html {
         scroll-behavior: smooth;
     }
 
-    /* Lenis scrollbar fix – keeps the page from shifting */
-    html.lenis {
-        height: auto;
+    /* Light theme (default) */
+    :root {
+        --color-bg: #FFFFFF;
+        --color-text: #0B212A;
     }
 
-    .lenis.lenis-smooth {
-        scroll-behavior: auto !important;
-    }
-
-    .lenis.lenis-smooth [data-lenis-prevent] {
-        overscroll-behavior: contain;
-    }
-
-    .lenis.lenis-stopped {
-        overflow: hidden;
+    /* Dark theme */
+    .dark {
+        --color-bg: #0B212A;
+        --color-text: #FFFFFF;
     }
 
     body {
-        @apply bg-white text-charcoal antialiased;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        font-family: 'Jost', sans-serif;
+        transition: background-color 0.3s, color 0.3s;
     }
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-        font-family: 'Playfair Display', serif;
+    ::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--color-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #C79F48;
+        /* old-gold */
     }
 }

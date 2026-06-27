@@ -7,7 +7,6 @@ const LazyImage = ({ src, alt, className, style, delay = 0 }) => {
     const [inView, setInView] = useState(false);
     const timeoutRef = useRef(null);
 
-    // IntersectionObserver – triggers when the element enters the viewport
     useEffect(() => {
         if (!ref.current) return;
         const observer = new IntersectionObserver(
@@ -23,7 +22,6 @@ const LazyImage = ({ src, alt, className, style, delay = 0 }) => {
         return () => observer.disconnect();
     }, []);
 
-    // When in view, start the loading timer with the given delay
     useEffect(() => {
         if (inView) {
             timeoutRef.current = setTimeout(() => {

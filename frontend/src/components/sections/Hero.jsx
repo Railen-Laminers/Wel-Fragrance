@@ -12,22 +12,12 @@ const Hero = () => {
 
     return (
         <section ref={ref} className="sticky top-0 z-1">
-            <Container
-                background="#0D0C0B"
-                className="h-screen max-h-[1000px] min-h-[600px] relative overflow-hidden"
-            >
-                {/* Parallax + gentle ping‑pong */}
+            <Container className="h-screen max-h-[1000px] min-h-[600px] relative overflow-hidden bg-white dark:bg-dark-teal">
                 <motion.div
                     style={{ y }}
                     className="absolute inset-0 z-0"
-                    animate={{
-                        x: [0, 6, -6, 0],
-                    }}
-                    transition={{
-                        duration: 14,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                    }}
+                    animate={{ x: [0, 6, -6, 0] }}
+                    transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
                 >
                     <LazyImage
                         src={bgImages.wel}
@@ -36,7 +26,6 @@ const Hero = () => {
                     />
                 </motion.div>
 
-                {/* Buttons wrapper – pinned to the bottom */}
                 <motion.div
                     style={{ opacity }}
                     className="absolute bottom-0 left-0 right-0 z-2 flex justify-center px-4 sm:px-6 pb-8 sm:pb-12 md:pb-16"
@@ -49,14 +38,13 @@ const Hero = () => {
                     >
                         <a
                             href="#products"
-                            className="sans px-6 py-3 md:px-8 md:py-4 text-[11px] no-underline uppercase inline-block bg-[var(--ivory)] text-[var(--black)] border border-[var(--ivory)] transition-all duration-300 cursor-pointer hover:bg-transparent hover:text-[var(--ivory)] hover:border-[var(--ivory)] text-center"
+                            className="font-jost px-6 py-3 md:px-8 md:py-4 text-[11px] uppercase no-underline inline-block bg-old-gold text-white border border-old-gold transition-all duration-300 hover:bg-transparent hover:text-old-gold hover:border-old-gold text-center"
                         >
                             Explore Collection
                         </a>
-
                         <a
                             href="#about"
-                            className="sans px-6 py-3 md:px-8 md:py-4 text-[11px] no-underline uppercase inline-block bg-[var(--black)] text-[var(--ivory)] border border-[var(--black)] transition-all duration-300 cursor-pointer hover:bg-transparent hover:text-[var(--ivory)] hover:border-[var(--ivory)] text-center"
+                            className="font-jost px-6 py-3 md:px-8 md:py-4 text-[11px] uppercase no-underline inline-block bg-dark-teal text-white border border-dark-teal transition-all duration-300 hover:bg-transparent hover:text-dark-teal hover:border-dark-teal text-center"
                         >
                             Our Story
                         </a>
