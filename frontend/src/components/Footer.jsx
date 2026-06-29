@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';  // ← added
 import { FaInstagram, FaFacebookF, FaTwitter } from 'react-icons/fa';
 import Container from './common/Container';
 import webLogo from '/webLogo.png';
@@ -92,7 +93,6 @@ const Footer = () => {
         <footer ref={ref} className="bg-dark-teal">
             <ScentMarquee />
 
-            {/* ── Animated content (slides up with stagger) ── */}
             <Container className="pt-14 pb-0">
                 <div className="max-w-[1440px] mx-auto">
                     {/* Grid columns */}
@@ -108,11 +108,13 @@ const Footer = () => {
                             style={{ transitionDelay: `${delays[0]}s` }}
                         >
                             <div className="mb-6">
-                                <img
-                                    src={webLogo}
-                                    alt="Wel Fragrance"
-                                    className="h-9 w-auto object-contain brightness-0 invert"
-                                />
+                                <Link to="/">
+                                    <img
+                                        src={webLogo}
+                                        alt="Wel Fragrance"
+                                        className="h-9 w-auto object-contain brightness-0 invert"
+                                    />
+                                </Link>
                             </div>
 
                             <p className="font-jost text-[13px] font-light leading-relaxed text-white/45 max-w-[280px] mb-8">
@@ -150,23 +152,47 @@ const Footer = () => {
                                 Explore
                             </div>
                             <div className="flex flex-col gap-3.5">
-                                {exploreLinks.map((link) => (
-                                    <a
-                                        key={link}
-                                        href={`#${link.toLowerCase()}`}
-                                        className="
-                      font-jost text-[13px] font-light text-white/45
-                      no-underline relative group w-fit
-                      hover:text-white transition-colors duration-200
-                    "
-                                    >
-                                        {link}
-                                        <span className="
-                      absolute left-0 -bottom-px w-0 h-px bg-old-gold
-                      transition-all duration-300 group-hover:w-full
-                    " />
-                                    </a>
-                                ))}
+                                {exploreLinks.map((link) => {
+                                    const isRoute = link === 'About' || link === 'Contact';
+                                    const path = isRoute ? `/${link.toLowerCase()}` : `#${link.toLowerCase()}`;
+                                    if (isRoute) {
+                                        return (
+                                            <Link
+                                                key={link}
+                                                to={path}
+                                                className="
+                          font-jost text-[13px] font-light text-white/45
+                          no-underline relative group w-fit
+                          hover:text-white transition-colors duration-200
+                        "
+                                            >
+                                                {link}
+                                                <span className="
+                          absolute left-0 -bottom-px w-0 h-px bg-old-gold
+                          transition-all duration-300 group-hover:w-full
+                        " />
+                                            </Link>
+                                        );
+                                    } else {
+                                        return (
+                                            <a
+                                                key={link}
+                                                href={path}
+                                                className="
+                          font-jost text-[13px] font-light text-white/45
+                          no-underline relative group w-fit
+                          hover:text-white transition-colors duration-200
+                        "
+                                            >
+                                                {link}
+                                                <span className="
+                          absolute left-0 -bottom-px w-0 h-px bg-old-gold
+                          transition-all duration-300 group-hover:w-full
+                        " />
+                                            </a>
+                                        );
+                                    }
+                                })}
                             </div>
                         </div>
 

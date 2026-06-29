@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import {
     FaChevronLeft,
     FaChevronRight,
@@ -91,15 +92,16 @@ const Hero = () => {
                         >
                             Explore Collection
                         </motion.a>
-                        <motion.a
-                            href="#about"
+                        <motion.div
+                            as={Link}
+                            to="/about"
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 1.8, duration: 0.9 }}
                             className="font-jost text-[10px] tracking-[0.3em] uppercase px-8 py-3.5 no-underline inline-block bg-dark-teal text-white border border-dark-teal transition-all duration-300 hover:bg-transparent hover:text-dark-teal hover:border-dark-teal text-center"
                         >
                             Our Story
-                        </motion.a>
+                        </motion.div>
                     </div>
                 </motion.div>
             </Container>
@@ -154,12 +156,12 @@ const About = () => {
                             to Canada. Every bottle is a tribute to dedication, family, and the
                             belief that scent has the power to connect us across borders.
                         </p>
-                        <a
-                            href="#about"
-                            className="font-jost text-[10px] tracking-[0.3em] uppercase px-8 py-3.5 no-underline border border-old-gold text-old-gold hover:bg-old-gold hover:text-white transition-colors duration-300"
+                        <Link
+                            to="/about"
+                            className="font-jost text-[10px] tracking-[0.3em] uppercase px-8 py-3.5 no-underline border border-old-gold text-old-gold hover:bg-old-gold hover:text-white transition-colors duration-300 inline-block"
                         >
                             Our Story <span className="ml-2 opacity-60">→</span>
-                        </a>
+                        </Link>
                     </Reveal>
                 </div>
             </Container>
@@ -293,7 +295,7 @@ const products = [
     },
 ];
 
-// ─── UPDATED Products component with cinematic transition ──────────
+// ─── Products component ──────────────────────────────────────────────────────
 const Products = () => {
     const [current, setCurrent] = useState(0);
     const [direction, setDirection] = useState(0);
@@ -308,8 +310,7 @@ const Products = () => {
     };
     const product = products[current];
 
-    // ─── Animation variants (type annotations removed for .jsx) ────
-
+    // ─── Animation variants ──────────────────────────────────────────────────
     const bgVariants = {
         hidden: { scale: 1.1, opacity: 0 },
         visible: {
@@ -361,8 +362,6 @@ const Products = () => {
         exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
     };
 
-    // ─── Render ──────────────────────────────────────────────────────
-
     return (
         <Container
             className={`
@@ -373,7 +372,7 @@ const Products = () => {
                 overflow-hidden bg-white dark:bg-dark-teal
             `}
         >
-            {/* Header – unchanged */}
+            {/* Header */}
             <div className="text-center mb-12 md:mb-16 lg:mb-8 flex-shrink-0">
                 <Reveal>
                     <span className="font-jost text-[10px] tracking-[0.3em] uppercase text-old-gold">
@@ -489,7 +488,7 @@ const Products = () => {
                     </motion.div>
                 </AnimatePresence>
 
-                {/* Navigation buttons – unchanged */}
+                {/* Navigation buttons */}
                 <button
                     onClick={prev}
                     className="absolute left-0 top-1/2 -translate-y-1/2 z-20 text-old-gold/40 hover:text-old-gold transition-colors p-4"
@@ -510,7 +509,7 @@ const Products = () => {
 };
 
 // ------------------------------------------------------------
-// Why Choose Us Section — Awwwards-inspired luxury narrative
+// Why Choose Us Section
 // ------------------------------------------------------------
 const values = [
     {
@@ -519,7 +518,7 @@ const values = [
         description:
             'Our fragrances are crafted with premium pure oils, ensuring lasting intensity and skin‑friendly wear.',
         detail:
-            'Each drop is a concentrate of nature\'s finest, free from fillers or synthetic extenders.',
+            "Each drop is a concentrate of nature's finest, free from fillers or synthetic extenders.",
     },
     {
         icon: FaLeaf,
@@ -550,12 +549,10 @@ const values = [
 const WhyChooseUs = () => {
     return (
         <section className="relative bg-white dark:bg-dark-teal overflow-hidden">
-            {/* Decorative background line — subtle brand signature */}
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-old-gold/20 to-transparent" />
 
             <Container className="py-20 md:py-28 lg:py-36">
                 <div className="max-w-7xl mx-auto">
-                    {/* Header — reduced, editorial, with a single strong sentence */}
                     <Reveal>
                         <div className="text-center mb-16 md:mb-20 lg:mb-24">
                             <span className="font-jost text-[10px] tracking-[0.3em] uppercase text-old-gold">
@@ -570,12 +567,10 @@ const WhyChooseUs = () => {
                                 Four pillars define our approach — each one a promise we make to
                                 you, and to ourselves.
                             </p>
-                            {/* Decorative divider */}
                             <div className="w-12 h-px bg-old-gold/40 mx-auto mt-6" />
                         </div>
                     </Reveal>
 
-                    {/* Values — presented as a visual essay, not a grid of cards */}
                     <Reveal stagger={0.1} className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16 lg:gap-x-20 lg:gap-y-20">
                         {values.map((item, index) => (
                             <motion.div
@@ -585,7 +580,6 @@ const WhyChooseUs = () => {
                                 className="group relative border-b border-old-gold/10 pb-8 md:pb-10 last:border-b-0 md:even:border-b-0"
                             >
                                 <div className="flex items-start gap-5 md:gap-6">
-                                    {/* Icon — refined, with a subtle glow on hover */}
                                     <div className="flex-shrink-0">
                                         <div className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center border border-old-gold/20 text-old-gold text-xl md:text-2xl transition-all duration-500 group-hover:border-old-gold/60 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(184,151,94,0.08)]">
                                             <item.icon />
@@ -599,11 +593,9 @@ const WhyChooseUs = () => {
                                         <p className="font-jost text-sm md:text-base font-light leading-relaxed text-black/70 dark:text-white/70 mt-1.5">
                                             {item.description}
                                         </p>
-                                        {/* Secondary detail line — adds depth */}
                                         <p className="font-jost text-xs md:text-sm font-light italic text-black/40 dark:text-white/40 mt-2 leading-relaxed border-l-2 border-old-gold/20 pl-3">
                                             {item.detail}
                                         </p>
-                                        {/* Decorative line that appears on hover */}
                                         <div className="w-8 h-px bg-old-gold/0 group-hover:bg-old-gold/40 transition-all duration-700 mt-4" />
                                     </div>
                                 </div>
@@ -611,7 +603,6 @@ const WhyChooseUs = () => {
                         ))}
                     </Reveal>
 
-                    {/* Closing statement — like a brand manifesto footer */}
                     <Reveal delay={0.3}>
                         <div className="mt-16 md:mt-20 lg:mt-24 text-center">
                             <div className="w-16 h-px bg-old-gold/30 mx-auto mb-6" />
@@ -639,7 +630,6 @@ const Contact = () => (
     <section id="contact" className="bg-white dark:bg-dark-teal border-t border-old-gold/10">
         <Container className="py-20 md:py-28 lg:py-32">
             <div className="max-w-5xl mx-auto">
-                {/* Two-column split */}
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_1px_1fr] gap-12 lg:gap-16 items-start">
 
                     {/* ── Left: emotional CTA ── */}
@@ -658,8 +648,8 @@ const Contact = () => (
                             For inquiries, collaborations, or simply to share your fragrance story —
                             we'd love to hear from you.
                         </p>
-                        <a
-                            href="mailto:wel.fragrancecollection@gmail.com"
+                        <Link
+                            to="/contact"
                             className="
                                 font-jost text-[10px] tracking-[0.3em] uppercase
                                 px-10 py-4 inline-block no-underline
@@ -670,10 +660,10 @@ const Contact = () => (
                             "
                         >
                             Send a Message
-                        </a>
+                        </Link>
                     </Reveal>
 
-                    {/* ── Vertical divider (lg only) ── */}
+                    {/* ── Vertical divider ── */}
                     <div className="hidden lg:block bg-old-gold/15 self-stretch" aria-hidden="true" />
 
                     {/* ── Right: contact details ── */}
@@ -704,7 +694,6 @@ const Contact = () => (
                             },
                         ].map(({ Icon, label, value, href, external }) => (
                             <div key={label} className="flex gap-4 items-start">
-                                {/* Icon box */}
                                 <div className="
                                     w-8 h-8 flex-shrink-0 flex items-center justify-center
                                     border border-old-gold/25 text-old-gold text-[12px] mt-0.5
