@@ -1,10 +1,35 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaInstagram, FaFacebookF, FaTwitter } from 'react-icons/fa';
 import Container from './common/Container';
 import webLogo from '/webLogo.png';
 
-// ─── Fragrance name marquee (CSS-only, no JS) ──────────────────────────────
+// ─── Custom hook: element in viewport ──────────────────────────────────────
+const useInView = (options = {}) => {
+    const [isInView, setIsInView] = useState(false);
+    const ref = useRef(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsInView(true);
+                }
+            },
+            { threshold: 0.2, ...options }
+        );
+
+        const el = ref.current;
+        if (el) observer.observe(el);
+
+        return () => {
+            if (el) observer.unobserve(el);
+        };
+    }, [options]);
+
+    return { ref, isInView };
+};
+
+// ─── Fragrance name marquee (CSS-only) ──────────────────────────────────────
 const SCENTS = ['Jaime', 'Dorz', 'Rupert', 'Vian', 'Litz', 'Iluminare', 'Fely', 'Lenzki', 'Rei', 'Joe', 'Mar', 'Greg'];
 
 const ScentMarquee = () => (
@@ -13,7 +38,6 @@ const ScentMarquee = () => (
             className="flex w-max"
             style={{ animation: 'marqueeFwd 32s linear infinite' }}
         >
-            {/* Doubled for seamless loop */}
             {[...SCENTS, ...SCENTS].map((name, i) => (
                 <span key={i} className="flex items-center">
                     <span className="font-playfair italic font-light text-[13px] text-old-gold/35 tracking-[0.08em] px-8 whitespace-nowrap">
@@ -24,62 +48,66 @@ const ScentMarquee = () => (
             ))}
         </div>
         <style>{`
-            @keyframes marqueeFwd {
-                from { transform: translateX(0); }
-                to   { transform: translateX(-50%); }
-            }
-            @media (prefers-reduced-motion: reduce) {
-                [style*="marqueeFwd"] { animation: none; }
-            }
-        `}</style>
+      @keyframes marqueeFwd {
+        from { transform: translateX(0); }
+        to   { transform: translateX(-50%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        [style*="marqueeFwd"] { animation: none; }
+      }
+    `}</style>
     </div>
 );
 
-// ─── Social icon button ───────────────────────────────────────────────────
+// ─── Social icon button (no Framer Motion) ─────────────────────────────────
 const SocialBtn = ({ Icon, href, label }) => (
-    <motion.a
+    <a
         href={href}
         target={href.startsWith('http') ? '_blank' : undefined}
         rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
         aria-label={label}
-        whileHover={{ y: -2 }}
-        whileTap={{ scale: 0.93 }}
         className="
-            w-9 h-9 border border-white/15 flex items-center justify-center
-            text-white/50 hover:text-old-gold hover:border-old-gold/50
-            transition-colors duration-300
-        "
+      w-9 h-9 border border-white/15 flex items-center justify-center
+      text-white/50 hover:text-old-gold hover:border-old-gold/50
+      transition-all duration-300 ease-out
+      hover:-translate-y-0.5 active:scale-95
+    "
     >
         <Icon size={13} />
-    </motion.a>
+    </a>
 );
 
-// ─── Footer ───────────────────────────────────────────────────────────────
+// ─── Footer ──────────────────────────────────────────────────────────────────
 const Footer = () => {
-    const exploreLinks  = ['About', 'Products', 'Catalogue', 'Contact'];
-    const supportLinks  = ['FAQ', 'Shipping', 'Returns'];
-    const legalLinks    = ['Privacy Policy', 'Terms of Service', 'Cookie Settings'];
+    const { ref, isInView } = useInView({ threshold: 0.1, triggerOnce: true });
+
+    const exploreLinks = ['About', 'Products', 'Catalogue', 'Contact'];
+    const supportLinks = ['FAQ', 'Shipping', 'Returns'];
+    const legalLinks = ['Privacy Policy', 'Terms of Service', 'Cookie Settings'];
+
+    // Stagger delays (in seconds) for each section
+    const delays = [0, 0.1, 0.2, 0.3]; // brand, explore, support, bottom bar
 
     return (
-        <motion.footer
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className="bg-dark-teal"
-        >
-            {/* ── Scent name ticker ── */}
+        <footer ref={ref} className="bg-dark-teal">
             <ScentMarquee />
 
-            {/* ── Main grid ── */}
+            {/* ── Animated content (slides up with stagger) ── */}
             <Container className="pt-14 pb-0">
                 <div className="max-w-[1440px] mx-auto">
+                    {/* Grid columns */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr] gap-12 md:gap-16 pb-14 border-b border-old-gold/10">
 
-                        {/* ── Brand column ── */}
-                        <div>
+                        {/* Brand column – delay 0 */}
+                        <div
+                            className={`
+                transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]
+                transform
+                ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}
+              `}
+                            style={{ transitionDelay: `${delays[0]}s` }}
+                        >
                             <div className="mb-6">
-                                {/* White logo on dark bg */}
                                 <img
                                     src={webLogo}
                                     alt="Wel Fragrance"
@@ -92,7 +120,6 @@ const Footer = () => {
                                 Crafted for those who know that true luxury whispers.
                             </p>
 
-                            {/* Contact snippet */}
                             <div className="space-y-2 mb-8">
                                 <a
                                     href="mailto:wel.fragrancecollection@gmail.com"
@@ -103,16 +130,22 @@ const Footer = () => {
                                 <p className="font-jost text-[12px] text-white/30">Philippines</p>
                             </div>
 
-                            {/* Socials */}
                             <div className="flex gap-3">
                                 <SocialBtn Icon={FaInstagram} href="https://instagram.com/Wel_FragranceCollection" label="Instagram" />
                                 <SocialBtn Icon={FaFacebookF} href="#" label="Facebook" />
-                                <SocialBtn Icon={FaTwitter}   href="#" label="Twitter" />
+                                <SocialBtn Icon={FaTwitter} href="#" label="Twitter" />
                             </div>
                         </div>
 
-                        {/* ── Explore column ── */}
-                        <div>
+                        {/* Explore column – delay 0.1s */}
+                        <div
+                            className={`
+                transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]
+                transform
+                ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}
+              `}
+                            style={{ transitionDelay: `${delays[1]}s` }}
+                        >
                             <div className="font-jost text-[9px] tracking-[0.32em] text-old-gold uppercase mb-6">
                                 Explore
                             </div>
@@ -122,23 +155,30 @@ const Footer = () => {
                                         key={link}
                                         href={`#${link.toLowerCase()}`}
                                         className="
-                                            font-jost text-[13px] font-light text-white/45
-                                            no-underline relative group w-fit
-                                            hover:text-white transition-colors duration-200
-                                        "
+                      font-jost text-[13px] font-light text-white/45
+                      no-underline relative group w-fit
+                      hover:text-white transition-colors duration-200
+                    "
                                     >
                                         {link}
                                         <span className="
-                                            absolute left-0 -bottom-px w-0 h-px bg-old-gold
-                                            transition-all duration-300 group-hover:w-full
-                                        " />
+                      absolute left-0 -bottom-px w-0 h-px bg-old-gold
+                      transition-all duration-300 group-hover:w-full
+                    " />
                                     </a>
                                 ))}
                             </div>
                         </div>
 
-                        {/* ── Support column ── */}
-                        <div>
+                        {/* Support column – delay 0.2s */}
+                        <div
+                            className={`
+                transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]
+                transform
+                ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}
+              `}
+                            style={{ transitionDelay: `${delays[2]}s` }}
+                        >
                             <div className="font-jost text-[9px] tracking-[0.32em] text-old-gold uppercase mb-6">
                                 Support
                             </div>
@@ -148,24 +188,32 @@ const Footer = () => {
                                         key={link}
                                         href="#"
                                         className="
-                                            font-jost text-[13px] font-light text-white/45
-                                            no-underline relative group w-fit
-                                            hover:text-white transition-colors duration-200
-                                        "
+                      font-jost text-[13px] font-light text-white/45
+                      no-underline relative group w-fit
+                      hover:text-white transition-colors duration-200
+                    "
                                     >
                                         {link}
                                         <span className="
-                                            absolute left-0 -bottom-px w-0 h-px bg-old-gold
-                                            transition-all duration-300 group-hover:w-full
-                                        " />
+                      absolute left-0 -bottom-px w-0 h-px bg-old-gold
+                      transition-all duration-300 group-hover:w-full
+                    " />
                                     </a>
                                 ))}
                             </div>
                         </div>
                     </div>
 
-                    {/* ── Bottom bar ── */}
-                    <div className="flex flex-col sm:flex-row justify-between items-center py-6 gap-5">
+                    {/* Bottom bar – delay 0.3s */}
+                    <div
+                        className={`
+              flex flex-col sm:flex-row justify-between items-center py-6 gap-5
+              transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]
+              transform
+              ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}
+            `}
+                        style={{ transitionDelay: `${delays[3]}s` }}
+                    >
                         <p className="font-jost text-[11px] text-white/25 tracking-[0.08em]">
                             © 2025 Wel Fragrance Collection. All rights reserved.
                         </p>
@@ -176,11 +224,11 @@ const Footer = () => {
                                     key={item}
                                     href="#"
                                     className="
-                                        font-jost text-[11px] text-white/25
-                                        no-underline hover:text-white/60
-                                        transition-colors duration-200
-                                        tracking-[0.04em]
-                                    "
+                    font-jost text-[11px] text-white/25
+                    no-underline hover:text-white/60
+                    transition-colors duration-200
+                    tracking-[0.04em]
+                  "
                                 >
                                     {item}
                                 </a>
@@ -189,7 +237,7 @@ const Footer = () => {
                     </div>
                 </div>
             </Container>
-        </motion.footer>
+        </footer>
     );
 };
 
