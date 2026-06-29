@@ -1,36 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useInView } from 'framer-motion';
 
-const LazyImage = ({ src, alt, className, style, delay = 0 }) => {
+const LazyImage = ({
+    src,
+    alt,
+    className,
+    style,
+    delay = 0,
+    placeholderColor = '#1a1a1a',
+}) => {
+    const ref = useRef(null);
+    const inView = useInView(ref, {
+        once: true,
+        margin: '200px 0px',
+    });
+
     const [loaded, setLoaded] = useState(false);
     const [shouldLoad, setShouldLoad] = useState(false);
-    const ref = useRef(null);
-    const [inView, setInView] = useState(false);
-    const timeoutRef = useRef(null);
-
-    useEffect(() => {
-        if (!ref.current) return;
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
-                    setInView(true);
-                    observer.disconnect();
-                }
-            },
-            { rootMargin: '200px' }
-        );
-        observer.observe(ref.current);
-        return () => observer.disconnect();
-    }, []);
 
     useEffect(() => {
         if (inView) {
-            timeoutRef.current = setTimeout(() => {
-                setShouldLoad(true);
-            }, delay);
+            const timer = setTimeout(() => setShouldLoad(true), delay);
+            return () => clearTimeout(timer);
         }
-        return () => {
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        };
     }, [inView, delay]);
 
     return (
@@ -41,7 +33,7 @@ const LazyImage = ({ src, alt, className, style, delay = 0 }) => {
                 ...style,
                 position: 'relative',
                 overflow: 'hidden',
-                background: '#1a1a1a',
+                background: placeholderColor,
             }}
         >
             {shouldLoad && (
@@ -56,13 +48,10 @@ const LazyImage = ({ src, alt, className, style, delay = 0 }) => {
                         height: '100%',
                         objectFit: 'cover',
                         opacity: loaded ? 1 : 0,
-                        transition: 'opacity 0.6s ease',
+                        transition: 'opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1)',
                         willChange: 'transform, opacity',
                     }}
                 />
-            )}
-            {!loaded && shouldLoad && (
-                <div style={{ position: 'absolute', inset: 0, background: '#1a1a1a' }} />
             )}
         </div>
     );
