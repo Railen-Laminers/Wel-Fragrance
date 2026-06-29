@@ -13,12 +13,12 @@ import {
     FaMapMarkerAlt,
 } from 'react-icons/fa';
 
+// ✅ Correct relative paths (up one level to components/)
 import Container from '../common/Container';
 import LazyImage from '../common/LazyImage';
 import Reveal from '../common/Reveal';
-import Nav from '../sections/Nav';
-import Footer from '../sections/Footer';
 
+// ✅ Assets (two levels up from pages/ to assets/)
 import {
     bgImages,
     dsc09312,
@@ -48,6 +48,7 @@ import {
 } from '../../assets/images';
 
 import welFragrance from '../../assets/videos/welFragrance.mp4';
+
 
 // ------------------------------------------------------------
 // Hero Section
@@ -571,7 +572,6 @@ const Contact = () => {
 const Home = () => {
     return (
         <div className="min-h-screen bg-white dark:bg-dark-teal">
-            <Nav />
             <div className="relative">
                 <Hero />
                 <About />
@@ -579,7 +579,6 @@ const Home = () => {
             <Products />
             <WhyChooseUs />
             <Contact />
-            <Footer />
         </div>
     );
 };

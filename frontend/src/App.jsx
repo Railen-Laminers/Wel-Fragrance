@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import Lenis from '@studio-freight/lenis';
-import Home from './components/pages/Home'; // 👈 the single merged file
+import Nav from './components/Nav';
+import Footer from './components/Footer';
+import Home from './components/pages/Home';
 
 export default function App() {
   useEffect(() => {
@@ -21,5 +23,11 @@ export default function App() {
     return () => lenis.destroy();
   }, []);
 
-  return <Home />;
+  return (
+    <div className="min-h-screen bg-white dark:bg-dark-teal">
+      <Nav />
+      <Home />
+      <Footer />
+    </div>
+  );
 }
