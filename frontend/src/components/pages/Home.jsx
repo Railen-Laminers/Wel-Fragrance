@@ -49,7 +49,6 @@ import {
 
 import welFragrance from '../../assets/videos/welFragrance.mp4';
 
-
 // ------------------------------------------------------------
 // Hero Section
 // ------------------------------------------------------------
@@ -80,7 +79,7 @@ const Hero = () => {
 
                 <motion.div
                     style={{ opacity }}
-                    className="absolute bottom-0 left-0 right-0 z-2 flex justify-center px-4 sm:px-6 pb-8 sm:pb-12 md:pb-16"
+                    className="absolute bottom-0 left-0 right-0 z-2 flex justify-center px-4 sm:px-6 pb-10 sm:pb-14 md:pb-18"
                 >
                     <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center w-full sm:w-auto">
                         <motion.a
@@ -88,7 +87,7 @@ const Hero = () => {
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 1.6, duration: 0.9 }}
-                            className="font-jost px-6 py-3 md:px-8 md:py-4 text-[11px] uppercase no-underline inline-block bg-old-gold text-white border border-old-gold transition-all duration-300 hover:bg-transparent hover:text-old-gold hover:border-old-gold text-center"
+                            className="font-jost text-[10px] tracking-[0.3em] uppercase px-8 py-3.5 no-underline inline-block bg-old-gold text-white border border-old-gold transition-all duration-300 hover:bg-transparent hover:text-old-gold hover:border-old-gold text-center"
                         >
                             Explore Collection
                         </motion.a>
@@ -97,7 +96,7 @@ const Hero = () => {
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 1.8, duration: 0.9 }}
-                            className="font-jost px-6 py-3 md:px-8 md:py-4 text-[11px] uppercase no-underline inline-block bg-dark-teal text-white border border-dark-teal transition-all duration-300 hover:bg-transparent hover:text-dark-teal hover:border-dark-teal text-center"
+                            className="font-jost text-[10px] tracking-[0.3em] uppercase px-8 py-3.5 no-underline inline-block bg-dark-teal text-white border border-dark-teal transition-all duration-300 hover:bg-transparent hover:text-dark-teal hover:border-dark-teal text-center"
                         >
                             Our Story
                         </motion.a>
@@ -139,17 +138,17 @@ const About = () => {
                     </Reveal>
 
                     <Reveal stagger={0.15} className="space-y-6">
-                        <h2 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-light text-dark-teal dark:text-white leading-[1.15]">
+                        <h2 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-light text-dark-teal dark:text-white leading-[1.15]">
                             The Essence of <br className="hidden sm:block" />
                             <span className="italic">Swiss Craftsmanship</span>
                         </h2>
-                        <p className="font-jost text-sm sm:text-base font-light leading-relaxed text-black/80 dark:text-white/80">
-                            Wel Fragrance Collection is more than perfume—it’s an expression of
+                        <p className="font-jost text-sm md:text-base font-light leading-relaxed text-black/70 dark:text-white/70">
+                            Wel Fragrance Collection is more than perfume—it's an expression of
                             passion, artistry, and the quiet beauty found in nature. Each scent
                             is composed to evoke a memory, a place, or a fleeting emotion,
                             turning the everyday into the unforgettable.
                         </p>
-                        <p className="font-jost text-sm sm:text-base font-light leading-relaxed text-black/80 dark:text-white/80">
+                        <p className="font-jost text-sm md:text-base font-light leading-relaxed text-black/70 dark:text-white/70">
                             Founded by Joel Malabo, the brand carries a deeply personal vision:
                             to create a signature fragrance that resonates from the Philippines
                             to Canada. Every bottle is a tribute to dedication, family, and the
@@ -157,7 +156,7 @@ const About = () => {
                         </p>
                         <a
                             href="#about"
-                            className="font-jost inline-block px-8 py-3.5 text-[11px] uppercase no-underline border border-old-gold text-old-gold transition-colors duration-300 hover:bg-old-gold hover:text-white"
+                            className="font-jost text-[10px] tracking-[0.3em] uppercase px-8 py-3.5 no-underline border border-old-gold text-old-gold hover:bg-old-gold hover:text-white transition-colors duration-300"
                         >
                             Our Story <span className="ml-2 opacity-60">→</span>
                         </a>
@@ -294,6 +293,7 @@ const products = [
     },
 ];
 
+// ─── UPDATED Products component with cinematic transition ──────────
 const Products = () => {
     const [current, setCurrent] = useState(0);
     const [direction, setDirection] = useState(0);
@@ -308,31 +308,81 @@ const Products = () => {
     };
     const product = products[current];
 
-    const slideVariants = {
-        enter: (dir) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
-        center: { x: 0, opacity: 1 },
-        exit: (dir) => ({ x: dir < 0 ? 60 : -60, opacity: 0 }),
+    // ─── Animation variants (type annotations removed for .jsx) ────
+
+    const bgVariants = {
+        hidden: { scale: 1.1, opacity: 0 },
+        visible: {
+            scale: 1,
+            opacity: 0.12,
+            transition: { duration: 1.2, ease: 'easeOut' },
+        },
+        exit: {
+            opacity: 0,
+            transition: { duration: 0.4, ease: 'easeOut' },
+        },
     };
+
+    const modelVariants = {
+        hidden: (dir) => ({
+            x: dir > 0 ? 100 : -100,
+            opacity: 0,
+        }),
+        visible: {
+            x: 0,
+            opacity: 1,
+            transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94], delay: 1.2 },
+        },
+        exit: (dir) => ({
+            x: dir > 0 ? -100 : 100,
+            opacity: 0,
+            transition: { duration: 0.4, ease: 'easeInOut' },
+        }),
+    };
+
+    const contentContainerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                delayChildren: 1.9,
+                staggerChildren: 0.1,
+            },
+        },
+        exit: {
+            opacity: 0,
+            transition: { duration: 0.3, staggerChildren: 0.05, staggerDirection: -1 },
+        },
+    };
+
+    const contentItemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
+        exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
+    };
+
+    // ─── Render ──────────────────────────────────────────────────────
 
     return (
         <Container
             className={`
-        py-16 md:py-24 lg:py-0
-        lg:mt-16
-        lg:h-screen lg:max-h-[1000px] lg:min-h-[600px]
-        flex flex-col justify-center
-        overflow-hidden bg-white dark:bg-dark-teal
-      `}
+                py-16 md:py-24 lg:py-0
+                lg:mt-16
+                lg:h-screen lg:max-h-[1000px] lg:min-h-[600px]
+                flex flex-col justify-center
+                overflow-hidden bg-white dark:bg-dark-teal
+            `}
         >
+            {/* Header – unchanged */}
             <div className="text-center mb-12 md:mb-16 lg:mb-8 flex-shrink-0">
                 <Reveal>
-                    <span className="font-playfair text-[11px] tracking-[0.3em] text-old-gold uppercase">
+                    <span className="font-jost text-[10px] tracking-[0.3em] uppercase text-old-gold">
                         Wel Fragrance Collection
                     </span>
                     <h2 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-light text-dark-teal dark:text-white mt-2">
                         Our Signature Scents
                     </h2>
-                    <p className="font-jost text-sm md:text-base font-light text-black/70 dark:text-white/70 max-w-2xl mx-auto mt-4 leading-relaxed">
+                    <p className="font-jost text-sm md:text-base font-light leading-relaxed text-black/70 dark:text-white/70 max-w-2xl mx-auto mt-4">
                         Each fragrance is a story waiting to be discovered. Let our collection
                         guide you through a world of emotion, memory, and artistry.
                     </p>
@@ -344,74 +394,102 @@ const Products = () => {
                 delay={0.2}
                 className="relative flex-1 flex items-center overflow-hidden"
             >
-                <motion.div
-                    key={product.id + '-bg'}
-                    initial={{ scale: 1.1, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 0.12 }}
-                    transition={{ duration: 1.2 }}
-                    className="absolute inset-0 z-0"
-                >
-                    <LazyImage
-                        src={product.productImage}
-                        alt=""
-                        className="w-full h-full object-cover"
-                    />
-                </motion.div>
-
-                <div className="relative z-10 w-full">
-                    <AnimatePresence mode="wait" custom={direction}>
+                <AnimatePresence mode="wait" custom={direction}>
+                    <motion.div
+                        key={product.id}
+                        custom={direction}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        className="relative w-full h-full"
+                    >
+                        {/* ── Background product image ── */}
                         <motion.div
-                            key={product.id}
-                            custom={direction}
-                            variants={slideVariants}
-                            initial="enter"
-                            animate="center"
-                            exit="exit"
-                            transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
-                            className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center px-4 md:px-8"
+                            variants={bgVariants}
+                            className="absolute inset-0 z-0"
                         >
-                            <div className="flex justify-center lg:justify-start">
-                                <div className="w-[240px] sm:w-[280px] md:w-[340px] lg:w-[400px] aspect-[3/4] overflow-hidden shadow-2xl">
-                                    <LazyImage
-                                        src={product.modelImage}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="text-center lg:text-left">
-                                <span className="font-playfair text-[11px] tracking-[0.3em] text-old-gold uppercase">
-                                    {product.type}
-                                </span>
-                                <h2 className="font-playfair text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-dark-teal dark:text-white mt-2 leading-[1.05]">
-                                    {product.name}
-                                </h2>
-                                <p className="font-jost text-sm font-light text-black/70 dark:text-white/70 mt-4 max-w-md mx-auto lg:mx-0">
-                                    {product.notes}
-                                </p>
-                                <p className="font-jost text-xs text-black/60 dark:text-white/60 mt-2 max-w-md mx-auto lg:mx-0 leading-relaxed">
-                                    {product.description}
-                                </p>
-                                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mt-8">
-                                    <a
-                                        href="#"
-                                        className="font-jost px-8 py-3.5 text-[11px] uppercase no-underline border border-old-gold text-old-gold hover:bg-old-gold hover:text-white transition-colors"
-                                    >
-                                        Discover
-                                    </a>
-                                    <a
-                                        href="#"
-                                        className="font-jost px-8 py-3.5 text-[11px] uppercase no-underline text-black/60 dark:text-white/60 hover:text-old-gold transition-colors"
-                                    >
-                                        Learn More →
-                                    </a>
-                                </div>
-                            </div>
+                            <LazyImage
+                                src={product.productImage}
+                                alt=""
+                                className="w-full h-full object-cover"
+                            />
                         </motion.div>
-                    </AnimatePresence>
-                </div>
 
+                        {/* ── Main content grid ── */}
+                        <div className="relative z-10 w-full h-full flex items-center">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center px-4 md:px-8 w-full">
+                                {/* Model image */}
+                                <motion.div
+                                    variants={modelVariants}
+                                    custom={direction}
+                                    className="flex justify-center lg:justify-start"
+                                >
+                                    <div className="w-[240px] sm:w-[280px] md:w-[340px] lg:w-[400px] aspect-[3/4] overflow-hidden shadow-2xl">
+                                        <LazyImage
+                                            src={product.modelImage}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                </motion.div>
+
+                                {/* Content with staggered fade-up */}
+                                <motion.div
+                                    variants={contentContainerVariants}
+                                    className="text-center lg:text-left"
+                                >
+                                    <motion.span
+                                        variants={contentItemVariants}
+                                        className="font-jost text-[10px] tracking-[0.3em] uppercase text-old-gold"
+                                    >
+                                        {product.type}
+                                    </motion.span>
+
+                                    <motion.h2
+                                        variants={contentItemVariants}
+                                        className="font-playfair text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light text-dark-teal dark:text-white mt-2 leading-[1.05]"
+                                    >
+                                        {product.name}
+                                    </motion.h2>
+
+                                    <motion.p
+                                        variants={contentItemVariants}
+                                        className="font-jost text-xs md:text-sm font-light leading-relaxed text-black/60 dark:text-white/60 mt-4 max-w-md mx-auto lg:mx-0"
+                                    >
+                                        {product.notes}
+                                    </motion.p>
+
+                                    <motion.p
+                                        variants={contentItemVariants}
+                                        className="font-jost text-xs md:text-sm font-light leading-relaxed text-black/60 dark:text-white/60 mt-2 max-w-md mx-auto lg:mx-0"
+                                    >
+                                        {product.description}
+                                    </motion.p>
+
+                                    <motion.div
+                                        variants={contentItemVariants}
+                                        className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mt-8"
+                                    >
+                                        <a
+                                            href="#"
+                                            className="font-jost text-[10px] tracking-[0.3em] uppercase px-8 py-3.5 no-underline border border-old-gold text-old-gold hover:bg-old-gold hover:text-white transition-colors"
+                                        >
+                                            Discover
+                                        </a>
+                                        <a
+                                            href="#"
+                                            className="font-jost text-[10px] tracking-[0.3em] uppercase px-8 py-3.5 no-underline text-black/60 dark:text-white/60 hover:text-old-gold transition-colors"
+                                        >
+                                            Learn More →
+                                        </a>
+                                    </motion.div>
+                                </motion.div>
+                            </div>
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
+
+                {/* Navigation buttons – unchanged */}
                 <button
                     onClick={prev}
                     className="absolute left-0 top-1/2 -translate-y-1/2 z-20 text-old-gold/40 hover:text-old-gold transition-colors p-4"
@@ -432,7 +510,7 @@ const Products = () => {
 };
 
 // ------------------------------------------------------------
-// Why Choose Us Section
+// Why Choose Us Section — Awwwards-inspired luxury narrative
 // ------------------------------------------------------------
 const values = [
     {
@@ -440,131 +518,231 @@ const values = [
         title: '100% Pure Oil',
         description:
             'Our fragrances are crafted with premium pure oils, ensuring lasting intensity and skin‑friendly wear.',
+        detail:
+            'Each drop is a concentrate of nature\'s finest, free from fillers or synthetic extenders.',
     },
     {
         icon: FaLeaf,
         title: 'Ethically Sourced',
         description:
             'We partner with sustainable suppliers who respect nature and local communities.',
+        detail:
+            'From harvest to bottle, every ingredient tells a story of responsible stewardship.',
     },
     {
         icon: FaHands,
         title: 'Artisan Craftsmanship',
         description:
             'Every blend is hand‑composed by experienced perfumers with a passion for storytelling.',
+        detail:
+            'Time‑honored techniques meet contemporary vision in each composition.',
     },
     {
         icon: FaTag,
         title: 'Affordable Luxury',
         description:
             'Experience world‑class scents at a fraction of the price, without compromising quality.',
+        detail:
+            'Luxury should be felt, not financed. We believe exceptional fragrance is for everyone.',
     },
 ];
 
 const WhyChooseUs = () => {
     return (
-        <Container className="py-16 md:py-24 lg:py-32 border-t border-old-gold/10 bg-white dark:bg-dark-teal">
-            <div className="max-w-6xl mx-auto">
-                <Reveal>
-                    <div className="text-center mb-12 md:mb-16">
-                        <span className="font-playfair text-[11px] tracking-[0.3em] text-old-gold uppercase">
-                            Why Wel Fragrance
-                        </span>
-                        <h2 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-light text-dark-teal dark:text-white mt-2">
-                            Crafted with Purpose
-                        </h2>
-                        <p className="font-jost text-sm md:text-base font-light text-black/70 dark:text-white/70 max-w-2xl mx-auto mt-4 leading-relaxed">
-                            Every bottle carries the vision of our founder and the commitment to
-                            quality that defines our brand.
-                        </p>
-                    </div>
-                </Reveal>
+        <section className="relative bg-white dark:bg-dark-teal overflow-hidden">
+            {/* Decorative background line — subtle brand signature */}
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-old-gold/20 to-transparent" />
 
-                <Reveal
-                    stagger={0.12}
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10"
-                >
-                    {values.map((item, index) => (
-                        <div key={index} className="text-center group">
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-old-gold/10 text-old-gold text-2xl mb-4 group-hover:bg-old-gold group-hover:text-white transition-colors duration-300">
-                                <item.icon />
-                            </div>
-                            <h3 className="font-playfair text-xl text-dark-teal dark:text-white font-light mb-2">
-                                {item.title}
-                            </h3>
-                            <p className="font-jost text-sm font-light text-black/70 dark:text-white/70 leading-relaxed">
-                                {item.description}
+            <Container className="py-20 md:py-28 lg:py-36">
+                <div className="max-w-7xl mx-auto">
+                    {/* Header — reduced, editorial, with a single strong sentence */}
+                    <Reveal>
+                        <div className="text-center mb-16 md:mb-20 lg:mb-24">
+                            <span className="font-jost text-[10px] tracking-[0.3em] uppercase text-old-gold">
+                                The Wel Philosophy
+                            </span>
+                            <h2 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-dark-teal dark:text-white mt-3 leading-[1.1] max-w-4xl mx-auto">
+                                Crafted with intention,
+                                <br className="hidden sm:block" />
+                                worn with meaning.
+                            </h2>
+                            <p className="font-jost text-sm md:text-base font-light leading-relaxed text-black/60 dark:text-white/60 max-w-2xl mx-auto mt-5">
+                                Four pillars define our approach — each one a promise we make to
+                                you, and to ourselves.
                             </p>
+                            {/* Decorative divider */}
+                            <div className="w-12 h-px bg-old-gold/40 mx-auto mt-6" />
                         </div>
-                    ))}
-                </Reveal>
-            </div>
-        </Container>
+                    </Reveal>
+
+                    {/* Values — presented as a visual essay, not a grid of cards */}
+                    <Reveal stagger={0.1} className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-16 lg:gap-x-20 lg:gap-y-20">
+                        {values.map((item, index) => (
+                            <motion.div
+                                key={index}
+                                whileHover={{ y: -4 }}
+                                transition={{ duration: 0.3, ease: 'easeOut' }}
+                                className="group relative border-b border-old-gold/10 pb-8 md:pb-10 last:border-b-0 md:even:border-b-0"
+                            >
+                                <div className="flex items-start gap-5 md:gap-6">
+                                    {/* Icon — refined, with a subtle glow on hover */}
+                                    <div className="flex-shrink-0">
+                                        <div className="w-12 h-12 md:w-14 md:h-14 flex items-center justify-center border border-old-gold/20 text-old-gold text-xl md:text-2xl transition-all duration-500 group-hover:border-old-gold/60 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(184,151,94,0.08)]">
+                                            <item.icon />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-playfair text-xl md:text-2xl font-light text-dark-teal dark:text-white tracking-wide">
+                                            {item.title}
+                                        </h3>
+                                        <p className="font-jost text-sm md:text-base font-light leading-relaxed text-black/70 dark:text-white/70 mt-1.5">
+                                            {item.description}
+                                        </p>
+                                        {/* Secondary detail line — adds depth */}
+                                        <p className="font-jost text-xs md:text-sm font-light italic text-black/40 dark:text-white/40 mt-2 leading-relaxed border-l-2 border-old-gold/20 pl-3">
+                                            {item.detail}
+                                        </p>
+                                        {/* Decorative line that appears on hover */}
+                                        <div className="w-8 h-px bg-old-gold/0 group-hover:bg-old-gold/40 transition-all duration-700 mt-4" />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </Reveal>
+
+                    {/* Closing statement — like a brand manifesto footer */}
+                    <Reveal delay={0.3}>
+                        <div className="mt-16 md:mt-20 lg:mt-24 text-center">
+                            <div className="w-16 h-px bg-old-gold/30 mx-auto mb-6" />
+                            <p className="font-playfair text-sm md:text-base font-light italic text-black/50 dark:text-white/50 max-w-lg mx-auto leading-relaxed">
+                                "Every bottle carries the vision of our founder and the commitment
+                                to quality that defines our brand."
+                            </p>
+                            <div className="mt-4 flex justify-center gap-3">
+                                <span className="w-1.5 h-1.5 rounded-full bg-old-gold/20" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-old-gold/40" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-old-gold/20" />
+                            </div>
+                        </div>
+                    </Reveal>
+                </div>
+            </Container>
+        </section>
     );
 };
 
 // ------------------------------------------------------------
 // Contact Section
 // ------------------------------------------------------------
-const Contact = () => {
-    return (
-        <Container className="py-16 md:py-24 lg:py-32 border-t border-old-gold/10 bg-white dark:bg-dark-teal">
-            <Reveal stagger={0.1} className="max-w-[640px] mx-auto text-center">
-                <div className="font-playfair text-[11px] tracking-[0.3em] text-old-gold uppercase mb-5">
-                    Wel Fragrance Collection
-                </div>
-                <h2 className="font-playfair text-3xl sm:text-4xl md:text-5xl font-light text-dark-teal dark:text-white mb-4 leading-[1.2]">
-                    Let’s create something
-                    <br />
-                    extraordinary together
-                </h2>
-                <p className="font-jost text-sm md:text-base font-light text-black/70 dark:text-white/70 mb-8 md:mb-10 leading-relaxed">
-                    For inquiries, collaborations, or simply to share your fragrance story —
-                    we’d love to hear from you.
-                </p>
+const Contact = () => (
+    <section id="contact" className="bg-white dark:bg-dark-teal border-t border-old-gold/10">
+        <Container className="py-20 md:py-28 lg:py-32">
+            <div className="max-w-5xl mx-auto">
+                {/* Two-column split */}
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_1px_1fr] gap-12 lg:gap-16 items-start">
 
-                <div className="flex flex-col items-center gap-4 text-black dark:text-white">
-                    <a
-                        href="mailto:wel.fragrancecollection@gmail.com"
-                        className="flex items-center gap-3 text-sm md:text-base no-underline border-b border-black/20 dark:border-white/20 pb-1 hover:border-old-gold transition-colors"
-                    >
-                        <FaEnvelope className="text-old-gold text-base" />
-                        <span className="font-playfair">wel.fragrancecollection@gmail.com</span>
-                    </a>
-
-                    <div className="flex items-center gap-3 text-sm md:text-base">
-                        <FaPhoneAlt className="text-old-gold text-base" />
-                        <span className="font-jost">
-                            +63 945 705 2630, +63 919 922 5430, +63 955 533 7500
+                    {/* ── Left: emotional CTA ── */}
+                    <Reveal stagger={0.1}>
+                        <span className="font-jost text-[10px] tracking-[0.3em] uppercase text-old-gold block mb-6">
+                            Wel Fragrance Collection
                         </span>
-                    </div>
+                        <h2
+                            className="font-playfair font-light text-dark-teal dark:text-white leading-[1.1] mb-6"
+                            style={{ fontSize: 'clamp(30px, 4vw, 50px)' }}
+                        >
+                            Let's create something<br />
+                            <em className="italic text-old-gold">extraordinary</em>
+                        </h2>
+                        <p className="font-jost text-sm md:text-base font-light leading-relaxed text-black/70 dark:text-white/70 mb-10 max-w-sm">
+                            For inquiries, collaborations, or simply to share your fragrance story —
+                            we'd love to hear from you.
+                        </p>
+                        <a
+                            href="mailto:wel.fragrancecollection@gmail.com"
+                            className="
+                                font-jost text-[10px] tracking-[0.3em] uppercase
+                                px-10 py-4 inline-block no-underline
+                                bg-dark-teal dark:bg-old-gold
+                                text-white border border-dark-teal dark:border-old-gold
+                                transition-all duration-300
+                                hover:bg-old-gold hover:border-old-gold dark:hover:bg-transparent dark:hover:text-old-gold
+                            "
+                        >
+                            Send a Message
+                        </a>
+                    </Reveal>
 
-                    <a
-                        href="https://instagram.com/Wel_FragranceCollection"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 text-sm md:text-base no-underline border-b border-black/20 dark:border-white/20 pb-1 hover:border-old-gold transition-colors"
-                    >
-                        <FaInstagram className="text-old-gold text-base" />
-                        <span className="font-jost">@Wel_FragranceCollection</span>
-                    </a>
+                    {/* ── Vertical divider (lg only) ── */}
+                    <div className="hidden lg:block bg-old-gold/15 self-stretch" aria-hidden="true" />
 
-                    <div className="flex items-center gap-3 text-sm md:text-base">
-                        <FaMapMarkerAlt className="text-old-gold text-base" />
-                        <span className="font-jost">Philippines</span>
-                    </div>
+                    {/* ── Right: contact details ── */}
+                    <Reveal stagger={0.08} className="flex flex-col gap-7 pt-2">
+                        {[
+                            {
+                                Icon: FaEnvelope,
+                                label: 'Email',
+                                value: 'wel.fragrancecollection@gmail.com',
+                                href: 'mailto:wel.fragrancecollection@gmail.com',
+                            },
+                            {
+                                Icon: FaPhoneAlt,
+                                label: 'Phone',
+                                value: '+63 945 705 2630 · +63 919 922 5430 · +63 955 533 7500',
+                            },
+                            {
+                                Icon: FaInstagram,
+                                label: 'Instagram',
+                                value: '@Wel_FragranceCollection',
+                                href: 'https://instagram.com/Wel_FragranceCollection',
+                                external: true,
+                            },
+                            {
+                                Icon: FaMapMarkerAlt,
+                                label: 'Location',
+                                value: 'Philippines',
+                            },
+                        ].map(({ Icon, label, value, href, external }) => (
+                            <div key={label} className="flex gap-4 items-start">
+                                {/* Icon box */}
+                                <div className="
+                                    w-8 h-8 flex-shrink-0 flex items-center justify-center
+                                    border border-old-gold/25 text-old-gold text-[12px] mt-0.5
+                                ">
+                                    <Icon />
+                                </div>
+                                <div>
+                                    <p className="font-jost text-[10px] tracking-[0.3em] uppercase text-old-gold mb-1">
+                                        {label}
+                                    </p>
+                                    {href ? (
+                                        <a
+                                            href={href}
+                                            target={external ? '_blank' : undefined}
+                                            rel={external ? 'noopener noreferrer' : undefined}
+                                            className="
+                                                font-jost text-sm md:text-base font-light
+                                                text-dark-teal dark:text-white
+                                                no-underline border-b border-old-gold/30
+                                                hover:border-old-gold transition-colors duration-200
+                                            "
+                                        >
+                                            {value}
+                                        </a>
+                                    ) : (
+                                        <p className="font-jost text-sm md:text-base font-light leading-relaxed text-black/70 dark:text-white/70">
+                                            {value}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </Reveal>
                 </div>
-
-                <a
-                    href="mailto:wel.fragrancecollection@gmail.com"
-                    className="font-jost inline-block px-8 py-4 md:px-12 md:py-4 text-[11px] uppercase no-underline border border-old-gold text-old-gold mt-10 md:mt-12 hover:bg-old-gold hover:text-white transition-colors"
-                >
-                    Get in Touch
-                </a>
-            </Reveal>
+            </div>
         </Container>
-    );
-};
+    </section>
+);
 
 // ------------------------------------------------------------
 // Home – Main Page Component
