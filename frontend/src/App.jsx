@@ -1,12 +1,13 @@
-import React, { useEffect, useRef } from 'react';
+import React, { lazy, Suspense, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Lenis from '@studio-freight/lenis';
 
 import Nav from './components/Nav';
 import Footer from './components/Footer';
-import Home from './components/pages/Home';
-import About from './components/pages/About';
-import Contact from './components/pages/Contact';
+
+const Home = lazy(() => import('./components/pages/Home'));
+const About = lazy(() => import('./components/pages/About'));
+const Contact = lazy(() => import('./components/pages/Contact'));
 
 // ─── Scroll‑to‑top component ──────────────────────────────────────────────
 function ScrollToTop({ lenisRef }) {
@@ -27,6 +28,16 @@ export default function App() {
   const lenisRef = useRef(null);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const lowEndDevice = typeof navigator !== 'undefined' && typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 2;
+
+    if (prefersReducedMotion || isMobile || lowEndDevice) {
+      return undefined;
+    }
+
     const lenis = new Lenis({
       duration: 0.8,
       easing: (t) => 1 - Math.pow(1 - t, 3),
@@ -50,11 +61,13 @@ export default function App() {
       <div className="min-h-screen bg-white dark:bg-dark-teal">
         <Nav />
         <ScrollToTop lenisRef={lenisRef} />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-        </Routes>
+        <Suspense fallback={<div className="min-h-screen bg-white dark:bg-dark-teal" /> }>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+          </Routes>
+        </Suspense>
         <Footer />
       </div>
     </BrowserRouter>

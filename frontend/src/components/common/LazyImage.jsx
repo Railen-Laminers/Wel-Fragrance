@@ -8,6 +8,11 @@ const LazyImage = ({
     style,
     delay = 0,
     placeholderColor = '#1a1a1a',
+    sizes = '100vw',
+    loading = 'lazy',
+    fetchPriority = 'auto',
+    priority = false,
+    srcSet,
 }) => {
     const ref = useRef(null);
     const inView = useInView(ref, {
@@ -19,11 +24,13 @@ const LazyImage = ({
     const [shouldLoad, setShouldLoad] = useState(false);
 
     useEffect(() => {
-        if (inView) {
+        if (priority || inView) {
             const timer = setTimeout(() => setShouldLoad(true), delay);
             return () => clearTimeout(timer);
         }
-    }, [inView, delay]);
+    }, [inView, delay, priority]);
+
+    if (!src) return null;
 
     return (
         <div
@@ -39,8 +46,11 @@ const LazyImage = ({
             {shouldLoad && (
                 <img
                     src={src}
+                    srcSet={srcSet}
+                    sizes={sizes}
                     alt={alt}
-                    loading="lazy"
+                    loading={priority ? 'eager' : loading}
+                    fetchPriority={priority ? 'high' : fetchPriority}
                     decoding="async"
                     onLoad={() => setLoaded(true)}
                     style={{

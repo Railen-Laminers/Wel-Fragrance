@@ -5,9 +5,8 @@ import Reveal from '../common/Reveal';
 import LazyImage from '../common/LazyImage';
 
 // ─── Images ────────────────────────────────────────────────────────────────
-// IMPORTANT: use actual imports so Webpack/Vite can process them
-import ceoImage from '../../assets/Models/DSC09812.jpg';    // CEO portrait
-import jomalone from '../../assets/Products/Jomalone.jpg';  // Perfume bottle
+import ceoImage from '../../assets/Models/DSC09812.webp';
+import jomalone from '../../assets/Products/Jomalone.webp';
 
 // ─── Components ─────────────────────────────────────────────────────────────
 

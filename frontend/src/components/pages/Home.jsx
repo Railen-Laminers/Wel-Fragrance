@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
@@ -20,8 +20,8 @@ import LazyImage from '../common/LazyImage';
 import Reveal from '../common/Reveal';
 
 // ✅ Assets (two levels up from pages/ to assets/)
+import { bgImages } from '../../assets/images/bg';
 import {
-    bgImages,
     dsc09312,
     dsc09348,
     dsc09388,
@@ -34,6 +34,8 @@ import {
     dsc09681,
     dsc09687,
     dsc09749,
+} from '../../assets/images/models';
+import {
     jaime,
     dorz,
     rupert,
@@ -46,9 +48,9 @@ import {
     joe,
     mar,
     greg,
-} from '../../assets/images';
+} from '../../assets/images/products';
 
-import welFragrance from '../../assets/videos/welFragrance.mp4';
+import welFragrance from '../../assets/videos/welFragrance-optimized.mp4';
 
 // ------------------------------------------------------------
 // Hero Section
@@ -75,6 +77,8 @@ const Hero = () => {
                         src={bgImages.wel}
                         alt="Wel Fragrance"
                         className="w-full h-full object-cover object-[center_20%]"
+                        sizes="(max-width: 768px) 100vw, 70vw"
+                        priority
                     />
                 </motion.div>
 
@@ -112,6 +116,54 @@ const Hero = () => {
 // ------------------------------------------------------------
 // About Section
 // ------------------------------------------------------------
+const VideoSection = () => {
+    const ref = useRef(null);
+    const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+
+    useEffect(() => {
+        const node = ref.current;
+        if (!node || typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+            setShouldLoadVideo(true);
+            return undefined;
+        }
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setShouldLoadVideo(true);
+                    observer.disconnect();
+                }
+            },
+            { rootMargin: '200px 0px' },
+        );
+
+        observer.observe(node);
+        return () => observer.disconnect();
+    }, []);
+
+    return (
+        <div ref={ref} className="relative overflow-hidden aspect-[4/5] bg-dark-teal/10">
+            {!shouldLoadVideo ? (
+                <div className="flex h-full w-full items-center justify-center bg-[#0B212A] text-sm uppercase tracking-[0.3em] text-white/70">
+                    Loading video…
+                </div>
+            ) : (
+                <video
+                    src={welFragrance}
+                    poster={bgImages.wel}
+                    preload="none"
+                    muted
+                    playsInline
+                    controls
+                    loop
+                    className="w-full h-full object-cover block"
+                />
+            )}
+            <div className="absolute bottom-0 left-0 w-2/5 h-px bg-old-gold" />
+        </div>
+    );
+};
+
 const About = () => {
     return (
         <section className="relative z-10">
@@ -125,18 +177,7 @@ const About = () => {
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-20 items-center w-full">
                     <Reveal y={0}>
-                        <div className="relative overflow-hidden aspect-[4/5]">
-                            <video
-                                src={welFragrance}
-                                autoPlay
-                                muted
-                                playsInline
-                                controls
-                                loop
-                                className="w-full h-full object-cover block"
-                            />
-                            <div className="absolute bottom-0 left-0 w-2/5 h-px bg-old-gold" />
-                        </div>
+                        <VideoSection />
                     </Reveal>
 
                     <Reveal stagger={0.15} className="space-y-6">

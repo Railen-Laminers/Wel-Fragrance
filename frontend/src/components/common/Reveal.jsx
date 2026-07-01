@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, useReducedMotion } from 'framer-motion';
 
 const Reveal = ({
     children,
@@ -15,6 +15,7 @@ const Reveal = ({
     className = "",
 }) => {
     const ref = useRef(null);
+    const prefersReducedMotion = useReducedMotion();
     const inView = useInView(ref, {
         once,
         margin: rootMargin,
@@ -32,6 +33,14 @@ const Reveal = ({
         hidden: { opacity: 0, y, x, scale },
         visible: { opacity: 1, y: 0, x: 0, scale: 1 },
     };
+
+    if (prefersReducedMotion) {
+        return (
+            <div ref={ref} className={className} style={{ willChange: 'auto' }}>
+                {children}
+            </div>
+        );
+    }
 
     if (stagger && React.Children.count(children) > 1) {
         return (

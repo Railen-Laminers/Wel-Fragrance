@@ -1,4 +1,4 @@
-import wel from '../Bg/Wel.jpg'
+import wel from '../Bg/Wel.webp'
 
 export const bgImages = {
   wel,
