@@ -1,24 +1,25 @@
+// src/components/sections/home/Hero.jsx
 import React, { useState, useEffect } from 'react';
-import GridMotion from '../../../components/GridMotion';
-import { useTheme } from '../../../context/ThemeContext';
-import LetterReveal from '../../../components/LetterReveal';
+import GridMotion from '@/components/GridMotion';
+import { useTheme } from '@/context/ThemeContext';
+import LetterReveal from '@/components/LetterReveal';
 
-// Images (unchanged)
-import img5237 from '../../../assets/products/IMG_5237.webp';
-import img5238 from '../../../assets/products/IMG_5238.webp';
-import img5240 from '../../../assets/products/IMG_5240.webp';
-import img5241 from '../../../assets/products/IMG_5241.webp';
-import img5242 from '../../../assets/products/IMG_5242.webp';
-import img5243 from '../../../assets/products/IMG_5243.webp';
-import img5246 from '../../../assets/products/IMG_5246.webp';
-import img5247 from '../../../assets/products/IMG_5247.webp';
-import img5250 from '../../../assets/products/IMG_5250.webp';
-import img5251 from '../../../assets/products/IMG_5251.webp';
-import img5257 from '../../../assets/products/IMG_5257.webp';
-import img5258 from '../../../assets/products/IMG_5258.webp';
-import img5259 from '../../../assets/products/IMG_5259.webp';
-import img5260 from '../../../assets/products/IMG_5260.webp';
-import img5262 from '../../../assets/products/IMG_5262.webp';
+// Individual image imports (make sure every file exists!)
+import img5237 from '@/assets/products/IMG_5237.webp';
+import img5238 from '@/assets/products/IMG_5238.webp';
+import img5240 from '@/assets/products/IMG_5240.webp';
+import img5241 from '@/assets/products/IMG_5241.webp';
+import img5242 from '@/assets/products/IMG_5242.webp';
+import img5243 from '@/assets/products/IMG_5243.webp';
+import img5246 from '@/assets/products/IMG_5246.webp';
+import img5247 from '@/assets/products/IMG_5247.webp';
+import img5250 from '@/assets/products/IMG_5250.webp';
+import img5251 from '@/assets/products/IMG_5251.webp';
+import img5257 from '@/assets/products/IMG_5257.webp';
+import img5258 from '@/assets/products/IMG_5258.webp';
+import img5259 from '@/assets/products/IMG_5259.webp';
+import img5260 from '@/assets/products/IMG_5260.webp';
+import img5262 from '@/assets/products/IMG_5262.webp';
 
 const imgImages = [
   img5237, img5238, img5240, img5241, img5242, img5243,
