@@ -1,43 +1,31 @@
 import React, { useEffect, useRef } from 'react';
 import Lenis from '@studio-freight/lenis';
-import Home from './components/pages/Home'; // direct import (no lazy)
+import Home from './components/pages/Home';
 
 export default function App() {
   const lenisRef = useRef(null);
+  const rafRef = useRef(null);
 
   useEffect(() => {
-    // Disable Lenis on low‑end devices or when reduced motion is preferred
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
-    const lowEndDevice =
-      typeof navigator !== 'undefined' &&
-      typeof navigator.hardwareConcurrency === 'number' &&
-      navigator.hardwareConcurrency <= 2;
-
-    if (prefersReducedMotion || isMobile || lowEndDevice) {
-      return undefined;
-    }
-
-    const lenis = new Lenis({
-      duration: 0.8,
-      easing: (t) => 1 - Math.pow(1 - t, 3),
-      smoothWheel: true,
-      wheelMultiplier: 0.6,
-      touchMultiplier: 1.0,
-    });
+    const lenis = new Lenis();
     lenisRef.current = lenis;
 
     const raf = (time) => {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      rafRef.current = requestAnimationFrame(raf);
     };
-    requestAnimationFrame(raf);
+    rafRef.current = requestAnimationFrame(raf);
 
-    return () => lenis.destroy();
+    return () => {
+      lenis.destroy();
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
   }, []);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-dark-teal">
+    <div className="min-h-screen bg-white">
       <Home />
     </div>
   );
