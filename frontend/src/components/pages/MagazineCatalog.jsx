@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 
 // ---------- MODEL IMAGES ----------
-import DSC09312 from '@/assets/models/DSC09312.webp';
+import DSC09313 from '@/assets/models/DSC09313.webp';
 import DSC09348 from '@/assets/models/DSC09348.webp';
 import DSC09388 from '@/assets/models/DSC09388.webp';
 import DSC09413 from '@/assets/models/DSC09413.webp';
@@ -38,7 +38,7 @@ const allProducts = [
 
 // ---------- MAP MODEL IMAGES TO PRODUCTS ----------
 const modelImages = [
-    DSC09312, DSC09348, DSC09388, DSC09413, DSC09428,
+    DSC09313, DSC09348, DSC09388, DSC09413, DSC09428,
     DSC09468, DSC09498, DSC09525, DSC09587, DSC09622,
     DSC09675, DSC09687, DSC09749,
 ];
