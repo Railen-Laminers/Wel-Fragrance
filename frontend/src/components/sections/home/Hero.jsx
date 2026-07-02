@@ -1,10 +1,9 @@
-// src/components/sections/home/Hero.jsx
 import React, { useState, useEffect } from 'react';
-import GridMotion from '@/components/GridMotion';
+import GridMotion from '@/components/common/GridMotion';
 import { useTheme } from '@/context/ThemeContext';
-import LetterReveal from '@/components/LetterReveal';
+import LetterReveal from '@/components/common/LetterReveal';
 
-// Individual image imports (make sure every file exists!)
+// Individual image imports
 import img5237 from '@/assets/products/IMG_5237.webp';
 import img5238 from '@/assets/products/IMG_5238.webp';
 import img5240 from '@/assets/products/IMG_5240.webp';
@@ -48,12 +47,15 @@ export default function Hero() {
   const gradientColor = theme === 'dark' ? '#0B212A' : '#f3f4f6';
 
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section className="relative h-screen w-full overflow-hidden 2xl:max-w-7xl 2xl:mx-auto">
       <GridMotion items={gridItems} gradientColor={gradientColor} />
 
       <div className="absolute inset-0 z-5 bg-white/30 dark:bg-black/60" />
 
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-10">
+      <div
+        id="hero-overlay"
+        className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-10"
+      >
         <div className="mb-4 sm:mb-5 font-jost text-[0.6rem] sm:text-[0.7rem] font-medium uppercase tracking-[0.28em] sm:tracking-[0.32em] text-old-gold/90">
           <LetterReveal
             active={active}

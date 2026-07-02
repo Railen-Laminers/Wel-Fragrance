@@ -1,9 +1,9 @@
-// src/components/sections/home/About.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useTheme } from '@/context/ThemeContext';
-import LetterReveal from '@/components/LetterReveal';
+import LetterReveal from '@/components/common/LetterReveal';
+import { FadeRevealText, ThemeRevealText } from '@/components/common/RevealText';
 
 // ---------- PRODUCT IMAGES ----------
 import eassyMiyaki from '@/assets/products/EassyMiyaki.webp';
@@ -32,96 +32,6 @@ const allModelImages = [
 ];
 
 gsap.registerPlugin(ScrollTrigger);
-
-// ---------- Fade‑in text for details (single paragraph) ----------
-const FadeRevealText = ({ lines, className, active, duration }) => {
-    const containerRef = useRef(null);
-    const { theme } = useTheme();
-    const text = lines.join(' '); // combine all fragments into one continuous paragraph
-
-    useEffect(() => {
-        const el = containerRef.current;
-        if (!el) return;
-
-        gsap.killTweensOf(el);
-
-        if (!active) {
-            gsap.set(el, { opacity: 0, y: 10 });
-            return;
-        }
-
-        gsap.set(el, { opacity: 0, y: 10 });
-        gsap.to(el, {
-            opacity: 1,
-            y: 0,
-            duration: duration / 1000,
-            ease: 'power2.out',
-        });
-
-        return () => {
-            gsap.killTweensOf(el);
-        };
-    }, [active, theme, duration]);
-
-    return (
-        <div ref={containerRef} className={className}>
-            {text}
-        </div>
-    );
-};
-
-// ---------- Theme‑aware reveal: letter (titles) or fade (details) ----------
-const ThemeRevealText = ({
-    lines,
-    className = '',
-    letterDelay = 0.08,
-    active = false,
-    initialDelay = 0,
-    duration = 1200,
-    letter = true, // true → letter‑by‑letter, false → simple fade
-}) => {
-    const { theme } = useTheme();
-    const [internalActive, setInternalActive] = useState(false);
-
-    useEffect(() => {
-        if (active) {
-            const timer = setTimeout(() => setInternalActive(true), initialDelay);
-            return () => clearTimeout(timer);
-        } else {
-            setInternalActive(false);
-        }
-    }, [active, initialDelay]);
-
-    // Re‑trigger on theme change
-    useEffect(() => {
-        if (active) {
-            setInternalActive(false);
-            const timer = setTimeout(() => setInternalActive(true), 50);
-            return () => clearTimeout(timer);
-        }
-    }, [theme, active]);
-
-    if (letter) {
-        return (
-            <LetterReveal
-                active={internalActive}
-                lines={lines}
-                letterDelay={letterDelay}
-                className={className}
-                duration={duration}
-            />
-        );
-    } else {
-        return (
-            <FadeRevealText
-                active={internalActive}
-                lines={lines}
-                className={className}
-                duration={duration}
-            />
-        );
-    }
-};
 
 // ---------- Component: Section with Image + Text (with optional button) ----------
 const SectionWithImage = ({
@@ -154,12 +64,13 @@ const SectionWithImage = ({
 
         tl.fromTo(
             img,
-            { opacity: 0, y: 60, scale: 0.85, rotate: -2 },
+            { opacity: 1, y: 60, scale: 0.85, rotate: -2, filter: 'blur(12px)' },
             {
                 opacity: 1,
                 y: 0,
                 scale: 1,
                 rotate: 0,
+                filter: 'blur(0px)',
                 duration: 1.2,
                 ease: 'power3.out',
             }
@@ -192,14 +103,13 @@ const SectionWithImage = ({
                     letterDelay={0.05}
                     duration={1200}
                     className="font-playfair text-3xl md:text-4xl text-old-gold"
-                // letter={true} by default → letter reveal
                 />
             </div>
             <div className="mb-4">
                 <ThemeRevealText
                     active={textReveal}
                     lines={paragraphs}
-                    letter={false}          // <-- Fade for details
+                    letter={false}
                     duration={700}
                     className="font-cormorant text-lg md:text-xl text-dark-teal/80 dark:text-white/80 leading-relaxed"
                 />
@@ -255,10 +165,11 @@ const FullWidthImageSection = ({ image, heading, subtext, imageRefs, index }) =>
 
         tl.fromTo(
             img,
-            { opacity: 0, scale: 0.95 },
+            { opacity: 1, scale: 0.95, filter: 'blur(12px)' },
             {
                 opacity: 1,
                 scale: 1,
+                filter: 'blur(0px)',
                 duration: 1.2,
                 ease: 'power3.out',
             }
@@ -287,14 +198,13 @@ const FullWidthImageSection = ({ image, heading, subtext, imageRefs, index }) =>
                         letterDelay={0.06}
                         duration={1200}
                         className="font-playfair text-3xl md:text-5xl text-white"
-                    // letter={true} by default
                     />
                 </div>
                 <div className="max-w-xl">
                     <ThemeRevealText
                         active={textReveal}
                         lines={subtext}
-                        letter={false}          // <-- Fade for details
+                        letter={false}
                         duration={900}
                         className="font-cormorant text-lg md:text-xl text-white/90 italic"
                     />
@@ -344,7 +254,6 @@ const ScrollHeading = ({ text, className = '' }) => {
                 letterDelay={0.05}
                 duration={1200}
                 className={className}
-            // letter={true} by default
             />
         </div>
     );
@@ -390,14 +299,13 @@ const ScrollQuote = ({ mainText, subText }) => {
                     letterDelay={0.05}
                     duration={1200}
                     className="font-playfair text-3xl md:text-4xl text-dark-teal/90 dark:text-white/90"
-                // letter={true} by default
                 />
             </div>
             <div>
                 <ThemeRevealText
                     active={revealed}
                     lines={[subText]}
-                    letter={false}          // <-- Fade for details
+                    letter={false}
                     duration={900}
                     className="font-cormorant text-lg text-old-gold/70 dark:text-old-gold/70 italic tracking-wide"
                 />
@@ -406,22 +314,24 @@ const ScrollQuote = ({ mainText, subText }) => {
     );
 };
 
-// ---------- Main About Component ----------
-const About = () => {
+// ---------- Main AfterHero Component ----------
+const AfterHero = () => {
     const imageRefs = useRef([]);
     const galleryRefs = useRef([]);
 
     useEffect(() => {
+        // Product images (the two products in the "Expressions" section)
         const productImages = imageRefs.current.slice(3, 5);
         productImages.forEach((el) => {
             if (!el) return;
             gsap.fromTo(
                 el,
-                { opacity: 0, y: 40, scale: 0.9 },
+                { opacity: 1, y: 40, scale: 0.9, filter: 'blur(12px)' },
                 {
                     opacity: 1,
                     y: 0,
                     scale: 1,
+                    filter: 'blur(0px)',
                     duration: 1,
                     ease: 'power3.out',
                     scrollTrigger: {
@@ -433,16 +343,18 @@ const About = () => {
             );
         });
 
+        // Gallery images (the model grid)
         const galleryImages = galleryRefs.current;
         galleryImages.forEach((el) => {
             if (!el) return;
             gsap.fromTo(
                 el,
-                { opacity: 0, y: 30, scale: 0.95 },
+                { opacity: 1, y: 30, scale: 0.95, filter: 'blur(12px)' },
                 {
                     opacity: 1,
                     y: 0,
                     scale: 1,
+                    filter: 'blur(0px)',
                     duration: 0.9,
                     ease: 'power3.out',
                     scrollTrigger: {
@@ -567,4 +479,4 @@ const About = () => {
     );
 };
 
-export default About;
+export default AfterHero;
