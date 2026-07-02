@@ -1,37 +1,23 @@
-import React, { useEffect, useRef } from 'react';
-import Lenis from '@studio-freight/lenis';
+// src/App.js
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom'; // 确保引入了 Router
 import Home from './components/pages/Home';
 import Navbar from './components/common/Navbar';
 import { ThemeProvider } from './context/ThemeContext';
+import SmoothScroll from './components/SmoothScroll';
 
 export default function App() {
-  const lenisRef = useRef(null);
-  const rafRef = useRef(null);
-
-  useEffect(() => {
-    const lenis = new Lenis();
-    lenisRef.current = lenis;
-
-    const raf = (time) => {
-      lenis.raf(time);
-      rafRef.current = requestAnimationFrame(raf);
-    };
-    rafRef.current = requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
-  }, []);
-
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-white dark:bg-dark-teal transition-colors duration-300">
-        <Navbar />
-        <Home />
-      </div>
+      <Router> {/* 1. Router 需要包裹住使用路由的组件 */}
+        <SmoothScroll
+          ease={0.08}
+          className="min-h-screen bg-white dark:bg-dark-teal transition-colors duration-300"
+        >
+          <Navbar />
+          <Home />
+        </SmoothScroll>
+      </Router>
     </ThemeProvider>
   );
 }

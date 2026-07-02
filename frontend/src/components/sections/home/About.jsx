@@ -33,14 +33,52 @@ const allModelImages = [
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ---------- Theme‑aware text reveal (unchanged) ----------
+// ---------- Fade‑in text for details (single paragraph) ----------
+const FadeRevealText = ({ lines, className, active, duration }) => {
+    const containerRef = useRef(null);
+    const { theme } = useTheme();
+    const text = lines.join(' '); // combine all fragments into one continuous paragraph
+
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
+        gsap.killTweensOf(el);
+
+        if (!active) {
+            gsap.set(el, { opacity: 0, y: 10 });
+            return;
+        }
+
+        gsap.set(el, { opacity: 0, y: 10 });
+        gsap.to(el, {
+            opacity: 1,
+            y: 0,
+            duration: duration / 1000,
+            ease: 'power2.out',
+        });
+
+        return () => {
+            gsap.killTweensOf(el);
+        };
+    }, [active, theme, duration]);
+
+    return (
+        <div ref={containerRef} className={className}>
+            {text}
+        </div>
+    );
+};
+
+// ---------- Theme‑aware reveal: letter (titles) or fade (details) ----------
 const ThemeRevealText = ({
     lines,
     className = '',
     letterDelay = 0.08,
     active = false,
     initialDelay = 0,
-    duration = 1200
+    duration = 1200,
+    letter = true, // true → letter‑by‑letter, false → simple fade
 }) => {
     const { theme } = useTheme();
     const [internalActive, setInternalActive] = useState(false);
@@ -54,6 +92,7 @@ const ThemeRevealText = ({
         }
     }, [active, initialDelay]);
 
+    // Re‑trigger on theme change
     useEffect(() => {
         if (active) {
             setInternalActive(false);
@@ -62,13 +101,26 @@ const ThemeRevealText = ({
         }
     }, [theme, active]);
 
-    return <LetterReveal
-        active={internalActive}
-        lines={lines}
-        letterDelay={letterDelay}
-        className={className}
-        duration={duration}
-    />;
+    if (letter) {
+        return (
+            <LetterReveal
+                active={internalActive}
+                lines={lines}
+                letterDelay={letterDelay}
+                className={className}
+                duration={duration}
+            />
+        );
+    } else {
+        return (
+            <FadeRevealText
+                active={internalActive}
+                lines={lines}
+                className={className}
+                duration={duration}
+            />
+        );
+    }
 };
 
 // ---------- Component: Section with Image + Text (with optional button) ----------
@@ -140,13 +192,14 @@ const SectionWithImage = ({
                     letterDelay={0.05}
                     duration={1200}
                     className="font-playfair text-3xl md:text-4xl text-old-gold"
+                // letter={true} by default → letter reveal
                 />
             </div>
             <div className="mb-4">
                 <ThemeRevealText
                     active={textReveal}
                     lines={paragraphs}
-                    letterDelay={0.01}
+                    letter={false}          // <-- Fade for details
                     duration={700}
                     className="font-cormorant text-lg md:text-xl text-dark-teal/80 dark:text-white/80 leading-relaxed"
                 />
@@ -234,13 +287,14 @@ const FullWidthImageSection = ({ image, heading, subtext, imageRefs, index }) =>
                         letterDelay={0.06}
                         duration={1200}
                         className="font-playfair text-3xl md:text-5xl text-white"
+                    // letter={true} by default
                     />
                 </div>
                 <div className="max-w-xl">
                     <ThemeRevealText
                         active={textReveal}
                         lines={subtext}
-                        letterDelay={0.02}
+                        letter={false}          // <-- Fade for details
                         duration={900}
                         className="font-cormorant text-lg md:text-xl text-white/90 italic"
                     />
@@ -290,6 +344,7 @@ const ScrollHeading = ({ text, className = '' }) => {
                 letterDelay={0.05}
                 duration={1200}
                 className={className}
+            // letter={true} by default
             />
         </div>
     );
@@ -335,13 +390,14 @@ const ScrollQuote = ({ mainText, subText }) => {
                     letterDelay={0.05}
                     duration={1200}
                     className="font-playfair text-3xl md:text-4xl text-dark-teal/90 dark:text-white/90"
+                // letter={true} by default
                 />
             </div>
             <div>
                 <ThemeRevealText
                     active={revealed}
                     lines={[subText]}
-                    letterDelay={0.02}
+                    letter={false}          // <-- Fade for details
                     duration={900}
                     className="font-cormorant text-lg text-old-gold/70 dark:text-old-gold/70 italic tracking-wide"
                 />
@@ -436,7 +492,7 @@ const About = () => {
                     reverse={true}
                     imageRefs={imageRefs}
                     index={1}
-                    buttonText="Discover the Products"
+                    buttonText="Learn More"
                     buttonLink="#"
                 />
 
