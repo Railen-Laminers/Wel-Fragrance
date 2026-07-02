@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
@@ -5,7 +6,8 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Home from './components/pages/Home';
 import About from './components/pages/About';
 import Contact from './components/pages/Contact';
-import Products from './components/pages/Products';   // <-- changed import
+import Products from './components/pages/Products';
+import MagazineCatalog from './components/pages/MagazineCatalog';  // <-- NEW IMPORT
 import Navbar from './components/common/Navbar';
 import CursorFollower from './components/common/CursorFollower';
 import GlobalParticles from './components/common/GlobalParticles';
@@ -56,7 +58,8 @@ function AnimatedRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/products" element={<Products />} />   {/* updated */}
+        <Route path="/products" element={<Products />} />
+        <Route path="/catalog" element={<MagazineCatalog />} />   {/* NEW ROUTE */}
       </Routes>
     </main>
   );

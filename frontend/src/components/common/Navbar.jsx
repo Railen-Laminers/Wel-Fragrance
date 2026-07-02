@@ -1,10 +1,11 @@
+// src/components/common/Navbar.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { useTheme } from '../../context/ThemeContext';
 import webLogo from '/webLogo.png';
 
-// ---- Custom Icons (unchanged) ----
+// ---- Custom Icons ----
 const IconMenu = () => (
     <svg width="22" height="14" viewBox="0 0 22 14" fill="none">
         <line x1="0" y1="1" x2="22" y2="1" stroke="currentColor" strokeWidth="1" />
@@ -63,12 +64,11 @@ const Navbar = () => {
     const [scrolled, setScrolled] = useState(false);
     const { theme, toggleTheme } = useTheme();
 
-    // Refs for GSAP animations
     const navRef = useRef(null);
     const drawerRef = useRef(null);
     const backdropRef = useRef(null);
 
-    // Scroll effect (same as old)
+    // Scroll effect
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 40);
@@ -77,7 +77,7 @@ const Navbar = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // GSAP entrance animation for the navbar (like new one)
+    // GSAP entrance animation for the navbar
     useEffect(() => {
         gsap.fromTo(
             navRef.current,
@@ -86,7 +86,7 @@ const Navbar = () => {
         );
     }, []);
 
-    // Animate drawer open/close with GSAP
+    // Animate drawer open/close
     useEffect(() => {
         if (menuOpen) {
             gsap.to(drawerRef.current, {
@@ -119,11 +119,11 @@ const Navbar = () => {
 
     const toggleMenu = () => setMenuOpen((prev) => !prev);
 
-    // Links (UPDATED: PRODUCTS now points to /products)
+    // Navigation links – CATALOGUE now points to /catalog
     const links = [
         { label: 'ABOUT', to: '/about' },
-        { label: 'PRODUCTS', to: '/products' },                // <-- CHANGED
-        { label: 'CATALOGUE', to: { pathname: '/', hash: 'catalogue' } },
+        { label: 'PRODUCTS', to: '/products' },
+        { label: 'CATALOGUE', to: '/catalog' },    // <-- UPDATED
         { label: 'CONTACT', to: '/contact' },
     ];
 
