@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom'; // ✅ import Link
+import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { gsap } from 'gsap';
 import { useTheme } from '../../context/ThemeContext';
 import webLogo from '/webLogo.png';
-import welStore from '../../assets/bg/welStore.webp';
 
 // ---- Custom Icons (unchanged) ----
 const IconMenu = () => (
@@ -61,13 +61,14 @@ const IconScentDark = () => (
 const Navbar = () => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
-    const [mounted, setMounted] = useState(false);
     const { theme, toggleTheme } = useTheme();
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+    // Refs for GSAP animations
+    const navRef = useRef(null);
+    const drawerRef = useRef(null);
+    const backdropRef = useRef(null);
 
+    // Scroll effect (same as old)
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 40);
@@ -76,30 +77,62 @@ const Navbar = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // GSAP entrance animation for the navbar (like new one)
     useEffect(() => {
-        document.body.style.overflow = menuOpen ? 'hidden' : '';
-        return () => { document.body.style.overflow = ''; };
+        gsap.fromTo(
+            navRef.current,
+            { y: -100, opacity: 0 },
+            { y: 0, opacity: 1, duration: 1.2, ease: 'expo.out', delay: 0.5 }
+        );
+    }, []);
+
+    // Animate drawer open/close with GSAP
+    useEffect(() => {
+        if (menuOpen) {
+            gsap.to(drawerRef.current, {
+                x: 0,
+                duration: 0.6,
+                ease: 'power3.out',
+            });
+            gsap.to(backdropRef.current, {
+                opacity: 1,
+                pointerEvents: 'auto',
+                duration: 0.4,
+                ease: 'power2.out',
+            });
+            document.body.style.overflow = 'hidden';
+        } else {
+            gsap.to(drawerRef.current, {
+                x: '100%',
+                duration: 0.5,
+                ease: 'power3.in',
+            });
+            gsap.to(backdropRef.current, {
+                opacity: 0,
+                pointerEvents: 'none',
+                duration: 0.4,
+                ease: 'power2.in',
+            });
+            document.body.style.overflow = '';
+        }
     }, [menuOpen]);
 
     const toggleMenu = () => setMenuOpen((prev) => !prev);
 
-    // ✅ Updated links: "ABOUT" goes to the dedicated About page, others scroll to sections on Home
+    // Links (UPDATED: PRODUCTS now points to /products)
     const links = [
-        { label: 'ABOUT', to: '/about', isHash: false },
-        { label: 'PRODUCTS', to: { pathname: '/', hash: 'products' }, isHash: true },
-        { label: 'CATALOGUE', to: { pathname: '/', hash: 'catalogue' }, isHash: true },
-        { label: 'CONTACT', to: { pathname: '/', hash: 'contact' }, isHash: true },
+        { label: 'ABOUT', to: '/about' },
+        { label: 'PRODUCTS', to: '/products' },                // <-- CHANGED
+        { label: 'CATALOGUE', to: { pathname: '/', hash: 'catalogue' } },
+        { label: 'CONTACT', to: '/contact' },
     ];
 
     return (
         <>
             {/* Navbar Bar */}
             <nav
-                className={`
-          fixed top-0 left-0 right-0 z-50 h-20 flex items-center
-          transition-all duration-700 ease-out
-          ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-5'}
-        `}
+                ref={navRef}
+                className="fixed top-0 left-0 right-0 z-50 h-20 flex items-center"
             >
                 <div
                     className={`
@@ -117,7 +150,7 @@ const Navbar = () => {
                     </Link>
 
                     <div className="flex items-center gap-4 pr-4">
-                        {/* Theme toggle (unchanged) */}
+                        {/* Theme toggle */}
                         <button
                             onClick={toggleTheme}
                             className={`
@@ -151,6 +184,7 @@ const Navbar = () => {
                             </span>
                         </button>
 
+                        {/* Burger button */}
                         <button
                             onClick={toggleMenu}
                             className="bg-transparent border-none cursor-pointer text-black dark:text-white transition-transform hover:scale-105 active:scale-95"
@@ -162,67 +196,87 @@ const Navbar = () => {
                 </div>
             </nav>
 
-            {/* Overlay – full screen background, content constrained */}
+            {/* Backdrop */}
             <div
-                className={`
-          fixed inset-0 z-[100] bg-white dark:bg-dark-teal flex items-center justify-center
-          transition-transform duration-500 ease-out will-change-transform
-          ${menuOpen
-                        ? 'translate-y-0 pointer-events-auto'
-                        : '-translate-y-full pointer-events-none'
-                    }
-        `}
+                ref={backdropRef}
+                className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none"
+                onClick={toggleMenu}
+            />
+
+            {/* Side Drawer Panel */}
+            <div
+                ref={drawerRef}
+                className="fixed top-0 right-0 z-[70] h-full w-80 max-w-[85vw] bg-white dark:bg-dark-teal shadow-2xl transform translate-x-full overflow-y-auto p-6 flex flex-col"
             >
-                <div className="relative w-full h-full max-w-7xl mx-auto flex flex-col">
-                    {/* Logo – inside constrained area */}
-                    <div className="absolute top-6 left-6 sm:top-7 sm:left-8">
-                        <Link to="/" onClick={toggleMenu}>
-                            <img src={webLogo} alt="Wel Fragrance" className="h-9 w-auto object-contain" />
+                {/* Header: Logo | Dark Mode | Close */}
+                <div className="grid grid-cols-3 items-center mb-10">
+                    <div className="flex justify-start">
+                        <Link to="/" onClick={toggleMenu} className="h-8 flex items-center">
+                            <img src={webLogo} alt="Wel Fragrance" className="h-full w-auto object-contain" />
                         </Link>
                     </div>
 
-                    {/* Close button */}
-                    <button
-                        onClick={toggleMenu}
-                        className="absolute top-6 right-6 sm:top-7 sm:right-8 bg-transparent border-none cursor-pointer text-black dark:text-white transition-transform hover:scale-110 active:scale-95"
-                    >
-                        <IconClose />
-                    </button>
+                    <div className="flex justify-center">
+                        <button
+                            onClick={toggleTheme}
+                            className={`
+                relative w-10 h-10 rounded-full flex items-center justify-center
+                transition-colors duration-300
+                ${theme === 'dark'
+                                    ? 'bg-white/10 hover:bg-white/20 text-white'
+                                    : 'bg-black/5 hover:bg-black/10 text-dark-teal'
+                                }
+                focus-visible:outline focus-visible:outline-2 focus-visible:outline-old-gold
+              `}
+                            aria-label="Toggle theme"
+                        >
+                            <span
+                                className={`
+                  absolute inset-0 rounded-full blur-md transition-opacity duration-500
+                  ${theme === 'dark'
+                                        ? 'bg-yellow-400/20 opacity-50'
+                                        : 'bg-indigo-400/20 opacity-0'
+                                    }
+                `}
+                            />
+                            <span
+                                className={`
+                  block transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]
+                  hover:scale-110
+                  ${theme === 'dark' ? 'rotate-180' : 'rotate-0'}
+                `}
+                            >
+                                {theme === 'dark' ? <IconScentLight /> : <IconScentDark />}
+                            </span>
+                        </button>
+                    </div>
 
-                    {/* Main content: 60% nav / 40% image */}
-                    <div className="flex flex-row flex-1 mt-20">
-                        {/* Left: navigation */}
-                        <div className="w-3/5 h-full flex flex-col justify-center items-start p-8 md:p-12 space-y-8">
-                            <nav className="flex flex-col space-y-6 w-full">
-                                {links.map((link) => (
-                                    <Link
-                                        key={link.label}
-                                        to={link.to}
-                                        onClick={toggleMenu}
-                                        className={`
-                      group flex items-center gap-4 text-4xl md:text-5xl font-jost font-light tracking-wider
-                      text-dark-teal dark:text-white no-underline border-b border-black/10 dark:border-white/10
-                      py-4 sm:py-5 transition-colors hover:text-old-gold
-                    `}
-                                    >
-                                        <span className="uppercase">{link.label}</span>
-                                        <span
-                                            className="text-xs md:text-sm uppercase tracking-widest text-old-gold opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all duration-300"
-                                        >
-                                            DISCOVER
-                                        </span>
-                                    </Link>
-                                ))}
-                            </nav>
-                        </div>
-
-                        {/* Right: image */}
-                        <div className="w-2/5 h-full relative overflow-hidden">
-                            <img src={welStore} alt="Wel Store" className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent" />
-                        </div>
+                    <div className="flex justify-end">
+                        <button
+                            onClick={toggleMenu}
+                            className="bg-transparent border-none cursor-pointer text-black dark:text-white transition-transform hover:scale-110 active:scale-95"
+                        >
+                            <IconClose />
+                        </button>
                     </div>
                 </div>
+
+                {/* Navigation links */}
+                <nav className="flex flex-col space-y-6 flex-1">
+                    {links.map((link) => (
+                        <Link
+                            key={link.label}
+                            to={link.to}
+                            onClick={toggleMenu}
+                            className="group flex items-center gap-4 text-2xl md:text-3xl font-jost font-light tracking-wider text-dark-teal dark:text-white no-underline border-b border-black/10 dark:border-white/10 py-3 transition-colors hover:text-old-gold"
+                        >
+                            <span className="uppercase">{link.label}</span>
+                            <span className="text-xs uppercase tracking-widest text-old-gold opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                                DISCOVER
+                            </span>
+                        </Link>
+                    ))}
+                </nav>
             </div>
         </>
     );

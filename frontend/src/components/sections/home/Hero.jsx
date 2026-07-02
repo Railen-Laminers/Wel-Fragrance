@@ -1,120 +1,132 @@
-import React, { useState, useEffect } from 'react';
-import GridMotion from '@/components/common/GridMotion';
-import { useTheme } from '@/context/ThemeContext';
-import LetterReveal from '@/components/common/LetterReveal';
-
-// Individual image imports
-import img5237 from '@/assets/products/IMG_5237.webp';
-import img5238 from '@/assets/products/IMG_5238.webp';
-import img5240 from '@/assets/products/IMG_5240.webp';
-import img5241 from '@/assets/products/IMG_5241.webp';
-import img5242 from '@/assets/products/IMG_5242.webp';
-import img5243 from '@/assets/products/IMG_5243.webp';
-import img5246 from '@/assets/products/IMG_5246.webp';
-import img5247 from '@/assets/products/IMG_5247.webp';
-import img5250 from '@/assets/products/IMG_5250.webp';
-import img5251 from '@/assets/products/IMG_5251.webp';
-import img5257 from '@/assets/products/IMG_5257.webp';
-import img5258 from '@/assets/products/IMG_5258.webp';
-import img5259 from '@/assets/products/IMG_5259.webp';
-import img5260 from '@/assets/products/IMG_5260.webp';
-import img5262 from '@/assets/products/IMG_5262.webp';
-
-const imgImages = [
-  img5237, img5238, img5240, img5241, img5242, img5243,
-  img5246, img5247, img5250, img5251, img5257, img5258,
-  img5259, img5260, img5262
-];
-
-const gridItems = Array.from({ length: 28 }, (_, i) => {
-  const img = imgImages[i % imgImages.length];
-  return (
-    <div key={i} className="absolute inset-0">
-      <img src={img} alt={`Wel product ${i + 1}`} className="w-full h-full object-cover" />
-    </div>
-  );
-});
+import React, { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
 
 export default function Hero() {
-  const [active, setActive] = useState(false);
-  const { theme } = useTheme();
+  const sectionRef = useRef(null);
+  const imageWrapperRef = useRef(null);
+  const headlineRef = useRef(null);
+  const eyebrowRef = useRef(null);
+  const textRef = useRef(null);
+  const ctaRef = useRef(null);
 
+  // ─── Hero‑only mouse parallax for the image ──────────────────
   useEffect(() => {
-    const timer = setTimeout(() => setActive(true), 1500);
-    return () => clearTimeout(timer);
+    const onMouseMove = (e) => {
+      if (imageWrapperRef.current) {
+        const x = (e.clientX / window.innerWidth - 0.5) * 10;
+        const y = (e.clientY / window.innerHeight - 0.5) * 10;
+        imageWrapperRef.current.style.transform = `translate(${x}px, ${y}px)`;
+      }
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    return () => window.removeEventListener('mousemove', onMouseMove);
   }, []);
 
-  const gradientColor = theme === 'dark' ? '#0B212A' : '#f3f4f6';
+  // ─── GSAP entrance animations ────────────────────────────────
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      tl.to(eyebrowRef.current, { opacity: 1, y: 0, duration: 1, delay: 0.3 })
+        .to(headlineRef.current.querySelectorAll('.headline-line'), {
+          y: 0,
+          opacity: 1,
+          duration: 1.2,
+          stagger: 0.15,
+        }, '-=0.5')
+        .to(textRef.current, { opacity: 1, y: 0, duration: 1 }, '-=0.8')
+        .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.8 }, '-=0.6')
+        .to('.hero-image', { scale: 1, duration: 1.5, ease: 'power2.out' }, '-=1.2');
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <section className="relative h-screen w-full overflow-hidden 2xl:max-w-7xl 2xl:mx-auto">
-      <GridMotion items={gridItems} gradientColor={gradientColor} />
+    <section ref={sectionRef} className="relative min-h-screen flex items-center z-10 pt-20 overflow-hidden bg-transparent">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          {/* Left */}
+          <div className="order-2 lg:order-1 relative">
+            <div className="absolute -left-8 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-old-gold/40 to-transparent hidden lg:block" />
+            <div className="space-y-8">
+              {/* Eyebrow */}
+              <div ref={eyebrowRef} className="flex items-center gap-4 opacity-0 translate-y-4">
+                <div className="h-px w-12 bg-old-gold/60" />
+                <span className="font-jost text-xs tracking-[0.3em] text-old-gold uppercase">Philippines & Canada</span>
+              </div>
 
-      <div className="absolute inset-0 z-5 bg-white/30 dark:bg-black/60" />
+              {/* Headline – inner spans now use block + pb-4 to prevent clipping */}
+              <h1 ref={headlineRef} className="font-cormorant text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[1.1] text-dark-teal dark:text-warm-white">
+                <span className="block overflow-hidden">
+                  <span className="headline-line block pb-4 opacity-0 translate-y-full">Every</span>
+                </span>
+                <span className="block overflow-hidden">
+                  <span className="headline-line block pb-4 opacity-0 translate-y-full bg-gradient-to-r from-old-gold via-[#E8D5A3] to-old-gold bg-clip-text text-transparent italic">Fragrance</span>
+                </span>
+                <span className="block overflow-hidden">
+                  <span className="headline-line block pb-4 opacity-0 translate-y-full">Tells a Story</span>
+                </span>
+              </h1>
 
-      <div
-        id="hero-overlay"
-        className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-4 sm:px-6 md:px-10"
-      >
-        <div className="mb-4 sm:mb-5 font-jost text-[0.6rem] sm:text-[0.7rem] font-medium uppercase tracking-[0.28em] sm:tracking-[0.32em] text-old-gold/90">
-          <LetterReveal
-            active={active}
-            lines={['Wel Fragrance Collection']}
-            letterDelay={0.06}
-            className="text-old-gold/90"
-          />
-        </div>
+              {/* Description */}
+              <div ref={textRef} className="space-y-4 max-w-lg opacity-0 translate-y-6">
+                <p className="font-inter text-warm-gray dark:text-warm-white/70 leading-relaxed text-sm md:text-base">
+                  At <span className="text-old-gold font-medium">Wel Fragrance Collection</span>, we believe that every fragrance tells a story — a story of passion, artistry, and individuality. Inspired by nature's purest essences and the beauty of human emotion, we craft perfumes that go beyond scent, creating timeless experiences that linger in memory.
+                </p>
+                <p className="font-inter text-warm-gray dark:text-warm-white/70 leading-relaxed text-sm md:text-base border-l-2 border-old-gold/30 pl-4">
+                  Our journey began with a vision of our CEO <span className="text-dark-teal dark:text-warm-white font-medium">Joel Malabo</span> to discover a scent that will be known in all parts of the Philippines & Canada. Each bottle reflects his determination, dreams, and the love for his Family.
+                </p>
+              </div>
 
-        <h1 className="font-playfair text-[clamp(2rem,5vw,5rem)] font-medium leading-[0.98] tracking-[-0.02em]">
-          <LetterReveal
-            active={active}
-            lines={['Scent, carried', 'between two shores']}
-            letterDelay={0.08}
-            className="text-dark-teal dark:text-white"
-          />
-        </h1>
+              {/* CTAs */}
+              <div ref={ctaRef} className="flex flex-wrap items-center gap-6 pt-4 opacity-0 translate-y-6">
+                <a href="#collection" className="group relative px-8 py-4 bg-old-gold text-warm-white dark:text-dark-teal font-jost text-sm tracking-[0.15em] uppercase font-medium overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(199,159,72,0.3)]">
+                  <span className="relative z-10">Explore Collection</span>
+                  <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                </a>
+                <a href="#story" className="group flex items-center gap-3 font-jost text-sm tracking-[0.15em] text-dark-teal dark:text-warm-white uppercase hover:text-old-gold transition-colors">
+                  <span>Our Story</span>
+                  <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
 
-        <div className="mt-4 sm:mt-6 max-w-xs sm:max-w-xl font-cormorant text-base sm:text-lg md:text-xl italic">
-          <LetterReveal
-            active={active}
-            lines={[
-              'Three signature expressions, composed where Manila\'s warmth',
-              'meets Montréal\'s quiet cool.',
-            ]}
-            letterDelay={0.05}
-            className="text-dark-teal/80 dark:text-white/80"
-          />
-        </div>
-
-        <div className="absolute bottom-6 sm:bottom-8 flex flex-col items-center gap-3">
-          <span className="font-jost text-[0.55rem] sm:text-[0.65rem] uppercase tracking-[0.2em] sm:tracking-[0.28em] text-dark-teal/50 dark:text-white/50">
-            <LetterReveal
-              active={active}
-              lines={['Discover the collection']}
-              letterDelay={0.06}
-              className="text-dark-teal/50 dark:text-white/50"
-            />
-          </span>
-          <span className="h-7 sm:h-9 w-px bg-gradient-to-b from-old-gold/70 to-transparent animate-scroll-line" />
+          {/* Right Image */}
+          <div className="order-1 lg:order-2 relative">
+            <div className="relative aspect-[3/4] lg:aspect-[4/5] overflow-hidden">
+              <div className="absolute inset-4 border border-old-gold/20 z-20 pointer-events-none" />
+              <div className="absolute top-4 left-4 w-8 h-8 border-t border-l border-old-gold/60 z-20" />
+              <div className="absolute bottom-4 right-4 w-8 h-8 border-b border-r border-old-gold/60 z-20" />
+              <div ref={imageWrapperRef} className="absolute inset-0 transition-transform duration-300 ease-out">
+                <img
+                  src="https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=1200&auto=format&fit=crop"
+                  alt="Luxury Perfume Collection"
+                  className="hero-image w-full h-full object-cover scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-warm-white dark:from-dark-teal via-transparent to-transparent opacity-60" />
+              </div>
+              {/* Floating Badge */}
+              <div className="absolute bottom-8 left-8 z-30 bg-warm-white/80 dark:bg-dark-teal/80 backdrop-blur-sm border border-old-gold/30 p-4 max-w-[220px]">
+                <p className="font-cormorant text-old-gold text-lg italic leading-snug">"Every scent is a reflection of you."</p>
+                <div className="mt-2 h-px w-full bg-gradient-to-r from-old-gold/50 to-transparent" />
+                <p className="font-jost text-xs text-warm-gray dark:text-warm-white/70 mt-2 tracking-wider uppercase">— Joel Malabo, CEO</p>
+              </div>
+            </div>
+            {/* Giant watermark */}
+            <div className="absolute -right-24 top-1/2 -translate-y-1/2 pointer-events-none select-none hidden xl:block">
+              <span className="font-playfair text-[14rem] leading-none text-old-gold/[0.03]" style={{ writingMode: 'vertical-rl' }}>WEL</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <style>{`
-        @keyframes scroll-line {
-          0% { transform: scaleY(0); transform-origin: top; opacity: 0; }
-          40% { transform: scaleY(1); transform-origin: top; opacity: 1; }
-          60% { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
-          100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
-        }
-        .animate-scroll-line {
-          animation: scroll-line 2.4s ease-in-out infinite;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .animate-scroll-line {
-            animation: none !important;
-          }
-        }
-      `}</style>
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60 z-10">
+        <span className="font-jost text-[10px] tracking-[0.3em] uppercase text-warm-gray dark:text-warm-white/70">Scroll</span>
+        <div className="w-px h-8 bg-gradient-to-b from-old-gold to-transparent animate-pulse" />
+      </div>
     </section>
   );
 }

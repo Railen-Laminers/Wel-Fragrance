@@ -9,19 +9,13 @@
         box-sizing: border-box;
     }
 
-    html {
-        scroll-behavior: smooth;
-    }
-
-    /* Light theme (default) */
     :root {
         --color-bg: #FFFFFF;
-        --color-text: #0B212A;
+        --color-text: #0B0B0C;
     }
 
-    /* Dark theme */
     .dark {
-        --color-bg: #0B212A;
+        --color-bg: #0B0B0C;
         --color-text: #FFFFFF;
     }
 
@@ -32,16 +26,55 @@
         transition: background-color 0.3s, color 0.3s;
     }
 
-    ::-webkit-scrollbar {
-        width: 3px;
+    /* ─── ULTRA‑THIN SCROLLBAR (WORKS EVERYWHERE) ─── */
+
+    /* 1. Chromium (Chrome, Edge, Safari) */
+    html::-webkit-scrollbar {
+        width: 1px;
+        height: 1px;
     }
 
-    ::-webkit-scrollbar-track {
-        background: var(--color-bg);
+    html::-webkit-scrollbar-track {
+        background: transparent;
     }
 
-    ::-webkit-scrollbar-thumb {
-        background: #C79F48;
-        /* old-gold */
+    html::-webkit-scrollbar-thumb {
+        background: rgba(199, 159, 72, 0.12);
+        border-radius: 10px;
+        transition: background 0.2s;
+    }
+
+    html::-webkit-scrollbar-thumb:hover {
+        background: rgba(199, 159, 72, 0.35);
+    }
+
+    /* 2. Firefox */
+    html {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(199, 159, 72, 0.12) transparent;
+    }
+
+    /* 3. Edge (old) / IE fallback */
+    html {
+        -ms-overflow-style: -ms-autohiding-scrollbar;
+    }
+
+    /* 4. Also apply to any overflowing elements */
+    *::-webkit-scrollbar {
+        width: 1px;
+        height: 1px;
+    }
+
+    *::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    *::-webkit-scrollbar-thumb {
+        background: rgba(199, 159, 72, 0.12);
+        border-radius: 10px;
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+        background: rgba(199, 159, 72, 0.35);
     }
 }
