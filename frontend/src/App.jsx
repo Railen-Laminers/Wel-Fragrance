@@ -1,5 +1,4 @@
-// src/App.jsx
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -7,59 +6,28 @@ import Home from './components/pages/Home';
 import About from './components/pages/About';
 import Contact from './components/pages/Contact';
 import Products from './components/pages/Products';
-import MagazineCatalog from './components/pages/MagazineCatalog';  // <-- NEW IMPORT
+import MagazineCatalog from './components/pages/MagazineCatalog';
 import Navbar from './components/common/Navbar';
 import CursorFollower from './components/common/CursorFollower';
 import GlobalParticles from './components/common/GlobalParticles';
 import { ThemeProvider } from './context/ThemeContext';
 import SmoothScroll from './components/common/SmoothScroll';
 
+// Register GSAP plugins (keep if used elsewhere, e.g. in page components)
 gsap.registerPlugin(ScrollTrigger);
 
+// ---- Simplified route component without any transition animation ----
 function AnimatedRoutes() {
   const location = useLocation();
-  const mainRef = useRef(null);
-  const [displayLocation, setDisplayLocation] = useState(location);
-  const [transitionStage, setTransitionStage] = useState('fadeIn');
-
-  useEffect(() => {
-    if (location.pathname !== displayLocation.pathname) {
-      setTransitionStage('fadeOut');
-    }
-  }, [location, displayLocation]);
-
-  useEffect(() => {
-    if (transitionStage === 'fadeOut') {
-      const tl = gsap.timeline({
-        onComplete: () => {
-          setDisplayLocation(location);
-          setTransitionStage('fadeIn');
-          window.scrollTo(0, 0);
-        }
-      });
-      tl.to(mainRef.current, {
-        opacity: 0,
-        y: -40,
-        duration: 0.6,
-        ease: 'power3.inOut'
-      });
-    } else if (transitionStage === 'fadeIn') {
-      gsap.fromTo(mainRef.current,
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.1 }
-      );
-      ScrollTrigger.refresh();
-    }
-  }, [transitionStage, location, displayLocation]);
 
   return (
-    <main ref={mainRef} className="relative">
-      <Routes location={displayLocation}>
+    <main className="relative">
+      <Routes location={location}>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/products" element={<Products />} />
-        <Route path="/catalog" element={<MagazineCatalog />} />   {/* NEW ROUTE */}
+        <Route path="/catalog" element={<MagazineCatalog />} />
       </Routes>
     </main>
   );
