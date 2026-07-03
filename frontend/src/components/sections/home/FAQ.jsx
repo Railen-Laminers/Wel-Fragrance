@@ -28,38 +28,50 @@ export default function FAQ() {
     const faqs = [
         {
             question: 'What makes Wel fragrances unique?',
-            answer: 'Each Wel fragrance is handcrafted with nature\'s purest essences, inspired by the vision of our CEO Joel Malabo. We blend traditional perfumery techniques with modern innovation to create scents that are both timeless and deeply personal.',
+            answer:
+                "Each Wel fragrance is handcrafted with nature's purest essences, inspired by the vision of our CEO Joel Malabo. We blend traditional perfumery techniques with modern innovation to create scents that are both timeless and deeply personal.",
         },
         {
             question: 'Do you ship to both the Philippines and Canada?',
-            answer: 'Yes, we proudly ship to all regions of the Philippines and across Canada. We offer express shipping options to ensure your fragrance arrives in perfect condition, no matter where you are.',
+            answer:
+                'Yes, we proudly ship to all regions of the Philippines and across Canada. We offer express shipping options to ensure your fragrance arrives in perfect condition, no matter where you are.',
         },
         {
             question: 'How do I choose my signature scent?',
-            answer: 'We recommend exploring our fragrance families — Floral, Oriental, Woody, and Fresh. Each scent is designed to resonate with different personalities and moods. You can also visit our boutiques for a personalized consultation.',
+            answer:
+                'We recommend exploring our fragrance families — Floral, Oriental, Woody, and Fresh. Each scent is designed to resonate with different personalities and moods. You can also visit our boutiques for a personalized consultation.',
         },
         {
             question: 'Are Wel fragrances suitable as gifts?',
-            answer: 'Absolutely. Every Wel fragrance comes in elegant, gift-ready packaging. We also offer complimentary gift wrapping and personalized message cards to make your gift truly special.',
+            answer:
+                'Absolutely. Every Wel fragrance comes in elegant, gift-ready packaging. We also offer complimentary gift wrapping and personalized message cards to make your gift truly special.',
         },
         {
             question: 'What is your return policy?',
-            answer: 'We stand behind the quality of our fragrances. If you\'re not completely satisfied, you may return unopened products within 14 days for a full refund. Opened products can be exchanged within 7 days.',
+            answer:
+                "We stand behind the quality of our fragrances. If you're not completely satisfied, you may return unopened products within 14 days for a full refund. Opened products can be exchanged within 7 days.",
         },
     ];
 
     return (
-        <section ref={sectionRef} className="relative py-24 lg:py-32 z-10 bg-transparent">
-            <div className="max-w-4xl mx-auto px-6 lg:px-8">
-                <div className="text-center mb-16">
-                    <div className="flex items-center justify-center gap-4 mb-6">
-                        <div className="h-px w-16 bg-old-gold/40" />
-                        <span className="font-jost text-xs tracking-[0.3em] text-old-gold uppercase">
-                            Questions
-                        </span>
-                        <div className="h-px w-16 bg-old-gold/40" />
+        <section
+            ref={sectionRef}
+            className="relative py-20 sm:py-24 lg:py-32 z-10 bg-transparent"
+        >
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-12 sm:mb-16">
+                    {/* Eyebrow with camera‑cursor corners - centered */}
+                    <div className="flex items-center justify-center gap-4 mb-4 sm:mb-6">
+                        <div className="relative inline-block px-3 sm:px-4 py-1 sm:py-1.5">
+                            <div className="absolute top-0 left-0 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-l-2 border-old-gold/60" />
+                            <div className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-r-2 border-old-gold/60" />
+                            <span className="font-jost text-[10px] sm:text-xs tracking-[0.3em] text-old-gold uppercase whitespace-nowrap">
+                                Questions
+                            </span>
+                        </div>
                     </div>
-                    <h2 className="font-cormorant text-4xl md:text-5xl text-dark-teal dark:text-warm-white">
+
+                    <h2 className="font-cormorant text-3xl sm:text-4xl md:text-5xl text-dark-teal dark:text-warm-white">
                         Frequently <span className="italic text-old-gold">Asked</span>
                     </h2>
                 </div>
@@ -72,19 +84,30 @@ export default function FAQ() {
                         >
                             <button
                                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                                className="w-full flex items-center justify-between p-6 lg:p-8 text-left group"
+                                className="w-full flex items-center justify-between p-4 sm:p-6 lg:p-8 text-left group"
                             >
-                                <span className="font-cormorant text-lg lg:text-xl text-dark-teal dark:text-warm-white group-hover:text-old-gold transition-colors duration-300 pr-8">
+                                <span className="font-cormorant text-base sm:text-lg lg:text-xl text-dark-teal dark:text-warm-white group-hover:text-old-gold transition-colors duration-300 pr-6 sm:pr-8">
                                     {faq.question}
                                 </span>
-                                <span className={`flex-shrink-0 w-8 h-8 border border-old-gold/30 flex items-center justify-center transition-all duration-500 ${openIndex === index ? 'bg-old-gold border-old-gold rotate-45' : ''}`}>
+                                <span
+                                    className={`flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 border border-old-gold/30 flex items-center justify-center transition-all duration-500 ${openIndex === index ? 'bg-old-gold border-old-gold rotate-45' : ''
+                                        }`}
+                                >
                                     <svg
-                                        className={`w-3 h-3 transition-colors duration-300 ${openIndex === index ? 'text-warm-white dark:text-dark-teal' : 'text-old-gold'}`}
+                                        className={`w-3 h-3 transition-colors duration-300 ${openIndex === index
+                                                ? 'text-warm-white dark:text-dark-teal'
+                                                : 'text-old-gold'
+                                            }`}
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
                                     >
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M12 4v16m8-8H4"
+                                        />
                                     </svg>
                                 </span>
                             </button>
@@ -93,7 +116,7 @@ export default function FAQ() {
                                 className={`overflow-hidden transition-all duration-500 ease-out ${openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                                     }`}
                             >
-                                <div className="px-6 lg:px-8 pb-6 lg:pb-8">
+                                <div className="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6 lg:pb-8">
                                     <div className="h-px w-full bg-old-gold/10 mb-4" />
                                     <p className="font-inter text-warm-gray dark:text-warm-white/70 text-sm leading-relaxed">
                                         {faq.answer}

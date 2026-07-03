@@ -9,7 +9,7 @@ export default function Hero() {
   const textRef = useRef(null);
   const ctaRef = useRef(null);
 
-  // ─── Hero‑only mouse parallax for the image ──────────────────
+  // Mouse parallax for image
   useEffect(() => {
     const onMouseMove = (e) => {
       if (imageWrapperRef.current) {
@@ -22,7 +22,7 @@ export default function Hero() {
     return () => window.removeEventListener('mousemove', onMouseMove);
   }, []);
 
-  // ─── GSAP entrance animations ────────────────────────────────
+  // GSAP entrance animations
   useEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
@@ -41,65 +41,113 @@ export default function Hero() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative min-h-screen flex items-center z-10 pt-20 overflow-hidden bg-transparent">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left */}
+    <section
+      ref={sectionRef}
+      className="relative min-h-screen flex items-center z-10 pt-20 overflow-hidden bg-transparent"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-20 items-center">
+          {/* Left content */}
           <div className="order-2 lg:order-1 relative">
             <div className="absolute -left-8 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-old-gold/40 to-transparent hidden lg:block" />
-            <div className="space-y-8">
-              {/* Eyebrow */}
-              <div ref={eyebrowRef} className="flex items-center gap-4 opacity-0 translate-y-4">
-                <div className="h-px w-12 bg-old-gold/60" />
-                <span className="font-jost text-xs tracking-[0.3em] text-old-gold uppercase">Philippines & Canada</span>
+            <div className="space-y-6 sm:space-y-8">
+              {/* Eyebrow – with camera‑cursor corners */}
+              <div
+                ref={eyebrowRef}
+                className="flex items-center gap-4 opacity-0 translate-y-4"
+              >
+                <div className="relative inline-block px-3 sm:px-4 py-1 sm:py-1.5">
+                  {/* Top-Left Corner */}
+                  <div className="absolute top-0 left-0 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-l-2 border-old-gold/60" />
+                  {/* Bottom-Right Corner */}
+                  <div className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-r-2 border-old-gold/60" />
+                  <span className="font-jost text-[10px] sm:text-xs tracking-[0.3em] text-old-gold uppercase whitespace-nowrap">
+                    Philippines & Canada
+                  </span>
+                </div>
               </div>
 
-              {/* Headline – inner spans now use block + pb-4 to prevent clipping */}
-              <h1 ref={headlineRef} className="font-cormorant text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[1.1] text-dark-teal dark:text-warm-white">
+              {/* Headline */}
+              <h1
+                ref={headlineRef}
+                className="font-cormorant text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[1.1] text-dark-teal dark:text-warm-white"
+              >
                 <span className="block overflow-hidden">
-                  <span className="headline-line block pb-4 opacity-0 translate-y-full">Every</span>
+                  <span className="headline-line block pb-2 sm:pb-4 opacity-0 translate-y-full">
+                    Every
+                  </span>
                 </span>
                 <span className="block overflow-hidden">
-                  <span className="headline-line block pb-4 opacity-0 translate-y-full bg-gradient-to-r from-old-gold via-[#E8D5A3] to-old-gold bg-clip-text text-transparent italic">Fragrance</span>
+                  <span className="headline-line block pb-2 sm:pb-4 opacity-0 translate-y-full bg-gradient-to-r from-old-gold via-[#E8D5A3] to-old-gold bg-clip-text text-transparent italic">
+                    Fragrance
+                  </span>
                 </span>
                 <span className="block overflow-hidden">
-                  <span className="headline-line block pb-4 opacity-0 translate-y-full">Tells a Story</span>
+                  <span className="headline-line block pb-2 sm:pb-4 opacity-0 translate-y-full">
+                    Tells a Story
+                  </span>
                 </span>
               </h1>
 
-              {/* Description */}
-              <div ref={textRef} className="space-y-4 max-w-lg opacity-0 translate-y-6">
+              {/* Description – simplified (removed CEO journey paragraph) */}
+              <div
+                ref={textRef}
+                className="max-w-lg opacity-0 translate-y-6"
+              >
                 <p className="font-inter text-warm-gray dark:text-warm-white/70 leading-relaxed text-sm md:text-base">
-                  At <span className="text-old-gold font-medium">Wel Fragrance Collection</span>, we believe that every fragrance tells a story — a story of passion, artistry, and individuality. Inspired by nature's purest essences and the beauty of human emotion, we craft perfumes that go beyond scent, creating timeless experiences that linger in memory.
-                </p>
-                <p className="font-inter text-warm-gray dark:text-warm-white/70 leading-relaxed text-sm md:text-base border-l-2 border-old-gold/30 pl-4">
-                  Our journey began with a vision of our CEO <span className="text-dark-teal dark:text-warm-white font-medium">Joel Malabo</span> to discover a scent that will be known in all parts of the Philippines & Canada. Each bottle reflects his determination, dreams, and the love for his Family.
+                  At <span className="text-old-gold font-medium">Wel Fragrance Collection</span>,
+                  we believe that every fragrance tells a story — a story of passion, artistry, and
+                  individuality. Inspired by nature's purest essences and the beauty of human
+                  emotion, we craft perfumes that go beyond scent, creating timeless experiences
+                  that linger in memory.
                 </p>
               </div>
 
               {/* CTAs */}
-              <div ref={ctaRef} className="flex flex-wrap items-center gap-6 pt-4 opacity-0 translate-y-6">
-                <a href="#collection" className="group relative px-8 py-4 bg-old-gold text-warm-white dark:text-dark-teal font-jost text-sm tracking-[0.15em] uppercase font-medium overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(199,159,72,0.3)]">
+              <div
+                ref={ctaRef}
+                className="flex flex-wrap items-center gap-4 sm:gap-6 pt-2 sm:pt-4 opacity-0 translate-y-6"
+              >
+                <a
+                  href="#collection"
+                  className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-old-gold text-warm-white dark:text-dark-teal font-jost text-xs sm:text-sm tracking-[0.15em] uppercase font-medium overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(199,159,72,0.3)]"
+                >
                   <span className="relative z-10">Explore Collection</span>
                   <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
                 </a>
-                <a href="#story" className="group flex items-center gap-3 font-jost text-sm tracking-[0.15em] text-dark-teal dark:text-warm-white uppercase hover:text-old-gold transition-colors">
+                <a
+                  href="#story"
+                  className="group flex items-center gap-3 font-jost text-xs sm:text-sm tracking-[0.15em] text-dark-teal dark:text-warm-white uppercase hover:text-old-gold transition-colors"
+                >
                   <span>Our Story</span>
-                  <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  <svg
+                    className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M17 8l4 4m0 0l-4 4m4-4H3"
+                    />
                   </svg>
                 </a>
               </div>
             </div>
           </div>
 
-          {/* Right Image */}
+          {/* Right image */}
           <div className="order-1 lg:order-2 relative">
-            <div className="relative aspect-[3/4] lg:aspect-[4/5] overflow-hidden">
+            <div className="relative aspect-[4/5] sm:aspect-[3/4] lg:aspect-[4/5] overflow-hidden">
               <div className="absolute inset-4 border border-old-gold/20 z-20 pointer-events-none" />
-              <div className="absolute top-4 left-4 w-8 h-8 border-t border-l border-old-gold/60 z-20" />
-              <div className="absolute bottom-4 right-4 w-8 h-8 border-b border-r border-old-gold/60 z-20" />
-              <div ref={imageWrapperRef} className="absolute inset-0 transition-transform duration-300 ease-out">
+              <div className="absolute top-4 left-4 w-6 sm:w-8 h-6 sm:h-8 border-t border-l border-old-gold/60 z-20" />
+              <div className="absolute bottom-4 right-4 w-6 sm:w-8 h-6 sm:h-8 border-b border-r border-old-gold/60 z-20" />
+              <div
+                ref={imageWrapperRef}
+                className="absolute inset-0 transition-transform duration-300 ease-out"
+              >
                 <img
                   src="https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=1200&auto=format&fit=crop"
                   alt="Luxury Perfume Collection"
@@ -108,15 +156,24 @@ export default function Hero() {
                 <div className="absolute inset-0 bg-gradient-to-t from-warm-white dark:from-dark-teal via-transparent to-transparent opacity-60" />
               </div>
               {/* Floating Badge */}
-              <div className="absolute bottom-8 left-8 z-30 bg-warm-white/80 dark:bg-dark-teal/80 backdrop-blur-sm border border-old-gold/30 p-4 max-w-[220px]">
-                <p className="font-cormorant text-old-gold text-lg italic leading-snug">"Every scent is a reflection of you."</p>
+              <div className="absolute bottom-4 sm:bottom-8 left-4 sm:left-8 z-30 bg-warm-white/80 dark:bg-dark-teal/80 backdrop-blur-sm border border-old-gold/30 p-3 sm:p-4 max-w-[180px] sm:max-w-[220px] hidden xs:block">
+                <p className="font-cormorant text-old-gold text-base sm:text-lg italic leading-snug">
+                  "Every scent is a reflection of you."
+                </p>
                 <div className="mt-2 h-px w-full bg-gradient-to-r from-old-gold/50 to-transparent" />
-                <p className="font-jost text-xs text-warm-gray dark:text-warm-white/70 mt-2 tracking-wider uppercase">— Joel Malabo, CEO</p>
+                <p className="font-jost text-[10px] sm:text-xs text-warm-gray dark:text-warm-white/70 mt-1 sm:mt-2 tracking-wider uppercase">
+                  — Joel Malabo, CEO
+                </p>
               </div>
             </div>
             {/* Giant watermark */}
             <div className="absolute -right-24 top-1/2 -translate-y-1/2 pointer-events-none select-none hidden xl:block">
-              <span className="font-playfair text-[14rem] leading-none text-old-gold/[0.03]" style={{ writingMode: 'vertical-rl' }}>WEL</span>
+              <span
+                className="font-playfair text-[14rem] leading-none text-old-gold/[0.03]"
+                style={{ writingMode: 'vertical-rl' }}
+              >
+                WEL
+              </span>
             </div>
           </div>
         </div>
@@ -124,7 +181,9 @@ export default function Hero() {
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60 z-10">
-        <span className="font-jost text-[10px] tracking-[0.3em] uppercase text-warm-gray dark:text-warm-white/70">Scroll</span>
+        <span className="font-jost text-[10px] tracking-[0.3em] uppercase text-warm-gray dark:text-warm-white/70">
+          Scroll
+        </span>
         <div className="w-px h-8 bg-gradient-to-b from-old-gold to-transparent animate-pulse" />
       </div>
     </section>

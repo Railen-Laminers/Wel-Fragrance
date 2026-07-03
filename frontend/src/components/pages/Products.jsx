@@ -45,10 +45,10 @@ export default function Products() {
     const sectionRef = useRef(null);
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [isModalMounted, setIsModalMounted] = useState(false); // controls presence in DOM
+    const [isModalMounted, setIsModalMounted] = useState(false);
     const modalRef = useRef(null);
     const modalContentRef = useRef(null);
-    const closingRef = useRef(false); // guards against double-close firing two tweens
+    const closingRef = useRef(false);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -62,7 +62,6 @@ export default function Products() {
         return () => ctx.revert();
     }, []);
 
-    // Open: mount modal, then animate in
     useEffect(() => {
         if (selectedProduct) {
             closingRef.current = false;
@@ -70,7 +69,6 @@ export default function Products() {
         }
     }, [selectedProduct]);
 
-    // Play the open animation once the modal is actually in the DOM
     useEffect(() => {
         if (isModalMounted && selectedProduct && !closingRef.current) {
             document.body.style.overflow = 'hidden';
@@ -84,11 +82,9 @@ export default function Products() {
     }, [isModalMounted, selectedProduct]);
 
     const openModal = (product) => setSelectedProduct(product);
-
     const closeModal = () => {
         if (closingRef.current || !isModalMounted) return;
         closingRef.current = true;
-
         const tl = gsap.timeline({
             onComplete: () => {
                 document.body.style.overflow = '';
@@ -96,7 +92,6 @@ export default function Products() {
                 setSelectedProduct(null);
             },
         });
-
         tl.to(modalContentRef.current, {
             scale: 0.9,
             y: 30,
@@ -109,7 +104,7 @@ export default function Products() {
             pointerEvents: 'none',
             duration: 0.35,
             ease: 'power2.in',
-        }, 0.05); // backdrop lingers a touch behind the card for a nicer feel
+        }, 0.05);
     };
 
     const handleBackdropClick = (e) => {
@@ -118,25 +113,29 @@ export default function Products() {
 
     return (
         <>
-            <div ref={sectionRef} className="min-h-screen bg-transparent pt-24 md:pt-32 pb-20">
-                <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                    <div className="products-header text-center mb-16">
-                        <div className="flex items-center justify-center gap-4 mb-6">
-                            <div className="h-px w-16 bg-old-gold/40" />
-                            <span className="font-jost text-xs tracking-[0.3em] text-old-gold uppercase">
-                                The Complete Collection
-                            </span>
-                            <div className="h-px w-16 bg-old-gold/40" />
+            <div ref={sectionRef} className="min-h-screen bg-transparent pt-20 sm:pt-24 md:pt-32 pb-16 sm:pb-20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="products-header text-center mb-12 sm:mb-16">
+                        {/* Eyebrow with camera‑cursor corners - centered */}
+                        <div className="flex items-center justify-center gap-4 mb-4 sm:mb-6">
+                            <div className="relative inline-block px-3 sm:px-4 py-1 sm:py-1.5">
+                                <div className="absolute top-0 left-0 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-l-2 border-old-gold/60" />
+                                <div className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-r-2 border-old-gold/60" />
+                                <span className="font-jost text-[10px] sm:text-xs tracking-[0.3em] text-old-gold uppercase whitespace-nowrap">
+                                    The Complete Collection
+                                </span>
+                            </div>
                         </div>
-                        <h1 className="font-cormorant text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white">
+
+                        <h1 className="font-cormorant text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white">
                             Our <span className="italic text-old-gold">Fragrances</span>
                         </h1>
-                        <p className="products-subtitle font-inter text-warm-gray dark:text-warm-white/70 max-w-2xl mx-auto mt-4 text-sm md:text-base">
+                        <p className="products-subtitle font-inter text-warm-gray dark:text-warm-white/70 max-w-2xl mx-auto mt-3 sm:mt-4 text-sm md:text-base px-4">
                             Explore our full range of handcrafted scents, each inspired by the beauty of contrast and the art of storytelling.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                         {allProducts.map((product, index) => (
                             <div
                                 key={product.id}
@@ -145,7 +144,7 @@ export default function Products() {
                                 onMouseLeave={() => setHoveredIndex(null)}
                                 onClick={() => openModal(product)}
                             >
-                                <div className="relative aspect-[3/4] overflow-hidden mb-6 bg-warm-white/50 dark:bg-charcoal/50 backdrop-blur-sm">
+                                <div className="relative aspect-[3/4] overflow-hidden mb-4 sm:mb-6 bg-warm-white/50 dark:bg-charcoal/50 backdrop-blur-sm">
                                     <div className="absolute inset-4 border border-old-gold/10 z-10 pointer-events-none group-hover:border-old-gold/30 transition-colors duration-500" />
                                     <img
                                         src={product.image}
@@ -155,14 +154,14 @@ export default function Products() {
                                     <div className="absolute inset-0 bg-gradient-to-t from-warm-white/60 dark:from-dark-teal/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
 
                                     {product.tag && (
-                                        <div className="absolute top-6 left-6 z-20">
+                                        <div className="absolute top-4 sm:top-6 left-4 sm:left-6 z-20">
                                             <span className="font-jost text-[10px] tracking-[0.2em] uppercase bg-old-gold text-warm-white dark:text-dark-teal px-3 py-1">
                                                 {product.tag}
                                             </span>
                                         </div>
                                     )}
 
-                                    <div className={`absolute bottom-6 left-6 right-6 z-20 transition-all duration-500 ${hoveredIndex === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                                    <div className={`absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 z-20 transition-all duration-500 ${hoveredIndex === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                                         <button
                                             className="group/btn relative w-full py-3 overflow-hidden bg-warm-white/20 dark:bg-dark-teal/20 backdrop-blur-md border border-warm-white/30 dark:border-dark-teal/30 font-jost text-xs tracking-[0.2em] uppercase text-dark-teal dark:text-warm-white transition-all duration-300 hover:shadow-[0_0_30px_rgba(199,159,72,0.3)]"
                                             onClick={(e) => { e.stopPropagation(); openModal(product); }}
@@ -175,8 +174,8 @@ export default function Products() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-2 text-center sm:text-left">
-                                    <h3 className="font-cormorant text-xl lg:text-2xl text-dark-teal dark:text-warm-white group-hover:text-old-gold transition-colors duration-300">
+                                <div className="space-y-1 sm:space-y-2 text-center sm:text-left">
+                                    <h3 className="font-cormorant text-lg sm:text-xl lg:text-2xl text-dark-teal dark:text-warm-white group-hover:text-old-gold transition-colors duration-300">
                                         {product.name}
                                     </h3>
                                     <p className="font-inter text-warm-gray dark:text-warm-white/70 text-xs tracking-wide">
@@ -190,10 +189,10 @@ export default function Products() {
                         ))}
                     </div>
 
-                    <div className="text-center mt-16">
+                    <div className="text-center mt-12 sm:mt-16">
                         <Link
                             to="/"
-                            className="group inline-flex items-center gap-3 font-jost text-sm tracking-[0.15em] text-dark-teal dark:text-warm-white uppercase hover:text-old-gold transition-colors"
+                            className="group inline-flex items-center gap-3 font-jost text-xs sm:text-sm tracking-[0.15em] text-dark-teal dark:text-warm-white uppercase hover:text-old-gold transition-colors"
                         >
                             <svg className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
@@ -204,7 +203,7 @@ export default function Products() {
                 </div>
             </div>
 
-            {/* MODAL — portaled to document.body; stays mounted through the exit tween */}
+            {/* MODAL */}
             {isModalMounted && selectedProduct && createPortal(
                 <div
                     ref={modalRef}
@@ -235,7 +234,7 @@ export default function Products() {
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-warm-white/30 dark:from-dark-teal/30 via-transparent to-transparent opacity-60" />
                                 {selectedProduct.tag && (
-                                    <div className="absolute top-6 left-6 z-10">
+                                    <div className="absolute top-4 sm:top-6 left-4 sm:left-6 z-10">
                                         <span className="font-jost text-[10px] tracking-[0.2em] uppercase bg-old-gold text-warm-white dark:text-dark-teal px-4 py-1.5">
                                             {selectedProduct.tag}
                                         </span>
@@ -243,34 +242,38 @@ export default function Products() {
                                 )}
                             </div>
 
-                            <div className="p-8 md:p-12 flex flex-col justify-center">
-                                <div className="mb-6">
-                                    <div className="flex items-center gap-4 mb-4">
-                                        <div className="h-px w-12 bg-old-gold/40" />
-                                        <span className="font-jost text-xs tracking-[0.3em] text-old-gold uppercase">
-                                            Signature Scent
-                                        </span>
+                            <div className="p-6 sm:p-8 md:p-12 flex flex-col justify-center">
+                                <div className="mb-4 sm:mb-6">
+                                    {/* Modal Eyebrow with camera‑cursor corners */}
+                                    <div className="flex items-center gap-4 mb-3 sm:mb-4">
+                                        <div className="relative inline-block px-3 sm:px-4 py-1 sm:py-1.5">
+                                            <div className="absolute top-0 left-0 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-l-2 border-old-gold/60" />
+                                            <div className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-r-2 border-old-gold/60" />
+                                            <span className="font-jost text-[10px] sm:text-xs tracking-[0.3em] text-old-gold uppercase whitespace-nowrap">
+                                                Signature Scent
+                                            </span>
+                                        </div>
                                     </div>
-                                    <h2 className="font-cormorant text-3xl md:text-4xl lg:text-5xl text-dark-teal dark:text-warm-white leading-tight">
+                                    <h2 className="font-cormorant text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-dark-teal dark:text-warm-white leading-tight">
                                         {selectedProduct.name}
                                     </h2>
                                 </div>
 
-                                <p className="font-inter text-warm-gray dark:text-warm-white/70 text-sm leading-relaxed mb-4">
+                                <p className="font-inter text-warm-gray dark:text-warm-white/70 text-sm leading-relaxed mb-3 sm:mb-4">
                                     {selectedProduct.notes}
                                 </p>
 
-                                <div className="border-t border-old-gold/10 pt-4 mb-6">
-                                    <p className="font-inter text-warm-gray dark:text-warm-white/70 text-base leading-relaxed italic">
+                                <div className="border-t border-old-gold/10 pt-3 sm:pt-4 mb-4 sm:mb-6">
+                                    <p className="font-inter text-warm-gray dark:text-warm-white/70 text-sm sm:text-base leading-relaxed italic">
                                         "{selectedProduct.story}"
                                     </p>
                                 </div>
 
-                                <div className="flex items-center justify-between mt-4">
-                                    <span className="font-jost text-old-gold text-2xl tracking-wider">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-2 sm:mt-4">
+                                    <span className="font-jost text-old-gold text-xl sm:text-2xl tracking-wider">
                                         {selectedProduct.price}
                                     </span>
-                                    <button className="group relative px-8 py-3 overflow-hidden bg-old-gold text-warm-white dark:text-dark-teal font-jost text-sm tracking-[0.15em] uppercase font-medium transition-all hover:shadow-[0_0_30px_rgba(199,159,72,0.3)]">
+                                    <button className="group relative px-6 sm:px-8 py-3 overflow-hidden bg-old-gold text-warm-white dark:text-dark-teal font-jost text-xs sm:text-sm tracking-[0.15em] uppercase font-medium transition-all hover:shadow-[0_0_30px_rgba(199,159,72,0.3)]">
                                         <span className="relative z-10">Add to Cart</span>
                                         <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
                                     </button>
