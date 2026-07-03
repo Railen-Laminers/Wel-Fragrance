@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Link } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -66,15 +67,15 @@ export default function CTA() {
                             </p>
 
                             <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-                                <a
-                                    href="#shop"
+                                <Link
+                                    to="/products"
                                     className="group relative px-6 sm:px-10 py-3 sm:py-4 bg-old-gold text-warm-white dark:text-dark-teal font-jost text-xs sm:text-sm tracking-[0.15em] uppercase font-medium overflow-hidden transition-all hover:shadow-[0_0_40px_rgba(199,159,72,0.3)]"
                                 >
                                     <span className="relative z-10">Shop Now</span>
                                     <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
-                                </a>
-                                <a
-                                    href="#contact"
+                                </Link>
+                                <Link
+                                    to="/contact"
                                     className="group flex items-center gap-3 font-jost text-xs sm:text-sm tracking-[0.15em] text-dark-teal dark:text-warm-white uppercase hover:text-old-gold transition-colors"
                                 >
                                     <span>Contact Us</span>
@@ -91,7 +92,7 @@ export default function CTA() {
                                             d="M17 8l4 4m0 0l-4 4m4-4H3"
                                         />
                                     </svg>
-                                </a>
+                                </Link>
                             </div>
                         </div>
                     </div>

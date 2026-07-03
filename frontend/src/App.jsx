@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react'; // ✅ added useEffect
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -11,14 +11,18 @@ import Navbar from './components/common/Navbar';
 import CursorFollower from './components/common/CursorFollower';
 import GlobalParticles from './components/common/GlobalParticles';
 import { ThemeProvider } from './context/ThemeContext';
-import SmoothScroll from './components/common/SmoothScroll';
 
-// Register GSAP plugins (keep if used elsewhere, e.g. in page components)
+// Register GSAP plugins (keep if used elsewhere)
 gsap.registerPlugin(ScrollTrigger);
 
-// ---- Simplified route component without any transition animation ----
+// ---- Route component with scroll-to-top on every route change ----
 function AnimatedRoutes() {
   const location = useLocation();
+
+  // Scroll to top instantly whenever the route changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
 
   return (
     <main className="relative">
@@ -38,11 +42,11 @@ export default function App() {
     <ThemeProvider>
       <Router>
         <GlobalParticles />
-        <SmoothScroll ease={0.08} className="min-h-screen bg-warm-white dark:bg-dark-teal transition-colors duration-500">
+        <div className="min-h-screen bg-warm-white dark:bg-dark-teal transition-colors duration-500">
           <CursorFollower />
           <Navbar />
           <AnimatedRoutes />
-        </SmoothScroll>
+        </div>
       </Router>
     </ThemeProvider>
   );

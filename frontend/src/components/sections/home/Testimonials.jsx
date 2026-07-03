@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Link } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -8,7 +9,7 @@ function cn(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
-// --- Testimonial data (3 stories, cycled) ---
+// --- Testimonial data ---
 const testimonialsData = [
   {
     author: 'Isabella Reyes',
@@ -49,29 +50,34 @@ const testimonialsImages = [
   { imgSrc: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=300', alt: 'Woman with a dog' },
 ];
 
-// --- Desktop / tablet positions (revised to avoid clipping and use consistent sizing) ---
-const desktopPositions = [
-  { top: '5%', left: '8%', size: 'w-24 h-24' },
-  { top: '10%', left: '28%', size: 'w-20 h-20' },
-  { top: '3%', left: '52%', size: 'w-16 h-16' },
-  { top: '8%', right: '10%', size: 'w-28 h-28' },
-  { top: '22%', right: '4%', size: 'w-20 h-20' },
-  { top: '44%', right: '6%', size: 'w-24 h-24' },
-  { top: '48%', left: '4%', size: 'w-28 h-28' },
-  { bottom: '5%', left: '16%', size: 'w-20 h-20' },
-  { bottom: '12%', left: '40%', size: 'w-16 h-16' },
-  { bottom: '8%', right: '24%', size: 'w-24 h-24' },
-  { bottom: '2%', right: '10%', size: 'w-20 h-20' },
-];
+// --- Pre‑defined positions ---
+const imagePositions = [
+  // Desktop (lg+) and Tablet (md+)
+  { top: '5%', left: '12%', className: 'hidden lg:block w-24 h-24' },
+  { top: '12%', left: '32%', className: 'hidden md:block w-20 h-20' },
+  { top: '4%', left: '55%', className: 'hidden md:block w-16 h-16' },
+  { top: '8%', right: '12%', className: 'hidden lg:block w-28 h-28' },
+  { top: '22%', right: '4%', className: 'hidden md:block w-20 h-20' },
+  { top: '42%', right: '8%', className: 'hidden lg:block w-24 h-24' },
+  { top: '48%', left: '4%', className: 'hidden md:block w-28 h-28' },
+  { bottom: '5%', left: '18%', className: 'hidden lg:block w-20 h-20' },
+  { bottom: '12%', left: '42%', className: 'hidden md:block w-16 h-16' },
+  { bottom: '8%', right: '28%', className: 'hidden md:block w-24 h-24' },
+  { bottom: '2%', right: '12%', className: 'hidden lg:block w-20 h-20' },
 
-// --- Mobile-only positions (kept inside viewport) ---
-const mobilePositions = [
-  { top: '4%', left: '6%', size: 'w-14 h-14' },
-  { top: '4%', right: '6%', size: 'w-16 h-16' },
-  { top: '30%', left: '2%', size: 'w-14 h-14' },
-  { top: '30%', right: '2%', size: 'w-16 h-16' },
-  { bottom: '10%', left: '10%', size: 'w-16 h-16' },
-  { bottom: '10%', right: '8%', size: 'w-14 h-14' },
+  // --- Mobile‑only positions (scattered, not too close to edges) ---
+  // Row 1: left and right with top margin
+  { top: '8%', left: '12%', className: 'block md:hidden w-16 h-16' },
+  { top: '6%', right: '12%', className: 'block md:hidden w-16 h-16' },
+  // Row 2: slightly inward with top ~28%
+  { top: '28%', left: '16%', className: 'block md:hidden w-16 h-16' },
+  { top: '26%', right: '16%', className: 'block md:hidden w-16 h-16' },
+  // Row 3: more scattered, top ~48%
+  { top: '48%', left: '10%', className: 'block md:hidden w-16 h-16' },
+  { top: '46%', right: '10%', className: 'block md:hidden w-16 h-16' },
+  // Row 4: bottom area
+  { bottom: '14%', left: '14%', className: 'block md:hidden w-16 h-16' },
+  { bottom: '12%', right: '14%', className: 'block md:hidden w-16 h-16' },
 ];
 
 // --- Star component ---
@@ -87,69 +93,15 @@ function Stars({ count }) {
   );
 }
 
-function FloatingImage({ position, image, testimonial, refCallback }) {
-  const floatDuration = 4 + Math.random() * 5;
-  const floatDelay = Math.random() * 2;
-  const floatStyle = {
-    animation: `float ${floatDuration}s ease-in-out ${floatDelay}s infinite alternate`,
-  };
-
-  // We now use only 'block' – no responsive 'hidden' – because we control visibility via the container's overflow and positioning.
-  return (
-    <div
-      ref={refCallback}
-      className={cn(
-        'absolute rounded-lg shadow-xl border-2 border-old-gold/10 hover:border-old-gold/30 transition-all duration-300 group floating-image',
-        position.size // size classes: w-* h-*
-      )}
-      style={{
-        top: position.top,
-        left: position.left,
-        right: position.right,
-        bottom: position.bottom,
-        ...floatStyle,
-        // Ensure they are above the background but below the CTA
-        zIndex: 10,
-      }}
-    >
-      <img
-        src={image.imgSrc}
-        alt={image.alt}
-        className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110"
-      />
-
-      {/* Tooltip */}
-      <div
-        className="absolute bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-48 sm:w-60 p-3 sm:p-4 rounded-lg bg-warm-white/95 dark:bg-charcoal/95 backdrop-blur-sm border border-old-gold/20 shadow-xl opacity-0 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:pointer-events-auto group-hover:-translate-y-1 z-30"
-        style={{ transformOrigin: 'bottom center' }}
-      >
-        <Stars count={testimonial.rating} />
-        <blockquote className="mt-1.5 font-cormorant italic text-xs sm:text-sm text-dark-teal dark:text-warm-white leading-snug text-center">
-          "{testimonial.quote.length > 70 ? testimonial.quote.slice(0, 70) + '…' : testimonial.quote}"
-        </blockquote>
-        <div className="mt-2 text-center">
-          <p className="font-jost text-[9px] sm:text-[10px] tracking-[0.15em] text-old-gold uppercase">
-            {testimonial.author}
-          </p>
-          <p className="font-inter text-warm-gray dark:text-warm-white/60 text-[9px] sm:text-[10px] mt-0.5">
-            {testimonial.location}
-          </p>
-        </div>
-        {/* Caret */}
-        <div className="absolute left-1/2 -bottom-1.5 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-warm-white/95 dark:bg-charcoal/95 border-r border-b border-old-gold/20" />
-      </div>
-    </div>
-  );
-}
-
 export default function Testimonials() {
   const sectionRef = useRef(null);
   const headingRef = useRef(null);
   const imageRefs = useRef([]);
+  const [activeTooltip, setActiveTooltip] = useState(null);
 
+  // GSAP animations
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Heading animation
       gsap.from(headingRef.current, {
         y: 30,
         opacity: 0,
@@ -158,11 +110,9 @@ export default function Testimonials() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top 80%',
-          once: true, // animates only once even if you scroll back
         },
       });
 
-      // Image animations – each image fades in and scales up
       imageRefs.current.forEach((el, i) => {
         if (!el) return;
         const delay = 0.1 + i * 0.08;
@@ -174,8 +124,7 @@ export default function Testimonials() {
           ease: 'back.out(1.7)',
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: 'top bottom', // triggers as soon as the section enters viewport
-            once: true,
+            start: 'top 80%',
           },
         });
       });
@@ -184,16 +133,16 @@ export default function Testimonials() {
     return () => ctx.revert();
   }, []);
 
-  let refIndex = 0;
-  const setRef = (el) => {
-    imageRefs.current[refIndex] = el;
-    refIndex += 1;
+  // Toggle tooltip on mobile (tap)
+  const toggleTooltip = (index) => {
+    if (window.innerWidth >= 1024) return; // desktop uses hover
+    setActiveTooltip(activeTooltip === index ? null : index);
   };
 
   return (
     <section
       ref={sectionRef}
-      className="relative py-20 sm:py-24 lg:py-32 z-10 bg-transparent overflow-hidden"
+      className="relative py-20 sm:py-24 lg:py-32 z-10 bg-transparent"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* --- HEADER --- */}
@@ -213,41 +162,68 @@ export default function Testimonials() {
         </div>
 
         {/* --- FLOATING IMAGES GRID --- */}
-        {/* Increased minHeight to ensure all images have space */}
-        <div className="relative w-full overflow-hidden" style={{ minHeight: '750px' }}>
+        <div className="relative w-full" style={{ minHeight: '650px' }}>
           <div className="absolute inset-0">
-            {/* Desktop / tablet set – visible on all screen sizes, but sized appropriately */}
-            {desktopPositions.map((position, index) => {
+            {imagePositions.map((pos, index) => {
               const image = testimonialsImages[index % testimonialsImages.length];
               const testimonial = testimonialsData[index % testimonialsData.length];
-              return (
-                <FloatingImage
-                  key={`desktop-${index}`}
-                  position={position}
-                  image={image}
-                  testimonial={testimonial}
-                  refCallback={setRef}
-                />
-              );
-            })}
+              const floatDuration = 4 + Math.random() * 5;
+              const floatDelay = Math.random() * 2;
+              const floatStyle = {
+                animation: `float ${floatDuration}s ease-in-out ${floatDelay}s infinite alternate`,
+                willChange: 'transform',
+              };
+              const isActive = activeTooltip === index;
 
-            {/* Mobile-only set – also visible but we can hide on larger screens if desired; here we keep them but they may overlap. 
-                To avoid clutter, we hide them on md and up. */}
-            {mobilePositions.map((position, index) => {
-              const image = testimonialsImages[index % testimonialsImages.length];
-              const testimonial = testimonialsData[index % testimonialsData.length];
               return (
                 <div
-                  key={`mobile-${index}`}
-                  className="block md:hidden" // Only visible on mobile
-                  style={{ position: 'absolute', top: position.top, left: position.left, right: position.right, bottom: position.bottom }}
+                  key={index}
+                  ref={(el) => (imageRefs.current[index] = el)}
+                  className={cn(
+                    'absolute rounded-lg shadow-xl border-2 border-old-gold/10 hover:border-old-gold/30 transition-all duration-300 group cursor-pointer',
+                    pos.className
+                  )}
+                  style={{
+                    top: pos.top,
+                    left: pos.left,
+                    right: pos.right,
+                    bottom: pos.bottom,
+                    ...floatStyle,
+                  }}
+                  onClick={() => toggleTooltip(index)}
                 >
-                  <FloatingImage
-                    position={{ ...position, size: position.size }} // reuse same size
-                    image={image}
-                    testimonial={testimonial}
-                    refCallback={setRef}
+                  <img
+                    src={image.imgSrc}
+                    alt={image.alt}
+                    className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110"
                   />
+
+                  {/* Tooltip – appears above the image */}
+                  <div
+                    className={cn(
+                      'absolute z-30 w-56 p-3 rounded-lg bg-warm-white/95 dark:bg-charcoal/95 backdrop-blur-sm border border-old-gold/20 shadow-xl transition-all duration-300',
+                      'bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2',
+                      'opacity-0 pointer-events-none',
+                      'group-hover:opacity-100 group-hover:pointer-events-auto group-hover:-translate-y-1',
+                      isActive && 'opacity-100 pointer-events-auto -translate-y-1'
+                    )}
+                    style={{ transformOrigin: 'bottom center' }}
+                  >
+                    <Stars count={testimonial.rating} />
+                    <blockquote className="mt-1.5 font-cormorant italic text-xs sm:text-sm text-dark-teal dark:text-warm-white leading-snug text-center">
+                      "{testimonial.quote}"
+                    </blockquote>
+                    <div className="mt-2 text-center">
+                      <p className="font-jost text-[9px] sm:text-[10px] tracking-[0.15em] text-old-gold uppercase">
+                        {testimonial.author}
+                      </p>
+                      <p className="font-inter text-warm-gray dark:text-warm-white/60 text-[9px] sm:text-[10px] mt-0.5">
+                        {testimonial.location}
+                      </p>
+                    </div>
+                    {/* Caret */}
+                    <div className="absolute left-1/2 -bottom-1.5 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-warm-white/95 dark:bg-charcoal/95 border-r border-b border-old-gold/20" />
+                  </div>
                 </div>
               );
             })}
@@ -255,13 +231,13 @@ export default function Testimonials() {
 
           {/* --- CENTERED CTA BUTTON --- */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-            <a
-              href="#share"
+            <Link
+              to="/contact"
               className="pointer-events-auto group relative px-8 sm:px-12 py-4 sm:py-5 bg-old-gold text-warm-white dark:text-dark-teal font-jost text-sm sm:text-base tracking-[0.15em] uppercase font-medium overflow-hidden transition-all hover:shadow-[0_0_40px_rgba(199,159,72,0.3)]"
             >
               <span className="relative z-10">Share Your Story</span>
               <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -270,7 +246,7 @@ export default function Testimonials() {
       <style>{`
         @keyframes float {
           0% { transform: translateY(0px); }
-          100% { transform: translateY(-16px); }
+          100% { transform: translateY(-8px); }
         }
       `}</style>
     </section>

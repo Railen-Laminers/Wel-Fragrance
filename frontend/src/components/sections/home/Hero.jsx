@@ -1,12 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
+import { Link } from 'react-router-dom';
+
+// use this images rather than internet images
+import EassyMiyaki from '@/assets/products/EassyMiyaki.webp';
 
 export default function Hero() {
   const sectionRef = useRef(null);
   const imageWrapperRef = useRef(null);
   const headlineRef = useRef(null);
   const eyebrowRef = useRef(null);
-  const textRef = useRef(null);
   const ctaRef = useRef(null);
 
   // Mouse parallax for image
@@ -33,7 +36,7 @@ export default function Hero() {
           duration: 1.2,
           stagger: 0.15,
         }, '-=0.5')
-        .to(textRef.current, { opacity: 1, y: 0, duration: 1 }, '-=0.8')
+        // Removed the textRef animation
         .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.8 }, '-=0.6')
         .to('.hero-image', { scale: 1, duration: 1.5, ease: 'power2.out' }, '-=1.2');
     }, sectionRef);
@@ -89,34 +92,20 @@ export default function Hero() {
                 </span>
               </h1>
 
-              {/* Description – simplified (removed CEO journey paragraph) */}
-              <div
-                ref={textRef}
-                className="max-w-lg opacity-0 translate-y-6"
-              >
-                <p className="font-inter text-warm-gray dark:text-warm-white/70 leading-relaxed text-sm md:text-base">
-                  At <span className="text-old-gold font-medium">Wel Fragrance Collection</span>,
-                  we believe that every fragrance tells a story — a story of passion, artistry, and
-                  individuality. Inspired by nature's purest essences and the beauty of human
-                  emotion, we craft perfumes that go beyond scent, creating timeless experiences
-                  that linger in memory.
-                </p>
-              </div>
-
               {/* CTAs */}
               <div
                 ref={ctaRef}
                 className="flex flex-wrap items-center gap-4 sm:gap-6 pt-2 sm:pt-4 opacity-0 translate-y-6"
               >
-                <a
-                  href="#collection"
+                <Link
+                  to="/products"
                   className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-old-gold text-warm-white dark:text-dark-teal font-jost text-xs sm:text-sm tracking-[0.15em] uppercase font-medium overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(199,159,72,0.3)]"
                 >
                   <span className="relative z-10">Explore Collection</span>
                   <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
-                </a>
-                <a
-                  href="#story"
+                </Link>
+                <Link
+                  to="/about"
                   className="group flex items-center gap-3 font-jost text-xs sm:text-sm tracking-[0.15em] text-dark-teal dark:text-warm-white uppercase hover:text-old-gold transition-colors"
                 >
                   <span>Our Story</span>
@@ -133,7 +122,7 @@ export default function Hero() {
                       d="M17 8l4 4m0 0l-4 4m4-4H3"
                     />
                   </svg>
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -177,14 +166,6 @@ export default function Hero() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60 z-10">
-        <span className="font-jost text-[10px] tracking-[0.3em] uppercase text-warm-gray dark:text-warm-white/70">
-          Scroll
-        </span>
-        <div className="w-px h-8 bg-gradient-to-b from-old-gold to-transparent animate-pulse" />
       </div>
     </section>
   );

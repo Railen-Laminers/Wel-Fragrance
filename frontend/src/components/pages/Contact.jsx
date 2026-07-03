@@ -1,11 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import React, { useEffect, useState } from 'react';
 
 export default function Contact() {
-    const sectionRef = useRef(null);
+    const [isLoaded, setIsLoaded] = useState(false);
     const [sent, setSent] = useState(false);
     const [values, setValues] = useState({ name: '', email: '', message: '' });
     const [privacyAgreed, setPrivacyAgreed] = useState(false);
@@ -16,6 +12,12 @@ export default function Contact() {
         { key: 'email', placeholder: 'Your Email', type: 'email', rows: null },
         { key: 'message', placeholder: 'Your Message / Feedback', type: 'textarea', rows: 4 },
     ];
+
+    // Trigger animation once after mount
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoaded(true), 100);
+        return () => clearTimeout(timer);
+    }, []);
 
     const resetForm = () => {
         setValues({ name: '', email: '', message: '' });
@@ -43,7 +45,6 @@ export default function Contact() {
             return;
         }
 
-        // Simulate sending
         console.log('Form submitted:', values);
         setSent(true);
         setValues({ name: '', email: '', message: '' });
@@ -61,37 +62,23 @@ export default function Contact() {
         if (formError) setFormError('');
     };
 
-    // GSAP entrance animations
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            // Left column
-            gsap.from('.contact-label', { opacity: 0, y: 20, duration: 1, ease: 'power3.out', delay: 0.2 });
-            gsap.from('.contact-headline', { opacity: 0, y: 40, duration: 1.2, ease: 'power3.out', delay: 0.3 });
-            gsap.from('.contact-description', { opacity: 0, y: 30, duration: 1, ease: 'power3.out', delay: 0.5 });
-            gsap.from('.contact-email', { opacity: 0, y: 20, duration: 0.8, ease: 'power3.out', delay: 0.6 });
-            gsap.from('.contact-sticky', { opacity: 0, x: -20, duration: 0.8, ease: 'power3.out', delay: 0.8 });
-
-            // Right column (form)
-            gsap.from('.contact-form-wrapper', {
-                opacity: 0,
-                y: 60,
-                duration: 1,
-                ease: 'power3.out',
-                delay: 0.4,
-            });
-        }, sectionRef);
-
-        return () => ctx.revert();
-    }, []);
+    // Base animation classes
+    const animClass = (delay) =>
+        `transition-all duration-700 ease-out transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+        }`;
+    const animStyle = (delay) => ({ transitionDelay: `${delay}ms` });
 
     return (
-        <div ref={sectionRef} className="min-h-screen bg-transparent pt-20 sm:pt-24 md:pt-32">
+        <div className="min-h-screen bg-transparent pt-20 sm:pt-24 md:pt-32">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
-                    {/* Left column */}
+                    {/* ===== LEFT COLUMN ===== */}
                     <div>
-                        {/* Eyebrow with camera‑cursor corners */}
-                        <div className="contact-label flex items-center gap-4 mb-6">
+                        {/* Eyebrow */}
+                        <div
+                            className={`contact-label flex items-center gap-4 mb-6 ${animClass(0)}`}
+                            style={animStyle(0)}
+                        >
                             <div className="relative inline-block px-3 sm:px-4 py-1 sm:py-1.5">
                                 <div className="absolute top-0 left-0 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-l-2 border-old-gold/60" />
                                 <div className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-r-2 border-old-gold/60" />
@@ -101,13 +88,20 @@ export default function Contact() {
                             </div>
                         </div>
 
-                        <h2 className="contact-headline font-cormorant text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white leading-[1.1] mb-4 sm:mb-6">
+                        {/* Headline */}
+                        <h2
+                            className={`contact-headline font-cormorant text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white leading-[1.1] mb-4 sm:mb-6 ${animClass(100)}`}
+                            style={animStyle(100)}
+                        >
                             Let's <br />
                             <span className="italic text-old-gold">Connect</span>
                         </h2>
 
-                        {/* Contact email */}
-                        <div className="contact-email border-b border-old-gold/20 pb-4 mb-6 sm:mb-8">
+                        {/* Email */}
+                        <div
+                            className={`contact-email border-b border-old-gold/20 pb-4 mb-6 sm:mb-8 ${animClass(200)}`}
+                            style={animStyle(200)}
+                        >
                             <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase mb-1">
                                 EMAIL
                             </p>
@@ -116,8 +110,11 @@ export default function Contact() {
                             </p>
                         </div>
 
-                        {/* Sticky note card */}
-                        <div className="contact-sticky">
+                        {/* Sticky note */}
+                        <div
+                            className={`contact-sticky ${animClass(300)}`}
+                            style={animStyle(300)}
+                        >
                             <div className="relative p-4 sm:p-6 border border-old-gold/10 bg-warm-white/40 dark:bg-charcoal/40 backdrop-blur-sm transform -rotate-0.5 hover:rotate-0 transition-transform duration-500">
                                 <div className="absolute top-0 left-0 w-6 h-6 sm:w-8 sm:h-8 border-t border-l border-old-gold/30" />
                                 <div className="absolute bottom-0 right-0 w-6 h-6 sm:w-8 sm:h-8 border-b border-r border-old-gold/30" />
@@ -132,9 +129,10 @@ export default function Contact() {
                         </div>
                     </div>
 
-                    {/* Right column – form */}
-                    <div className="contact-form-wrapper md:pt-8 lg:pt-16">
+                    {/* ===== RIGHT COLUMN ===== */}
+                    <div className="md:pt-8 lg:pt-16">
                         {sent ? (
+                            // Success message (no animation on mount – appears after submit)
                             <div className="text-center py-12 sm:py-16">
                                 <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-3xl sm:text-4xl md:text-5xl mb-4">
                                     Received.
@@ -154,29 +152,41 @@ export default function Contact() {
                             </div>
                         ) : (
                             <div className="space-y-6 sm:space-y-8">
-                                {fields.map((field) => (
-                                    <div key={field.key}>
-                                        {field.type === 'textarea' ? (
-                                            <textarea
-                                                rows={field.rows}
-                                                placeholder={field.placeholder}
-                                                value={values[field.key]}
-                                                onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                                                className="w-full px-4 py-3 bg-warm-white/70 dark:bg-charcoal/70 backdrop-blur-sm border border-old-gold/10 focus:border-old-gold/50 hover:border-old-gold/30 transition-colors duration-300 font-inter text-warm-gray dark:text-warm-white/80 placeholder:text-warm-gray/60 dark:placeholder:text-warm-white/40 resize-none text-sm sm:text-base"
-                                            />
-                                        ) : (
-                                            <input
-                                                type={field.type}
-                                                placeholder={field.placeholder}
-                                                value={values[field.key]}
-                                                onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                                                className="w-full px-4 py-3 bg-warm-white/70 dark:bg-charcoal/70 backdrop-blur-sm border border-old-gold/10 focus:border-old-gold/50 hover:border-old-gold/30 transition-colors duration-300 font-inter text-warm-gray dark:text-warm-white/80 placeholder:text-warm-gray/60 dark:placeholder:text-warm-white/40 text-sm sm:text-base"
-                                            />
-                                        )}
-                                    </div>
-                                ))}
+                                {/* Form fields – staggered, starting after left side (400ms offset) */}
+                                {fields.map((field, index) => {
+                                    const delay = 400 + index * 100; // 400, 500, 600
+                                    return (
+                                        <div
+                                            key={field.key}
+                                            className={animClass(delay)}
+                                            style={animStyle(delay)}
+                                        >
+                                            {field.type === 'textarea' ? (
+                                                <textarea
+                                                    rows={field.rows}
+                                                    placeholder={field.placeholder}
+                                                    value={values[field.key]}
+                                                    onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                                                    className="w-full px-4 py-3 bg-warm-white/70 dark:bg-charcoal/70 backdrop-blur-sm border border-old-gold/10 focus:border-old-gold/50 hover:border-old-gold/30 transition-colors duration-300 font-inter text-warm-gray dark:text-warm-white/80 placeholder:text-warm-gray/60 dark:placeholder:text-warm-white/40 resize-none text-sm sm:text-base"
+                                                />
+                                            ) : (
+                                                <input
+                                                    type={field.type}
+                                                    placeholder={field.placeholder}
+                                                    value={values[field.key]}
+                                                    onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                                                    className="w-full px-4 py-3 bg-warm-white/70 dark:bg-charcoal/70 backdrop-blur-sm border border-old-gold/10 focus:border-old-gold/50 hover:border-old-gold/30 transition-colors duration-300 font-inter text-warm-gray dark:text-warm-white/80 placeholder:text-warm-gray/60 dark:placeholder:text-warm-white/40 text-sm sm:text-base"
+                                                />
+                                            )}
+                                        </div>
+                                    );
+                                })}
 
-                                <div>
+                                {/* Privacy checkbox – delay 700ms */}
+                                <div
+                                    className={animClass(700)}
+                                    style={animStyle(700)}
+                                >
                                     <label className="flex items-start gap-3 cursor-pointer group">
                                         <input
                                             type="checkbox"
@@ -191,15 +201,23 @@ export default function Contact() {
                                     </label>
                                 </div>
 
+                                {/* Error message – delay 800ms */}
                                 {formError && (
-                                    <div>
+                                    <div
+                                        className={animClass(800)}
+                                        style={animStyle(800)}
+                                    >
                                         <p className="font-inter text-sm text-rose-600/80 dark:text-rose-400/80 border-l-2 border-rose-600/50 dark:border-rose-400/50 pl-3 italic">
                                             {formError}
                                         </p>
                                     </div>
                                 )}
 
-                                <div>
+                                {/* Submit button – delay 900ms */}
+                                <div
+                                    className={animClass(900)}
+                                    style={animStyle(900)}
+                                >
                                     <button
                                         onClick={handleSubmit}
                                         className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-old-gold text-warm-white dark:text-dark-teal font-jost text-xs sm:text-sm tracking-[0.15em] uppercase font-medium overflow-hidden transition-all hover:shadow-[0_0_40px_rgba(199,159,72,0.3)]"

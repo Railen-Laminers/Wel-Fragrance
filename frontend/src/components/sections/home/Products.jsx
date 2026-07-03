@@ -1,6 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Link } from 'react-router-dom';
+
+// Local product images
+import img5237 from '@/assets/products/IMG_5237.webp';
+import img5238 from '@/assets/products/IMG_5238.webp';
+import img5240 from '@/assets/products/IMG_5240.webp';
+import img5241 from '@/assets/products/IMG_5241.webp';
+import img5242 from '@/assets/products/IMG_5242.webp';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,28 +38,28 @@ export default function Products() {
             name: 'Midnight Orchid',
             notes: 'Black Orchid, Vanilla, Sandalwood',
             price: '₱4,500',
-            image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=800&fit=crop',
+            image: img5237,   // replaced
             tag: 'Bestseller',
         },
         {
             name: 'Golden Dawn',
             notes: 'Bergamot, Jasmine, Amber',
             price: '₱3,800',
-            image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&h=800&fit=crop',
+            image: img5238,   // replaced
             tag: 'New',
         },
         {
             name: 'Velvet Rose',
             notes: 'Damask Rose, Oud, Musk',
             price: '₱5,200',
-            image: 'https://images.unsplash.com/photo-1587017539504-67cfbddac569?w=600&h=800&fit=crop',
+            image: img5240,   // replaced
             tag: null,
         },
         {
             name: 'Ocean Whisper',
             notes: 'Sea Salt, Citrus, Driftwood',
             price: '₱3,500',
-            image: 'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=600&h=800&fit=crop',
+            image: img5241,   // replaced
             tag: null,
         },
     ];
@@ -64,12 +72,9 @@ export default function Products() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12 sm:mb-16">
                     <div>
-                        {/* Eyebrow – now using camera‑cursor corners */}
                         <div className="flex items-center gap-4 mb-4">
                             <div className="relative inline-block px-3 sm:px-4 py-1 sm:py-1.5">
-                                {/* Top-Left Corner */}
                                 <div className="absolute top-0 left-0 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-l-2 border-old-gold/60" />
-                                {/* Bottom-Right Corner */}
                                 <div className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-r-2 border-old-gold/60" />
                                 <span className="font-jost text-[10px] sm:text-xs tracking-[0.3em] text-old-gold uppercase whitespace-nowrap">
                                     The Collection
@@ -82,8 +87,8 @@ export default function Products() {
                         </h2>
                     </div>
 
-                    <a
-                        href="#all-products"
+                    <Link
+                        to="/products"
                         className="mt-6 md:mt-0 group flex items-center gap-3 font-jost text-xs sm:text-sm tracking-[0.15em] text-dark-teal dark:text-warm-white uppercase hover:text-old-gold transition-colors"
                     >
                         <span>View All</span>
@@ -100,7 +105,7 @@ export default function Products() {
                                 d="M17 8l4 4m0 0l-4 4m4-4H3"
                             />
                         </svg>
-                    </a>
+                    </Link>
                 </div>
 
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
@@ -130,8 +135,8 @@ export default function Products() {
 
                                 <div
                                     className={`absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 z-20 transition-all duration-500 ${hoveredIndex === index
-                                            ? 'opacity-100 translate-y-0'
-                                            : 'opacity-0 translate-y-4'
+                                        ? 'opacity-100 translate-y-0'
+                                        : 'opacity-0 translate-y-4'
                                         }`}
                                 >
                                     <button className="group/btn relative w-full py-3 overflow-hidden bg-warm-white/20 dark:bg-dark-teal/20 backdrop-blur-md border border-warm-white/30 dark:border-dark-teal/30 font-jost text-xs tracking-[0.2em] uppercase text-dark-teal dark:text-warm-white transition-all duration-300 hover:shadow-[0_0_30px_rgba(199,159,72,0.3)]">
