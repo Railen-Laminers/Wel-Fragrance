@@ -66,7 +66,7 @@ export default function Products() {
         return () => clearTimeout(timer);
     }, []);
 
-    // Modal open/close logic (no GSAP)
+    // Modal open/close logic
     const openModal = (product) => {
         setSelectedProduct(product);
         setIsModalMounted(true);

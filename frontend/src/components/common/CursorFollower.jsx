@@ -1,14 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 
 export default function CursorFollower() {
     const cursorRef = useRef(null);
     const dotRef = useRef(null);
-    const isTouch = useRef(false);
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
 
     useEffect(() => {
-        if ('ontouchstart' in window) {
-            isTouch.current = true;
+        const touchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        setIsTouchDevice(touchDevice);
+
+        if (touchDevice) {
             return;
         }
 
@@ -63,7 +65,7 @@ export default function CursorFollower() {
         };
     }, []);
 
-    if (isTouch.current) return null;
+    if (isTouchDevice) return null;
 
     return (
         <>

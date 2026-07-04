@@ -1,7 +1,5 @@
-import React, { useEffect } from 'react'; // ✅ added useEffect
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Home from './components/pages/Home';
 import About from './components/pages/About';
 import Contact from './components/pages/Contact';
@@ -11,9 +9,6 @@ import Navbar from './components/common/Navbar';
 import CursorFollower from './components/common/CursorFollower';
 import GlobalParticles from './components/common/GlobalParticles';
 import { ThemeProvider } from './context/ThemeContext';
-
-// Register GSAP plugins (keep if used elsewhere)
-gsap.registerPlugin(ScrollTrigger);
 
 // ---- Route component with scroll-to-top on every route change ----
 function AnimatedRoutes() {

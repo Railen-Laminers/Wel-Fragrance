@@ -1,37 +1,60 @@
 import React, { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function Lifestyle() {
     const sectionRef = useRef(null);
+    const animated = useRef(false);
 
     useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.from('.lifestyle-text', {
-                x: 60,
-                opacity: 0,
-                duration: 1.2,
-                ease: 'power3.out',
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top 70%',
-                },
-            });
+        const section = sectionRef.current;
+        if (!section) return;
 
-            gsap.from('.lifestyle-image', {
-                x: -60,
-                opacity: 0,
-                duration: 1.2,
-                ease: 'power3.out',
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top 70%',
-                },
-            });
-        }, sectionRef);
-        return () => ctx.revert();
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting && !animated.current) {
+                        animated.current = true;
+
+                        // Text slides in from the right (x: 60px → 0)
+                        const text = section.querySelector('.lifestyle-text');
+                        if (text) {
+                            text.animate(
+                                [
+                                    { opacity: 0, transform: 'translateX(60px)' },
+                                    { opacity: 1, transform: 'translateX(0)' },
+                                ],
+                                {
+                                    duration: 1200,
+                                    easing: 'cubic-bezier(0.22, 1, 0.36, 1)', // power3.out
+                                    fill: 'forwards',
+                                }
+                            );
+                        }
+
+                        // Image slides in from the left (x: -60px → 0)
+                        const image = section.querySelector('.lifestyle-image');
+                        if (image) {
+                            image.animate(
+                                [
+                                    { opacity: 0, transform: 'translateX(-60px)' },
+                                    { opacity: 1, transform: 'translateX(0)' },
+                                ],
+                                {
+                                    duration: 1200,
+                                    easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                                    fill: 'forwards',
+                                }
+                            );
+                        }
+
+                        observer.unobserve(section);
+                    }
+                });
+            },
+            { threshold: 0.3 } // matches 'top 70%'
+        );
+
+        observer.observe(section);
+        return () => observer.disconnect();
     }, []);
 
     return (
@@ -41,7 +64,7 @@ export default function Lifestyle() {
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
-                    <div className="lifestyle-image relative">
+                    <div className="lifestyle-image relative opacity-0 -translate-x-16">
                         <div className="relative aspect-[4/5] overflow-hidden bg-warm-white/50 dark:bg-charcoal/50 backdrop-blur-sm">
                             <div className="absolute inset-4 border border-old-gold/20 z-10 pointer-events-none" />
                             <div className="absolute top-4 left-4 w-10 h-10 sm:w-12 sm:h-12 border-t border-l border-old-gold/40 z-10" />
@@ -66,7 +89,7 @@ export default function Lifestyle() {
                         </div>
                     </div>
 
-                    <div className="lifestyle-text space-y-6 sm:space-y-8">
+                    <div className="lifestyle-text space-y-6 sm:space-y-8 opacity-0 translate-x-16">
                         {/* Eyebrow with camera‑cursor corners */}
                         <div className="flex items-center gap-4">
                             <div className="relative inline-block px-3 sm:px-4 py-1 sm:py-1.5">

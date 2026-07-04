@@ -1,8 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
 import { Link } from 'react-router-dom';
-
-// use this images rather than internet images
 import EassyMiyaki from '@/assets/products/EassyMiyaki.webp';
 
 export default function Hero() {
@@ -12,12 +9,12 @@ export default function Hero() {
   const eyebrowRef = useRef(null);
   const ctaRef = useRef(null);
 
-  // Mouse parallax for image
+  // Mouse parallax for image (unchanged)
   useEffect(() => {
     const onMouseMove = (e) => {
       if (imageWrapperRef.current) {
-        const x = (e.clientX / window.innerWidth - 0.5) * 10;
-        const y = (e.clientY / window.innerHeight - 0.5) * 10;
+        const x = ((e.clientX / window.innerWidth) - 0.5) * 10;
+        const y = ((e.clientY / window.innerHeight) - 0.5) * 10;
         imageWrapperRef.current.style.transform = `translate(${x}px, ${y}px)`;
       }
     };
@@ -25,22 +22,86 @@ export default function Hero() {
     return () => window.removeEventListener('mousemove', onMouseMove);
   }, []);
 
-  // GSAP entrance animations
+  // Entrance animations using Web Animations API
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-      tl.to(eyebrowRef.current, { opacity: 1, y: 0, duration: 1, delay: 0.3 })
-        .to(headlineRef.current.querySelectorAll('.headline-line'), {
-          y: 0,
-          opacity: 1,
-          duration: 1.2,
-          stagger: 0.15,
-        }, '-=0.5')
-        // Removed the textRef animation
-        .to(ctaRef.current, { opacity: 1, y: 0, duration: 0.8 }, '-=0.6')
-        .to('.hero-image', { scale: 1, duration: 1.5, ease: 'power2.out' }, '-=1.2');
-    }, sectionRef);
-    return () => ctx.revert();
+    const animations = [];
+
+    // Eyebrow: fade in + slide up
+    const eyebrow = eyebrowRef.current;
+    if (eyebrow) {
+      const anim = eyebrow.animate(
+        [
+          { opacity: 0, transform: 'translateY(4px)' },
+          { opacity: 1, transform: 'translateY(0)' },
+        ],
+        {
+          duration: 1000,
+          delay: 300,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'forwards',
+        }
+      );
+      animations.push(anim);
+    }
+
+    // Headline lines: stagger up
+    const lines = headlineRef.current?.querySelectorAll('.headline-line') || [];
+    const lineDelay = 800; // start after eyebrow + overlap
+    lines.forEach((line, i) => {
+      const anim = line.animate(
+        [
+          { opacity: 0, transform: 'translateY(100%)' },
+          { opacity: 1, transform: 'translateY(0)' },
+        ],
+        {
+          duration: 1200,
+          delay: lineDelay + i * 150,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'forwards',
+        }
+      );
+      animations.push(anim);
+    });
+
+    // CTA: fade in + slide up
+    const cta = ctaRef.current;
+    if (cta) {
+      const anim = cta.animate(
+        [
+          { opacity: 0, transform: 'translateY(6px)' },
+          { opacity: 1, transform: 'translateY(0)' },
+        ],
+        {
+          duration: 800,
+          delay: 1700, // after headline animation starts
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'forwards',
+        }
+      );
+      animations.push(anim);
+    }
+
+    // Hero image: scale from 1.1 to 1
+    const heroImage = document.querySelector('.hero-image');
+    if (heroImage) {
+      const anim = heroImage.animate(
+        [
+          { transform: 'scale(1.1)' },
+          { transform: 'scale(1)' },
+        ],
+        {
+          duration: 1500,
+          delay: 1100,
+          easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+          fill: 'forwards',
+        }
+      );
+      animations.push(anim);
+    }
+
+    return () => {
+      animations.forEach((anim) => anim.cancel());
+    };
   }, []);
 
   return (

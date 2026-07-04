@@ -3,8 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 
-import Jomalone from '@/assets/products/Jomalone.webp'; // user this image rather than internet image
-import DSC09812 from '@/assets/models/DSC09812.webp'; // Ceo Profile Image Portrait
+import DSC09812 from '@/assets/models/DSC09812.webp';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -124,7 +123,7 @@ export default function About() {
     ];
 
     return (
-        <div ref={pageRef} className="min-h-screen bg-transparent pt-20 sm:pt-24 md:pt-32">
+        <div ref={pageRef} className="min-h-screen bg-transparent pt-20 sm:pt-24 md:pt-32 overflow-x-hidden">
             {/* ===== HERO ===== */}
             <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 lg:pb-32">
                 <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
@@ -139,7 +138,7 @@ export default function About() {
                             </div>
                         </div>
 
-                        <h1 className="font-cormorant text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-dark-teal dark:text-warm-white leading-[0.95] mb-6 sm:mb-8 about-headline">
+                        <h1 className="font-cormorant text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-dark-teal dark:text-warm-white leading-[0.95] mb-6 sm:mb-8 about-headline break-words">
                             Between Two <br />
                             <em className="italic text-old-gold">Shores</em>
                         </h1>
@@ -162,7 +161,7 @@ export default function About() {
                             <img
                                 src="https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=800&h=1000&fit=crop"
                                 alt="Wel Fragrance Atelier"
-                                className="about-hero-img-inner w-full h-full object-cover scale-110"
+                                className="about-hero-img-inner w-full h-full object-cover scale-110 max-w-full"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-warm-white/40 dark:from-dark-teal/40 via-transparent to-transparent opacity-40" />
                         </div>
@@ -176,7 +175,7 @@ export default function About() {
                     <div className="grid lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-20">
                         <div className="lg:col-span-5">
                             <div className="lg:sticky lg:top-32 story-quote">
-                                <div className="font-cormorant text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white leading-tight italic">
+                                <div className="font-cormorant text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white leading-tight italic break-words">
                                     "I wanted to discover a scent that would be known in every corner of the Philippines and Canada."
                                 </div>
                                 <div className="mt-6 sm:mt-8 flex items-center gap-4">
@@ -194,7 +193,7 @@ export default function About() {
                         </div>
 
                         <div className="lg:col-span-7 space-y-6 sm:space-y-8">
-                            <p className="font-inter text-base sm:text-lg text-warm-gray dark:text-warm-white/70 leading-relaxed story-text">
+                            <p className="font-inter text-base sm:text-lg text-warm-gray dark:text-warm-white/70 leading-relaxed story-text break-words">
                                 Our journey began with the vision of our CEO, <strong className="text-dark-teal dark:text-warm-white">Joel Malabo</strong>,
                                 to create a fragrance brand that would be recognized throughout the Philippines
                                 and Canada. Every bottle reflects his determination, dreams, and deep love for
@@ -202,7 +201,7 @@ export default function About() {
                                 and excellence.
                             </p>
 
-                            <p className="font-inter text-base sm:text-lg text-warm-gray dark:text-warm-white/70 leading-relaxed story-text">
+                            <p className="font-inter text-base sm:text-lg text-warm-gray dark:text-warm-white/70 leading-relaxed story-text break-words">
                                 What started as a personal quest to capture the essence of home has evolved into
                                 a house of perfumery that serves both nations, bridging cultures through the
                                 universal language of scent. We work with master perfumers in Grasse and local
@@ -215,12 +214,12 @@ export default function About() {
                             <div className="relative p-6 sm:p-8 lg:p-10 border border-old-gold/10 bg-warm-white/30 dark:bg-dark-teal/30 backdrop-blur-sm story-highlight">
                                 <div className="absolute top-0 left-0 w-6 h-6 sm:w-8 sm:h-8 border-t border-l border-old-gold/30" />
                                 <div className="absolute bottom-0 right-0 w-6 h-6 sm:w-8 sm:h-8 border-b border-r border-old-gold/30" />
-                                <p className="font-cormorant text-xl sm:text-2xl lg:text-3xl text-old-gold italic leading-snug">
+                                <p className="font-cormorant text-xl sm:text-2xl lg:text-3xl text-old-gold italic leading-snug break-words">
                                     "Each bottle reflects his determination, dreams, and the love for his family."
                                 </p>
                             </div>
 
-                            <p className="font-inter text-base sm:text-lg text-warm-gray dark:text-warm-white/70 leading-relaxed story-text">
+                            <p className="font-inter text-base sm:text-lg text-warm-gray dark:text-warm-white/70 leading-relaxed story-text break-words">
                                 We believe in the power of scent to connect people, inspire creativity, and
                                 promote well‑being. Through a commitment to sustainability, ethical sourcing,
                                 artistry, and innovation, we create signature fragrances that resonate with the
@@ -244,7 +243,7 @@ export default function About() {
                                 </span>
                             </div>
                         </div>
-                        <h2 className="font-cormorant text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white">
+                        <h2 className="font-cormorant text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white break-words">
                             Mission &amp; <span className="italic text-old-gold">Vision</span>
                         </h2>
                     </div>
@@ -260,7 +259,7 @@ export default function About() {
                                     Mission
                                 </h3>
                             </div>
-                            <p className="font-inter text-sm sm:text-base text-warm-gray dark:text-warm-white/70 leading-relaxed">
+                            <p className="font-inter text-sm sm:text-base text-warm-gray dark:text-warm-white/70 leading-relaxed break-words">
                                 We are dedicated to crafting exceptional fragrances that evoke emotions, tell
                                 meaningful stories, and enhance the beauty of everyday life. We believe in the
                                 power of scent to connect people, inspire creativity, and promote well‑being.
@@ -281,7 +280,7 @@ export default function About() {
                                     Vision
                                 </h3>
                             </div>
-                            <p className="font-inter text-sm sm:text-base text-warm-gray dark:text-warm-white/70 leading-relaxed">
+                            <p className="font-inter text-sm sm:text-base text-warm-gray dark:text-warm-white/70 leading-relaxed break-words">
                                 We envision a world where fragrance transcends mere scent and becomes a universal
                                 language of connection, emotion, and self‑expression. Our aspiration is to be a
                                 leading fragrance brand recognized for innovative creations, exceptional quality,
@@ -296,7 +295,7 @@ export default function About() {
                 </div>
             </section>
 
-            {/* ===== VALUES (unchanged) ===== */}
+            {/* ===== VALUES ===== */}
             <section className="relative py-16 sm:py-24 lg:py-32 bg-warm-white/20 dark:bg-charcoal/20 backdrop-blur-sm border-y border-old-gold/10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-12 sm:mb-20 values-header">
@@ -309,7 +308,7 @@ export default function About() {
                                 </span>
                             </div>
                         </div>
-                        <h2 className="font-cormorant text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white">
+                        <h2 className="font-cormorant text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white break-words">
                             Guided by <span className="italic text-old-gold">Purpose</span>
                         </h2>
                     </div>
@@ -326,10 +325,10 @@ export default function About() {
                                 <span className="font-playfair text-4xl sm:text-5xl text-old-gold/10 group-hover:text-old-gold/20 transition-colors">
                                     0{i + 1}
                                 </span>
-                                <h3 className="font-cormorant text-xl sm:text-2xl text-dark-teal dark:text-warm-white mt-3 sm:mt-4 mb-2 sm:mb-3 group-hover:text-old-gold transition-colors">
+                                <h3 className="font-cormorant text-xl sm:text-2xl text-dark-teal dark:text-warm-white mt-3 sm:mt-4 mb-2 sm:mb-3 group-hover:text-old-gold transition-colors break-words">
                                     {val.title}
                                 </h3>
-                                <p className="font-inter text-warm-gray dark:text-warm-white/70 text-sm leading-relaxed">
+                                <p className="font-inter text-warm-gray dark:text-warm-white/70 text-sm leading-relaxed break-words">
                                     {val.desc}
                                 </p>
                             </div>
@@ -353,7 +352,7 @@ export default function About() {
                                 </div>
                             </div>
 
-                            <h2 className="font-cormorant text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white leading-tight">
+                            <h2 className="font-cormorant text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white leading-tight break-words">
                                 Joel <span className="italic text-old-gold">Malabo</span>
                             </h2>
                             <p className="font-jost text-xs sm:text-sm tracking-[0.15em] text-warm-gray dark:text-warm-white/70 uppercase">
@@ -361,13 +360,13 @@ export default function About() {
                             </p>
 
                             <div className="space-y-3 sm:space-y-4 text-warm-gray dark:text-warm-white/70 leading-relaxed">
-                                <p className="font-inter text-sm sm:text-base">
+                                <p className="font-inter text-sm sm:text-base break-words">
                                     Joel Malabo is a first‑generation Filipino‑Canadian entrepreneur whose journey
                                     from Manila to Montreal shaped his unique perspective on scent and memory. With a
                                     background in international business and a lifelong passion for the art of
                                     perfumery, he founded Wel to bridge the cultures that define him.
                                 </p>
-                                <p className="font-inter text-sm sm:text-base">
+                                <p className="font-inter text-sm sm:text-base break-words">
                                     His vision is rooted in a simple yet profound belief: that fragrance has the
                                     power to evoke emotion, preserve memory, and connect us to the people and places
                                     we love. Every bottle in the Wel collection is a reflection of his determination,
@@ -375,7 +374,7 @@ export default function About() {
                                 </p>
                             </div>
 
-                            <blockquote className="relative pl-4 sm:pl-6 border-l-2 border-old-gold/40 italic font-cormorant text-lg sm:text-xl text-old-gold">
+                            <blockquote className="relative pl-4 sm:pl-6 border-l-2 border-old-gold/40 italic font-cormorant text-lg sm:text-xl text-old-gold break-words">
                                 "Every scent tells a story—and every story deserves to be remembered."
                             </blockquote>
                         </div>
@@ -388,7 +387,7 @@ export default function About() {
                                 <img
                                     src={DSC09812}
                                     alt="Joel Malabo, Founder & CEO"
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover max-w-full"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-warm-white/40 dark:from-dark-teal/40 via-transparent to-transparent opacity-40" />
                             </div>
@@ -397,7 +396,7 @@ export default function About() {
                                     From Manila to Montreal
                                 </p>
                                 <div className="mt-2 h-px w-full bg-gradient-to-r from-old-gold/50 to-transparent" />
-                                <p className="font-inter text-[10px] sm:text-xs text-warm-gray dark:text-warm-white/70 mt-1 sm:mt-2">
+                                <p className="font-inter text-[10px] sm:text-xs text-warm-gray dark:text-warm-white/70 mt-1 sm:mt-2 break-words">
                                     A journey of scent and soul.
                                 </p>
                             </div>
@@ -419,12 +418,12 @@ export default function About() {
                         </div>
                     </div>
 
-                    <h2 className="about-cta-headline font-cormorant text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white leading-tight mb-4 sm:mb-8">
+                    <h2 className="about-cta-headline font-cormorant text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-dark-teal dark:text-warm-white leading-tight mb-4 sm:mb-8 break-words">
                         Because at Wel, <br />
                         <span className="italic text-old-gold">Every Scent is a Reflection of You</span>
                     </h2>
 
-                    <p className="about-cta-text font-inter text-sm sm:text-base text-warm-gray dark:text-warm-white/70 leading-relaxed max-w-2xl mx-auto mb-6 sm:mb-10">
+                    <p className="about-cta-text font-inter text-sm sm:text-base text-warm-gray dark:text-warm-white/70 leading-relaxed max-w-2xl mx-auto mb-6 sm:mb-10 break-words">
                         Whether you are searching for your signature fragrance or a meaningful gift to celebrate
                         life's special moments, Wel Fragrance Collection invites you to explore a world of
                         captivating aromas designed to resonate with your spirit. Because at Wel Fragrance

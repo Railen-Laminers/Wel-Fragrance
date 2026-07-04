@@ -1,6 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 
 // Local product images
@@ -8,29 +6,53 @@ import img5237 from '@/assets/products/IMG_5237.webp';
 import img5238 from '@/assets/products/IMG_5238.webp';
 import img5240 from '@/assets/products/IMG_5240.webp';
 import img5241 from '@/assets/products/IMG_5241.webp';
-import img5242 from '@/assets/products/IMG_5242.webp';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function Products() {
     const sectionRef = useRef(null);
     const [hoveredIndex, setHoveredIndex] = useState(null);
+    const animated = useRef(false);
 
     useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.from('.product-card', {
-                y: 80,
-                opacity: 0,
-                duration: 1,
-                stagger: 0.15,
-                ease: 'power3.out',
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top 70%',
-                },
-            });
-        }, sectionRef);
-        return () => ctx.revert();
+        const section = sectionRef.current;
+        if (!section) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting && !animated.current) {
+                        animated.current = true;
+
+                        const cards = section.querySelectorAll('.product-card');
+                        const staggerDelay = 150;
+
+                        cards.forEach((card, index) => {
+                            card.animate(
+                                [
+                                    { opacity: 0, transform: 'translateY(80px)' },
+                                    { opacity: 1, transform: 'translateY(0)' },
+                                ],
+                                {
+                                    duration: 1000,
+                                    delay: index * staggerDelay,
+                                    easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                                    fill: 'forwards',
+                                }
+                            );
+                        });
+
+                        observer.unobserve(section);
+                    }
+                });
+            },
+            {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px',
+            }
+        );
+
+        observer.observe(section);
+
+        return () => observer.disconnect();
     }, []);
 
     const products = [
@@ -38,28 +60,28 @@ export default function Products() {
             name: 'Midnight Orchid',
             notes: 'Black Orchid, Vanilla, Sandalwood',
             price: '₱4,500',
-            image: img5237,   // replaced
+            image: img5237,
             tag: 'Bestseller',
         },
         {
             name: 'Golden Dawn',
             notes: 'Bergamot, Jasmine, Amber',
             price: '₱3,800',
-            image: img5238,   // replaced
+            image: img5238,
             tag: 'New',
         },
         {
             name: 'Velvet Rose',
             notes: 'Damask Rose, Oud, Musk',
             price: '₱5,200',
-            image: img5240,   // replaced
+            image: img5240,
             tag: null,
         },
         {
             name: 'Ocean Whisper',
             notes: 'Sea Salt, Citrus, Driftwood',
             price: '₱3,500',
-            image: img5241,   // replaced
+            image: img5241,
             tag: null,
         },
     ];
@@ -108,11 +130,11 @@ export default function Products() {
                     </Link>
                 </div>
 
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                     {products.map((product, index) => (
                         <div
                             key={product.name}
-                            className="product-card group relative"
+                            className="product-card group relative opacity-0 translate-y-20"
                             onMouseEnter={() => setHoveredIndex(index)}
                             onMouseLeave={() => setHoveredIndex(null)}
                         >
@@ -133,18 +155,22 @@ export default function Products() {
                                     </div>
                                 )}
 
+                                {/* Discover button now a Link */}
                                 <div
                                     className={`absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 z-20 transition-all duration-500 ${hoveredIndex === index
-                                        ? 'opacity-100 translate-y-0'
-                                        : 'opacity-0 translate-y-4'
+                                            ? 'opacity-100 translate-y-0'
+                                            : 'opacity-0 translate-y-4'
                                         }`}
                                 >
-                                    <button className="group/btn relative w-full py-3 overflow-hidden bg-warm-white/20 dark:bg-dark-teal/20 backdrop-blur-md border border-warm-white/30 dark:border-dark-teal/30 font-jost text-xs tracking-[0.2em] uppercase text-dark-teal dark:text-warm-white transition-all duration-300 hover:shadow-[0_0_30px_rgba(199,159,72,0.3)]">
+                                    <Link
+                                        to="/products"
+                                        className="group/btn relative w-full py-3 overflow-hidden bg-warm-white/20 dark:bg-dark-teal/20 backdrop-blur-md border border-warm-white/30 dark:border-dark-teal/30 font-jost text-xs tracking-[0.2em] uppercase text-dark-teal dark:text-warm-white transition-all duration-300 hover:shadow-[0_0_30px_rgba(199,159,72,0.3)] flex items-center justify-center"
+                                    >
                                         <span className="relative z-10 transition-colors duration-300 group-hover/btn:text-warm-white dark:group-hover/btn:text-dark-teal">
                                             Discover
                                         </span>
                                         <div className="absolute inset-0 bg-old-gold transform translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-out" />
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
 

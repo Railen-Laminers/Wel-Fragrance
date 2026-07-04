@@ -66,16 +66,12 @@ const imagePositions = [
   { bottom: '2%', right: '12%', className: 'hidden lg:block w-20 h-20' },
 
   // --- Mobile‑only positions (scattered, not too close to edges) ---
-  // Row 1: left and right with top margin
   { top: '8%', left: '12%', className: 'block md:hidden w-16 h-16' },
   { top: '6%', right: '12%', className: 'block md:hidden w-16 h-16' },
-  // Row 2: slightly inward with top ~28%
   { top: '28%', left: '16%', className: 'block md:hidden w-16 h-16' },
   { top: '26%', right: '16%', className: 'block md:hidden w-16 h-16' },
-  // Row 3: more scattered, top ~48%
   { top: '48%', left: '10%', className: 'block md:hidden w-16 h-16' },
   { top: '46%', right: '10%', className: 'block md:hidden w-16 h-16' },
-  // Row 4: bottom area
   { bottom: '14%', left: '14%', className: 'block md:hidden w-16 h-16' },
   { bottom: '12%', right: '14%', className: 'block md:hidden w-16 h-16' },
 ];
@@ -97,7 +93,8 @@ export default function Testimonials() {
   const sectionRef = useRef(null);
   const headingRef = useRef(null);
   const imageRefs = useRef([]);
-  const [activeTooltip, setActiveTooltip] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(null);
 
   // GSAP animations
   useEffect(() => {
@@ -133,11 +130,28 @@ export default function Testimonials() {
     return () => ctx.revert();
   }, []);
 
-  // Toggle tooltip on mobile (tap)
-  const toggleTooltip = (index) => {
-    if (window.innerWidth >= 1024) return; // desktop uses hover
-    setActiveTooltip(activeTooltip === index ? null : index);
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isModalOpen) {
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isModalOpen]);
+
+  // Open modal on small screens (below lg breakpoint)
+  const handleImageClick = (index) => {
+    if (window.innerWidth < 1024) {
+      setSelectedIndex(index);
+      setIsModalOpen(true);
+    }
   };
+
+  // Get testimonial and image for the selected index
+  const selectedTestimonial = selectedIndex !== null ? testimonialsData[selectedIndex % testimonialsData.length] : null;
+  const selectedImage = selectedIndex !== null ? testimonialsImages[selectedIndex % testimonialsImages.length] : null;
 
   return (
     <section
@@ -173,7 +187,6 @@ export default function Testimonials() {
                 animation: `float ${floatDuration}s ease-in-out ${floatDelay}s infinite alternate`,
                 willChange: 'transform',
               };
-              const isActive = activeTooltip === index;
 
               return (
                 <div
@@ -190,7 +203,7 @@ export default function Testimonials() {
                     bottom: pos.bottom,
                     ...floatStyle,
                   }}
-                  onClick={() => toggleTooltip(index)}
+                  onClick={() => handleImageClick(index)}
                 >
                   <img
                     src={image.imgSrc}
@@ -198,14 +211,13 @@ export default function Testimonials() {
                     className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110"
                   />
 
-                  {/* Tooltip – appears above the image */}
+                  {/* Tooltip – visible only on large screens (desktop) */}
                   <div
                     className={cn(
-                      'absolute z-30 w-56 p-3 rounded-lg bg-warm-white/95 dark:bg-charcoal/95 backdrop-blur-sm border border-old-gold/20 shadow-xl transition-all duration-300',
+                      'hidden lg:block absolute z-30 w-56 p-3 rounded-lg bg-warm-white/95 dark:bg-charcoal/95 backdrop-blur-sm border border-old-gold/20 shadow-xl transition-all duration-300',
                       'bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2',
                       'opacity-0 pointer-events-none',
-                      'group-hover:opacity-100 group-hover:pointer-events-auto group-hover:-translate-y-1',
-                      isActive && 'opacity-100 pointer-events-auto -translate-y-1'
+                      'group-hover:opacity-100 group-hover:pointer-events-auto group-hover:-translate-y-1'
                     )}
                     style={{ transformOrigin: 'bottom center' }}
                   >
@@ -241,6 +253,58 @@ export default function Testimonials() {
           </div>
         </div>
       </div>
+
+      {/* --- MODAL (for mobile/tablet) --- */}
+      {isModalOpen && selectedTestimonial && selectedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="relative bg-white dark:bg-charcoal rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 p-1 rounded-full hover:bg-warm-gray/20 dark:hover:bg-warm-white/10 transition-colors"
+              aria-label="Close modal"
+            >
+              <svg className="w-6 h-6 text-dark-teal dark:text-warm-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Content */}
+            <div className="flex flex-col items-center text-center">
+              {/* Image */}
+              <img
+                src={selectedImage.imgSrc}
+                alt={selectedImage.alt}
+                className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-old-gold/20 shadow-lg mb-4"
+              />
+
+              {/* Rating */}
+              <Stars count={selectedTestimonial.rating} />
+
+              {/* Quote */}
+              <blockquote className="mt-4 font-cormorant italic text-lg sm:text-xl text-dark-teal dark:text-warm-white leading-relaxed">
+                "{selectedTestimonial.quote}"
+              </blockquote>
+
+              {/* Author & Location */}
+              <div className="mt-4">
+                <p className="font-jost text-xs sm:text-sm tracking-[0.15em] text-old-gold uppercase">
+                  {selectedTestimonial.author}
+                </p>
+                <p className="font-inter text-warm-gray dark:text-warm-white/60 text-xs sm:text-sm mt-0.5">
+                  {selectedTestimonial.location}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CSS floating animation */}
       <style>{`

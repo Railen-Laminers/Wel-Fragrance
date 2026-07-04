@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 /**
  * ============================================================================
@@ -44,8 +44,10 @@ const COLOR_EDGE = `rgba(${GOLD_BASE}, ${BASE_ALPHA * 0.3})`;
 const COLOR_MID = `rgba(${GOLD_BASE}, ${BASE_ALPHA})`;
 const COLOR_HIGHLIGHT = `rgba(${GOLD_HIGHLIGHT}, ${SHIMMER_ALPHA})`;
 
-const useGoldFoilLines = (canvasRef) => {
+const useGoldFoilLines = (canvasRef, shouldRender) => {
     useEffect(() => {
+        if (!shouldRender) return;
+
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         let animationId;
@@ -192,12 +194,37 @@ const useGoldFoilLines = (canvasRef) => {
             window.removeEventListener('resize', resize);
             cancelAnimationFrame(animationId);
         };
-    }, [canvasRef]);
+    }, [canvasRef, shouldRender]);
 };
 
 export default function GlobalParticles() {
     const canvasRef = useRef(null);
-    useGoldFoilLines(canvasRef);
+    const [shouldRenderParticles, setShouldRenderParticles] = useState(() => {
+        if (typeof window === 'undefined') return false;
+
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const isSmallScreen = window.innerWidth <= 768;
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        return !isTouchDevice && !isSmallScreen && !prefersReducedMotion;
+    });
+
+    useEffect(() => {
+        const updateProfile = () => {
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            const isSmallScreen = window.innerWidth <= 768;
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            setShouldRenderParticles(!isTouchDevice && !isSmallScreen && !prefersReducedMotion);
+        };
+
+        updateProfile();
+        window.addEventListener('resize', updateProfile);
+        return () => window.removeEventListener('resize', updateProfile);
+    }, []);
+
+    useGoldFoilLines(canvasRef, shouldRenderParticles);
+
+    if (!shouldRenderParticles) return null;
 
     return (
         <canvas

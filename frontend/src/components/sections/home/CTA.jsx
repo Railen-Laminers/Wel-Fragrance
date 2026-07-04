@@ -1,27 +1,44 @@
 import React, { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function CTA() {
     const sectionRef = useRef(null);
+    const animated = useRef(false);
 
     useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.from('.cta-content', {
-                scale: 0.95,
-                opacity: 0,
-                duration: 1.2,
-                ease: 'power3.out',
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top 80%',
-                },
-            });
-        }, sectionRef);
-        return () => ctx.revert();
+        const section = sectionRef.current;
+        if (!section) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting && !animated.current) {
+                        animated.current = true;
+
+                        const content = section.querySelector('.cta-content');
+                        if (content) {
+                            content.animate(
+                                [
+                                    { opacity: 0, transform: 'scale(0.95)' },
+                                    { opacity: 1, transform: 'scale(1)' },
+                                ],
+                                {
+                                    duration: 1200,
+                                    easing: 'cubic-bezier(0.22, 1, 0.36, 1)', // power3.out
+                                    fill: 'forwards',
+                                }
+                            );
+                        }
+
+                        observer.unobserve(section);
+                    }
+                });
+            },
+            { threshold: 0.2 } // approximates 'top 80%'
+        );
+
+        observer.observe(section);
+        return () => observer.disconnect();
     }, []);
 
     return (
@@ -30,7 +47,7 @@ export default function CTA() {
             className="relative py-20 sm:py-24 lg:py-32 z-10 bg-transparent"
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="cta-content relative overflow-hidden">
+                <div className="cta-content relative overflow-hidden opacity-0 scale-95">
                     {/* Background Image with lighter overlay */}
                     <div className="absolute inset-0">
                         <img
