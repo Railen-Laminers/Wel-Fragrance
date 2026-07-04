@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { FaInstagram, FaEnvelope, FaPhone, FaStore, FaMapPin } from 'react-icons/fa';
 
 export default function Contact() {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -13,7 +14,6 @@ export default function Contact() {
         { key: 'message', placeholder: 'Your Message / Feedback', type: 'textarea', rows: 4 },
     ];
 
-    // Trigger animation once after mount
     useEffect(() => {
         const timer = setTimeout(() => setIsLoaded(true), 100);
         return () => clearTimeout(timer);
@@ -62,7 +62,6 @@ export default function Contact() {
         if (formError) setFormError('');
     };
 
-    // Base animation classes
     const animClass = (delay) =>
         `transition-all duration-700 ease-out transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`;
@@ -97,17 +96,66 @@ export default function Contact() {
                             <span className="italic text-old-gold">Connect</span>
                         </h2>
 
-                        {/* Email */}
+                        {/* Contact details with icons */}
                         <div
-                            className={`contact-email border-b border-old-gold/20 pb-4 mb-6 sm:mb-8 ${animClass(200)}`}
+                            className={`contact-details space-y-4 border-b border-old-gold/20 pb-4 mb-6 sm:mb-8 ${animClass(200)}`}
                             style={animStyle(200)}
                         >
-                            <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase mb-1">
-                                EMAIL
-                            </p>
-                            <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">
-                                hello@welfragrance.com
-                            </p>
+                            <div className="flex items-start gap-3">
+                                <FaStore className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">
+                                        Business
+                                    </p>
+                                    <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">
+                                        Wel Fragrance Collection
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <FaEnvelope className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">
+                                        Email
+                                    </p>
+                                    <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">
+                                        wel.fragrancecollection@gmail.com
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <FaPhone className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">
+                                        Phone
+                                    </p>
+                                    <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">
+                                        +1 7782219055
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <FaInstagram className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">
+                                        Instagram
+                                    </p>
+                                    <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">
+                                        @Wel_FragranceCollection
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <FaMapPin className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">
+                                        Location
+                                    </p>
+                                    <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">
+                                        Farcon Ville, San Cristobal, Calamba Laguna
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Sticky note */}
@@ -132,7 +180,6 @@ export default function Contact() {
                     {/* ===== RIGHT COLUMN ===== */}
                     <div className="md:pt-8 lg:pt-16">
                         {sent ? (
-                            // Success message (no animation on mount – appears after submit)
                             <div className="text-center py-12 sm:py-16">
                                 <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-3xl sm:text-4xl md:text-5xl mb-4">
                                     Received.
@@ -152,9 +199,8 @@ export default function Contact() {
                             </div>
                         ) : (
                             <div className="space-y-6 sm:space-y-8">
-                                {/* Form fields – staggered, starting after left side (400ms offset) */}
                                 {fields.map((field, index) => {
-                                    const delay = 400 + index * 100; // 400, 500, 600
+                                    const delay = 400 + index * 100;
                                     return (
                                         <div
                                             key={field.key}
@@ -182,7 +228,6 @@ export default function Contact() {
                                     );
                                 })}
 
-                                {/* Privacy checkbox – delay 700ms */}
                                 <div
                                     className={animClass(700)}
                                     style={animStyle(700)}
@@ -201,7 +246,6 @@ export default function Contact() {
                                     </label>
                                 </div>
 
-                                {/* Error message – delay 800ms */}
                                 {formError && (
                                     <div
                                         className={animClass(800)}
@@ -213,7 +257,6 @@ export default function Contact() {
                                     </div>
                                 )}
 
-                                {/* Submit button – delay 900ms */}
                                 <div
                                     className={animClass(900)}
                                     style={animStyle(900)}

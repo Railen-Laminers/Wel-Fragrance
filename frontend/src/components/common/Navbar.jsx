@@ -5,7 +5,7 @@ import webLogo from '/webLogo.png';
 import webLogoText from '/webLogoText.png';
 import welStore from '@/assets/bg/welStore.webp';
 
-// ---- Icons (unchanged) ----
+// ---- Icons ----
 const IconMenu = () => (
   <svg width="22" height="14" viewBox="0 0 22 14" fill="none">
     <line x1="0" y1="1" x2="22" y2="1" stroke="currentColor" strokeWidth="1" />
@@ -52,26 +52,37 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Entrance: after 500ms, fade in and slide down (keep this if you want)
+  // Entrance animation
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 500);
     return () => clearTimeout(timer);
   }, []);
 
-  // Scroll effect – only when menu is closed
+  // Scroll effect: background & bottom detection
   useEffect(() => {
     const handleScroll = () => {
-      if (!menuOpen) setScrolled(window.scrollY > 40);
+      if (!menuOpen) {
+        setScrolled(window.scrollY > 40);
+
+        const scrollHeight = document.documentElement.scrollHeight;
+        const windowHeight = window.innerHeight;
+        const scrollY = window.scrollY;
+        const bottomThreshold = 100;
+        const atBottom = scrollY + windowHeight >= scrollHeight - bottomThreshold;
+        setIsAtBottom(atBottom);
+      }
     };
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [menuOpen]);
 
-  // Control content visibility with delay after expansion – but now only for sliding
+  // Menu content delay
   useEffect(() => {
     if (menuOpen) {
       setContentVisible(false);
@@ -91,10 +102,8 @@ const Navbar = () => {
   const handleLinkClick = (path) => (e) => {
     e.preventDefault();
     if (isClosing) return;
-
     setIsClosing(true);
     setMenuOpen(false);
-
     setTimeout(() => {
       navigate(path);
       setIsClosing(false);
@@ -118,6 +127,8 @@ const Navbar = () => {
     return location.pathname.startsWith(path);
   };
 
+  const navbarTransform = isAtBottom && !menuOpen ? '-translate-y-full' : 'translate-y-0';
+
   return (
     <nav
       className={`
@@ -129,9 +140,10 @@ const Navbar = () => {
           ? 'h-screen bg-white dark:bg-dark-teal overflow-y-auto'
           : `h-20 ${scrolled ? 'bg-white/70 dark:bg-dark-teal/70 backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-soft' : 'bg-transparent border-b border-transparent'}`
         }
+        transform ${navbarTransform}
       `}
     >
-      {/* Top bar – unchanged */}
+      {/* Top bar */}
       <div className={`
         sticky top-0 z-10 w-full h-20 flex items-center justify-between px-4 sm:px-8 
         2xl:max-w-7xl 2xl:mx-auto
@@ -185,7 +197,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Content container – sliding only, no opacity */}
+      {/* Menu content */}
       <div className={`
         flex-1 w-full 
         transition-all duration-700
@@ -193,14 +205,12 @@ const Navbar = () => {
         px-4 sm:px-8
         2xl:max-w-7xl 2xl:mx-auto
       `}>
-        {/* Inner content wrapper – only translateY, no opacity */}
         <div className={`
           flex flex-col lg:flex-row h-full w-full gap-8 lg:gap-12 
           py-8 lg:py-12
           transition-transform duration-500 ease-out
           ${contentVisible ? 'translate-y-0' : 'translate-y-8'}
         `}>
-          {/* Left – 70% links */}
           <div className="lg:w-[70%] flex flex-col justify-center">
             <nav className="w-full">
               {links.map((link) => {
@@ -231,7 +241,6 @@ const Navbar = () => {
             </nav>
           </div>
 
-          {/* Right – 30% image */}
           <div className="lg:w-[30%] flex items-center justify-center">
             <div className="relative aspect-[4/5] w-full max-w-sm lg:max-w-full overflow-hidden bg-warm-white/30 dark:bg-charcoal/30 backdrop-blur-sm">
               <div className="absolute inset-4 border border-old-gold/20 z-10 pointer-events-none" />

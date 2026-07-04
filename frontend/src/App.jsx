@@ -6,15 +6,14 @@ import Contact from './components/pages/Contact';
 import Products from './components/pages/Products';
 import MagazineCatalog from './components/pages/MagazineCatalog';
 import Navbar from './components/common/Navbar';
+import Footer from './components/common/Footer';
 import CursorFollower from './components/common/CursorFollower';
 import GlobalParticles from './components/common/GlobalParticles';
 import { ThemeProvider } from './context/ThemeContext';
 
-// ---- Route component with scroll-to-top on every route change ----
 function AnimatedRoutes() {
   const location = useLocation();
 
-  // Scroll to top instantly whenever the route changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location]);
@@ -37,10 +36,11 @@ export default function App() {
     <ThemeProvider>
       <Router>
         <GlobalParticles />
-        <div className="min-h-screen bg-warm-white dark:bg-dark-teal transition-colors duration-500">
+        <div className="min-h-screen bg-warm-white dark:bg-dark-teal transition-colors duration-500 flex flex-col">
           <CursorFollower />
           <Navbar />
           <AnimatedRoutes />
+          <Footer />
         </div>
       </Router>
     </ThemeProvider>
