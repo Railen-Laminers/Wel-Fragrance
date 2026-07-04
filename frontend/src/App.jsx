@@ -36,7 +36,7 @@ export default function App() {
     <ThemeProvider>
       <Router>
         <GlobalParticles />
-        <div className="min-h-screen bg-warm-white dark:bg-dark-teal transition-colors duration-500 flex flex-col">
+        <div className="min-h-screen bg-transparent transition-colors duration-500 flex flex-col">
           <CursorFollower />
           <Navbar />
           <AnimatedRoutes />

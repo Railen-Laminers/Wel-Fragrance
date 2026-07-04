@@ -73,13 +73,23 @@ const Navbar = () => {
         const windowHeight = window.innerHeight;
         const scrollY = window.scrollY;
         const bottomThreshold = 100;
-        const atBottom = scrollY + windowHeight >= scrollHeight - bottomThreshold;
+
+        // Guard: only consider "at bottom" if the page actually scrolls
+        const atBottom =
+          scrollHeight > windowHeight &&
+          scrollY + windowHeight >= scrollHeight - bottomThreshold;
+
         setIsAtBottom(atBottom);
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    handleScroll(); // run once on mount in case page loads already scrolled
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
   }, [menuOpen]);
 
   // Menu content delay
@@ -127,7 +137,12 @@ const Navbar = () => {
     return location.pathname.startsWith(path);
   };
 
-  const navbarTransform = isAtBottom && !menuOpen ? '-translate-y-full' : 'translate-y-0';
+  // Single source of truth for opacity + translate, so classes never conflict
+  const navbarPosition = !isLoaded
+    ? 'opacity-0 -translate-y-5'
+    : isAtBottom && !menuOpen
+      ? 'opacity-100 -translate-y-full'
+      : 'opacity-100 translate-y-0';
 
   return (
     <nav
@@ -135,12 +150,12 @@ const Navbar = () => {
         fixed top-0 left-0 right-0 z-50 
         flex flex-col
         transition-all duration-700 ease-out
-        ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-5'}
+        transform
+        ${navbarPosition}
         ${menuOpen
           ? 'h-screen bg-white dark:bg-dark-teal overflow-y-auto'
           : `h-20 ${scrolled ? 'bg-white/70 dark:bg-dark-teal/70 backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-soft' : 'bg-transparent border-b border-transparent'}`
         }
-        transform ${navbarTransform}
       `}
     >
       {/* Top bar */}
