@@ -143,6 +143,7 @@ export default function Products() {
                                 <img
                                     src={product.image}
                                     alt={product.name}
+                                    loading="lazy"
                                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-warm-white/60 dark:from-dark-teal/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />

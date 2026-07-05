@@ -73,6 +73,7 @@ export default function Lifestyle() {
                             <img
                                 src="https://images.unsplash.com/photo-1616949755610-8c9bbc08f138?w=800&h=1000&fit=crop"
                                 alt="Luxury Lifestyle"
+                                loading="lazy"
                                 className="w-full h-full object-cover"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-warm-white/60 dark:from-dark-teal/60 via-transparent to-transparent opacity-60" />

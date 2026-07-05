@@ -53,6 +53,7 @@ export default function CTA() {
                         <img
                             src="https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=1400&h=800&fit=crop"
                             alt="Fragrance Background"
+                            loading="lazy"
                             className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-warm-white/60 dark:bg-dark-teal/60" />

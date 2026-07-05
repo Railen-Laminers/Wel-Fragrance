@@ -208,6 +208,7 @@ export default function Testimonials() {
                   <img
                     src={image.imgSrc}
                     alt={image.alt}
+                    loading="lazy"
                     className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110"
                   />
 
@@ -281,6 +282,7 @@ export default function Testimonials() {
               <img
                 src={selectedImage.imgSrc}
                 alt={selectedImage.alt}
+                loading="lazy"
                 className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-old-gold/20 shadow-lg mb-4"
               />
 
