@@ -1,5 +1,6 @@
-import React, { useEffect, lazy, Suspense } from 'react';
+import React, { useEffect, lazy, Suspense, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import Lenis from '@studio-freight/lenis';
 import Home from './components/pages/Home';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
@@ -16,7 +17,11 @@ function AnimatedRoutes() {
   const location = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const lenis = window.__lenis;
+    if (lenis) {
+      // Instant teleport to top – no animation
+      lenis.scrollTo(0, { immediate: true });
+    }
   }, [location]);
 
   return (
@@ -35,6 +40,32 @@ function AnimatedRoutes() {
 }
 
 export default function App() {
+  useEffect(() => {
+    // Initialize Lenis with smooth scrolling for wheel/touch
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+    });
+
+    window.__lenis = lenis;
+
+    // RAF loop for Lenis
+    const raf = (time) => {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    };
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+      delete window.__lenis;
+    };
+  }, []);
+
   return (
     <ThemeProvider>
       <Router>

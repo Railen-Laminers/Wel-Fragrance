@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import EassyMiyaki from '@/assets/products/EassyMiyaki.webp';
 
 export default function Hero() {
   const sectionRef = useRef(null);
@@ -9,7 +8,7 @@ export default function Hero() {
   const eyebrowRef = useRef(null);
   const ctaRef = useRef(null);
 
-  // Mouse parallax for image (unchanged)
+  // Mouse parallax for image
   useEffect(() => {
     const onMouseMove = (e) => {
       if (imageWrapperRef.current) {
@@ -26,7 +25,6 @@ export default function Hero() {
   useEffect(() => {
     const animations = [];
 
-    // Eyebrow: fade in + slide up
     const eyebrow = eyebrowRef.current;
     if (eyebrow) {
       const anim = eyebrow.animate(
@@ -44,9 +42,8 @@ export default function Hero() {
       animations.push(anim);
     }
 
-    // Headline lines: stagger up
     const lines = headlineRef.current?.querySelectorAll('.headline-line') || [];
-    const lineDelay = 800; // start after eyebrow + overlap
+    const lineDelay = 800;
     lines.forEach((line, i) => {
       const anim = line.animate(
         [
@@ -63,7 +60,6 @@ export default function Hero() {
       animations.push(anim);
     });
 
-    // CTA: fade in + slide up
     const cta = ctaRef.current;
     if (cta) {
       const anim = cta.animate(
@@ -73,7 +69,7 @@ export default function Hero() {
         ],
         {
           duration: 800,
-          delay: 1700, // after headline animation starts
+          delay: 1700,
           easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
           fill: 'forwards',
         }
@@ -81,7 +77,6 @@ export default function Hero() {
       animations.push(anim);
     }
 
-    // Hero image: scale from 1.1 to 1
     const heroImage = document.querySelector('.hero-image');
     if (heroImage) {
       const anim = heroImage.animate(
@@ -107,7 +102,7 @@ export default function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen flex items-center z-10 pt-20 overflow-hidden bg-transparent"
+      className="relative flex items-center z-10 pt-20 pb-16 sm:pb-20 lg:py-24 overflow-hidden bg-transparent"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-20 items-center">
@@ -115,15 +110,13 @@ export default function Hero() {
           <div className="order-2 lg:order-1 relative">
             <div className="absolute -left-8 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-old-gold/40 to-transparent hidden lg:block" />
             <div className="space-y-6 sm:space-y-8">
-              {/* Eyebrow – with camera‑cursor corners */}
+              {/* Eyebrow */}
               <div
                 ref={eyebrowRef}
                 className="flex items-center gap-4 opacity-0 translate-y-4"
               >
                 <div className="relative inline-block px-3 sm:px-4 py-1 sm:py-1.5">
-                  {/* Top-Left Corner */}
                   <div className="absolute top-0 left-0 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-l-2 border-old-gold/60" />
-                  {/* Bottom-Right Corner */}
                   <div className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-r-2 border-old-gold/60" />
                   <span className="font-jost text-[10px] sm:text-xs tracking-[0.3em] text-old-gold uppercase whitespace-nowrap">
                     Philippines & Canada
@@ -134,7 +127,7 @@ export default function Hero() {
               {/* Headline */}
               <h1
                 ref={headlineRef}
-                className="font-cormorant text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[1.1] text-dark-teal dark:text-warm-white"
+                className="font-cormorant text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-7xl 2xl:text-8xl leading-[1.1] text-dark-teal dark:text-warm-white"
               >
                 <span className="block overflow-hidden">
                   <span className="headline-line block pb-2 sm:pb-4 opacity-0 translate-y-full">
@@ -188,7 +181,7 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Right image */}
+          {/* Right image – now exactly like About: aspect-ratio only, no max-height */}
           <div className="order-1 lg:order-2 relative">
             <div className="relative aspect-[4/5] sm:aspect-[3/4] lg:aspect-[4/5] overflow-hidden">
               <div className="absolute inset-4 border border-old-gold/20 z-20 pointer-events-none" />
