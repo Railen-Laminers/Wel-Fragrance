@@ -163,7 +163,7 @@ export default function Contact() {
                             className={`contact-sticky ${animClass(300)}`}
                             style={animStyle(300)}
                         >
-                            <div className="relative p-4 sm:p-6 border border-old-gold/10 bg-warm-white/40 dark:bg-charcoal/40 backdrop-blur-sm transform -rotate-0.5 hover:rotate-0 transition-transform duration-500">
+                            <div className="relative p-4 sm:p-6 border border-old-gold/30 bg-warm-white dark:bg-charcoal backdrop-blur-sm transform -rotate-0.5 hover:rotate-0 transition-transform duration-500">
                                 <div className="absolute top-0 left-0 w-6 h-6 sm:w-8 sm:h-8 border-t border-l border-old-gold/30" />
                                 <div className="absolute bottom-0 right-0 w-6 h-6 sm:w-8 sm:h-8 border-b border-r border-old-gold/30" />
                                 <p className="font-jost text-[0.58rem] text-warm-gray dark:text-warm-white/60 tracking-widest mb-2">
@@ -213,7 +213,7 @@ export default function Contact() {
                                                     placeholder={field.placeholder}
                                                     value={values[field.key]}
                                                     onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                                                    className="w-full px-4 py-3 bg-warm-white/70 dark:bg-charcoal/70 backdrop-blur-sm border border-old-gold/10 focus:border-old-gold/50 hover:border-old-gold/30 transition-colors duration-300 font-inter text-warm-gray dark:text-warm-white/80 placeholder:text-warm-gray/60 dark:placeholder:text-warm-white/40 resize-none text-sm sm:text-base"
+                                                    className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal backdrop-blur-sm border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300 font-inter text-warm-gray dark:text-warm-white/80 placeholder:text-warm-gray/60 dark:placeholder:text-warm-white/40 resize-none text-sm sm:text-base"
                                                 />
                                             ) : (
                                                 <input
@@ -221,7 +221,7 @@ export default function Contact() {
                                                     placeholder={field.placeholder}
                                                     value={values[field.key]}
                                                     onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                                                    className="w-full px-4 py-3 bg-warm-white/70 dark:bg-charcoal/70 backdrop-blur-sm border border-old-gold/10 focus:border-old-gold/50 hover:border-old-gold/30 transition-colors duration-300 font-inter text-warm-gray dark:text-warm-white/80 placeholder:text-warm-gray/60 dark:placeholder:text-warm-white/40 text-sm sm:text-base"
+                                                    className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal backdrop-blur-sm border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300 font-inter text-warm-gray dark:text-warm-white/80 placeholder:text-warm-gray/60 dark:placeholder:text-warm-white/40 text-sm sm:text-base"
                                                 />
                                             )}
                                         </div>

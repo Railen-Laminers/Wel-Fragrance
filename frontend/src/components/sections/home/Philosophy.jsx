@@ -91,12 +91,12 @@ export default function Philosophy() {
                     {pillars.map((pillar) => (
                         <div
                             key={pillar.number}
-                            className="philosophy-card group relative p-6 sm:p-8 lg:p-10 border border-old-gold/10 hover:border-old-gold/30 transition-all duration-700 bg-warm-white/70 dark:bg-charcoal/70 backdrop-blur-sm"
+                            className="philosophy-card group relative p-6 sm:p-8 lg:p-10 border border-old-gold/30 hover:border-old-gold/50 transition-all duration-700 bg-warm-white dark:bg-charcoal backdrop-blur-sm"
                         >
                             <div className="absolute top-0 left-0 w-10 h-10 sm:w-12 sm:h-12 border-t border-l border-old-gold/20 group-hover:border-old-gold/50 transition-colors duration-500" />
                             <div className="absolute bottom-0 right-0 w-10 h-10 sm:w-12 sm:h-12 border-b border-r border-old-gold/20 group-hover:border-old-gold/50 transition-colors duration-500" />
 
-                            <span className="font-playfair text-5xl sm:text-6xl text-old-gold/10 group-hover:text-old-gold/20 transition-colors duration-500">
+                            <span className="font-playfair text-5xl sm:text-6xl text-old-gold/30 group-hover:text-old-gold/50 transition-colors duration-500">
                                 {pillar.number}
                             </span>
                             <h3 className="font-cormorant text-xl sm:text-2xl lg:text-3xl text-dark-teal dark:text-warm-white mt-4 mb-3 sm:mb-4 group-hover:text-old-gold transition-colors duration-500">
