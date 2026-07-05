@@ -9,8 +9,18 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          animations: ['gsap', '@studio-freight/lenis'],
+        },
+      },
+    },
+  },
   server: {
-    host: '0.0.0.0', // or host: true
-    port: 5173,      // optional
+    host: '0.0.0.0',
+    port: 5173,
   },
 });
