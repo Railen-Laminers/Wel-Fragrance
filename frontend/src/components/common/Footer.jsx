@@ -2,8 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { FaInstagram, FaEnvelope } from 'react-icons/fa';
-import webLogo from '/webLogo.png';
-import webLogoText from '/webLogoText.png';
+import webLogo from '/webLogo.webp';
+import webLogoText from '/webLogoText.webp';
 
 const Footer = () => {
     const { theme } = useTheme();

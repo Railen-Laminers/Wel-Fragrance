@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
-import webLogo from '/webLogo.png';
-import webLogoText from '/webLogoText.png';
+import webLogo from '/webLogo.webp';
+import webLogoText from '/webLogoText.webp';
 import welStore from '@/assets/bg/welStore.webp';
 
 // ---- Icons ----
@@ -264,6 +264,7 @@ const Navbar = () => {
               <img
                 src={welStore}
                 alt="Wel Store"
+                loading="lazy"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-warm-white/40 dark:from-dark-teal/40 via-transparent to-transparent opacity-40" />
