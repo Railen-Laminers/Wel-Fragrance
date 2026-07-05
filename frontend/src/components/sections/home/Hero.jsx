@@ -202,6 +202,8 @@ export default function Hero() {
                   src="https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=1200&auto=format&fit=crop"
                   alt="Luxury Perfume Collection"
                   className="hero-image w-full h-full object-cover scale-110"
+                  fetchpriority="high"
+                  loading="eager"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-warm-white dark:from-dark-teal via-transparent to-transparent opacity-60" />
               </div>
