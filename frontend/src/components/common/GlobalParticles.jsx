@@ -30,19 +30,29 @@ const DRIFT_SPEED = 0.00035;        // very slow horizontal drift of each line
 const DRIFT_RANGE = 18;             // px range of that horizontal drift
 const SHIMMER_SPEED = 0.00003;      // how fast the light-catch sweep travels — very slow
 const SHIMMER_WIDTH = 0.22;         // width of the bright sweep, as a fraction of line length
-const BASE_ALPHA = 0.22;            // resting opacity of the foil line
-const SHIMMER_ALPHA = 0.85;         // peak opacity where the "light" catches the foil
+const BASE_ALPHA = 0.22;            // resting opacity of the foil line (dark mode)
+const SHIMMER_ALPHA = 0.85;         // peak opacity where the "light" catches the foil (dark mode)
+const BASE_ALPHA_LIGHT = 0.55;      // higher resting opacity for light mode — cream bg needs more contrast
+const SHIMMER_ALPHA_LIGHT = 1.0;    // full shimmer opacity in light mode
 const SEGMENTS = 16;                // curve resolution per line — enough for a smooth bow at this amplitude
 
 // Warm gold foil palette
-const GOLD_BASE = '199, 159, 72';       // muted gold, the line's resting color
-const GOLD_HIGHLIGHT = '255, 236, 196'; // bright warm highlight for the shimmer sweep
+const GOLD_BASE = '199, 159, 72';         // muted gold for dark mode
+const GOLD_BASE_LIGHT = '160, 120, 30';   // deeper, richer gold for light mode — higher contrast on cream
+const GOLD_HIGHLIGHT = '255, 236, 196';   // bright warm highlight for the shimmer sweep
+const GOLD_HIGHLIGHT_LIGHT = '199, 159, 72'; // warmer highlight for light mode
 
-// Pre-built color strings — computed once instead of on every frame/line,
-// since only the shimmer's position changes frame to frame, not its color.
-const COLOR_EDGE = `rgba(${GOLD_BASE}, ${BASE_ALPHA * 0.3})`;
-const COLOR_MID = `rgba(${GOLD_BASE}, ${BASE_ALPHA})`;
-const COLOR_HIGHLIGHT = `rgba(${GOLD_HIGHLIGHT}, ${SHIMMER_ALPHA})`;
+// Pre-built color strings — two sets, one per color scheme, swapped per-frame.
+const COLORS_DARK = {
+    edge:      `rgba(${GOLD_BASE}, ${BASE_ALPHA * 0.3})`,
+    mid:       `rgba(${GOLD_BASE}, ${BASE_ALPHA})`,
+    highlight: `rgba(${GOLD_HIGHLIGHT}, ${SHIMMER_ALPHA})`,
+};
+const COLORS_LIGHT = {
+    edge:      `rgba(${GOLD_BASE_LIGHT}, ${BASE_ALPHA_LIGHT * 0.35})`,
+    mid:       `rgba(${GOLD_BASE_LIGHT}, ${BASE_ALPHA_LIGHT})`,
+    highlight: `rgba(${GOLD_HIGHLIGHT_LIGHT}, ${SHIMMER_ALPHA_LIGHT})`,
+};
 
 const useGoldFoilLines = (canvasRef) => {
     useEffect(() => {
@@ -132,7 +142,7 @@ const useGoldFoilLines = (canvasRef) => {
         // not a straight rule) with a soft gradient that sweeps a brighter
         // highlight along its length, like light catching foil as it tilts.
         // -------------------------------------------------------------------
-        const drawLine = (line, t) => {
+        const drawLine = (line, t, colors) => {
             const x0 = line.baseX + Math.sin(t * DRIFT_SPEED + line.driftPhase) * DRIFT_RANGE;
             const { segAngleBase, segTaper, segXOffset, pointsX, pointsY } = line;
             const waveT = t * WAVE_SPEED * line.waveSpeedMul + line.wavePhase;
@@ -151,15 +161,15 @@ const useGoldFoilLines = (canvasRef) => {
             const sweepEnd = Math.min(1, shimmerPos + SHIMMER_WIDTH / 2);
 
             const gradient = ctx.createLinearGradient(x0, line.y, x0 + line.lineWidth, line.y);
-            gradient.addColorStop(0, COLOR_EDGE);
+            gradient.addColorStop(0, colors.edge);
             if (sweepStart > 0) {
-                gradient.addColorStop(sweepStart, COLOR_MID);
+                gradient.addColorStop(sweepStart, colors.mid);
             }
-            gradient.addColorStop(Math.min(1, Math.max(0, shimmerPos)), COLOR_HIGHLIGHT);
+            gradient.addColorStop(Math.min(1, Math.max(0, shimmerPos)), colors.highlight);
             if (sweepEnd < 1) {
-                gradient.addColorStop(sweepEnd, COLOR_MID);
+                gradient.addColorStop(sweepEnd, colors.mid);
             }
-            gradient.addColorStop(1, COLOR_EDGE);
+            gradient.addColorStop(1, colors.edge);
 
             ctx.beginPath();
             ctx.moveTo(pointsX[0], pointsY[0]);
@@ -182,9 +192,12 @@ const useGoldFoilLines = (canvasRef) => {
         // -------------------------------------------------------------------
         const animate = (timestamp) => {
             if (!document.hidden) {
+                // Detect color scheme per frame so it responds instantly to theme toggles
+                const isDark = document.documentElement.classList.contains('dark');
+                const colors = isDark ? COLORS_DARK : COLORS_LIGHT;
                 ctx.clearRect(0, 0, width, height);
                 for (let i = 0; i < lines.length; i++) {
-                    drawLine(lines[i], timestamp);
+                    drawLine(lines[i], timestamp, colors);
                 }
             }
             animationId = requestAnimationFrame(animate);
@@ -221,7 +234,7 @@ export default function GlobalParticles() {
     return (
         <canvas
             ref={canvasRef}
-            className="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-60"
+            className="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-80"
         />
     );
 }
