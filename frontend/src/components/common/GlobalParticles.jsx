@@ -46,9 +46,13 @@ const COLOR_HIGHLIGHT = `rgba(${GOLD_HIGHLIGHT}, ${SHIMMER_ALPHA})`;
 
 const useGoldFoilLines = (canvasRef) => {
     useEffect(() => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
         let animationId;
+        let cleanupFn;
+
+        const init = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
         let lines = [];
         let width = 0;
         let height = 0;
@@ -188,10 +192,25 @@ const useGoldFoilLines = (canvasRef) => {
 
         animationId = requestAnimationFrame(animate);
 
-        return () => {
+        cleanupFn = () => {
             window.removeEventListener('resize', resize);
             cancelAnimationFrame(animationId);
         };
+        };
+
+        if ('requestIdleCallback' in window) {
+            const idleId = requestIdleCallback(init, { timeout: 2000 });
+            return () => {
+                cancelIdleCallback(idleId);
+                cleanupFn?.();
+            };
+        } else {
+            const t = setTimeout(init, 300);
+            return () => {
+                clearTimeout(t);
+                cleanupFn?.();
+            };
+        }
     }, [canvasRef]);
 };
 
