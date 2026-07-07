@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 
-import DSC09812 from '@/assets/models/DSC09812.webp';
+import DSC09790 from '@/assets/models/DSC09790.webp';
 import DSC09428 from '@/assets/models/DSC09428.webp';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -386,7 +386,7 @@ export default function About() {
                                 <div className="absolute top-4 left-4 w-8 h-8 sm:w-10 sm:h-10 border-t border-l border-old-gold/50 z-10" />
                                 <div className="absolute bottom-4 right-4 w-8 h-8 sm:w-10 sm:h-10 border-b border-r border-old-gold/50 z-10" />
                                 <img
-                                    src={DSC09812}
+                                    src={DSC09790}
                                     alt="Joel Malabo, Founder & CEO"
                                     className="w-full h-full object-cover max-w-full"
                                 />
