@@ -2,10 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 // Local product images
-import img5237 from '@/assets/products/IMG_5237.webp';
-import img5238 from '@/assets/products/IMG_5238.webp';
-import img5240 from '@/assets/products/IMG_5240.webp';
-import img5241 from '@/assets/products/IMG_5241.webp';
+import jaimeImage from '@/assets/products/Jaime.webp';
+import dorzImage from '@/assets/products/Dorz.webp';
+import rupertImage from '@/assets/products/Rupert.webp';
+import vianImage from '@/assets/products/Vian.webp';
 
 export default function Products() {
     const sectionRef = useRef(null);
@@ -57,31 +57,31 @@ export default function Products() {
 
     const products = [
         {
-            name: 'Midnight Orchid',
-            notes: 'Black Orchid, Vanilla, Sandalwood',
-            price: '₱4,500',
-            image: img5237,
-            tag: 'Bestseller',
-        },
-        {
-            name: 'Golden Dawn',
-            notes: 'Bergamot, Jasmine, Amber',
-            price: '₱3,800',
-            image: img5238,
+            name: 'Jaime',
+            notes: 'Floral fruity • 100% pure oil fragrance',
+            price: '₱1,500',
+            image: jaimeImage,
             tag: 'New',
         },
         {
-            name: 'Velvet Rose',
-            notes: 'Damask Rose, Oud, Musk',
-            price: '₱5,200',
-            image: img5240,
+            name: 'Dorz',
+            notes: 'Oriental floral • For women',
+            price: '₱1,500',
+            image: dorzImage,
+            tag: 'Featured',
+        },
+        {
+            name: 'Rupert',
+            notes: 'Woody citrus • For men',
+            price: '₱1,500',
+            image: rupertImage,
             tag: null,
         },
         {
-            name: 'Ocean Whisper',
-            notes: 'Sea Salt, Citrus, Driftwood',
-            price: '₱3,500',
-            image: img5241,
+            name: 'Vian',
+            notes: 'Sweet fruity floral • For women',
+            price: '₱1,500',
+            image: vianImage,
             tag: null,
         },
     ];
@@ -159,8 +159,8 @@ export default function Products() {
                                 {/* Discover button now a Link */}
                                 <div
                                     className={`absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 z-20 transition-all duration-500 ${hoveredIndex === index
-                                            ? 'opacity-100 translate-y-0'
-                                            : 'opacity-0 translate-y-4'
+                                        ? 'opacity-100 translate-y-0'
+                                        : 'opacity-0 translate-y-4'
                                         }`}
                                 >
                                     <Link

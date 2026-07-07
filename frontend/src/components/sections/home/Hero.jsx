@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
+import Jomalone from '@/assets/products/Jomalone.webp';
+
 export default function Hero() {
   const sectionRef = useRef(null);
   const imageWrapperRef = useRef(null);
@@ -192,7 +194,7 @@ export default function Hero() {
                 className="absolute inset-0 transition-transform duration-300 ease-out"
               >
                 <img
-                  src="https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=1200&auto=format&fit=crop"
+                  src={Jomalone}
                   alt="Luxury Perfume Collection"
                   className="hero-image w-full h-full object-cover scale-110"
                   fetchpriority="high"

@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 
 import DSC09812 from '@/assets/models/DSC09812.webp';
+import DSC09428 from '@/assets/models/DSC09428.webp';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -159,7 +160,7 @@ export default function About() {
                             <div className="absolute bottom-4 right-4 w-8 h-8 sm:w-10 sm:h-10 border-b border-r border-old-gold/50 z-10" />
 
                             <img
-                                src="https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=800&h=1000&fit=crop"
+                                src={DSC09428}
                                 alt="Wel Fragrance Atelier"
                                 className="about-hero-img-inner w-full h-full object-cover scale-110 max-w-full"
                             />

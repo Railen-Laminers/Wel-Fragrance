@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
+import EassyMiyaki from '@/assets/products/EassyMiyaki.webp';
+
 export default function Lifestyle() {
     const sectionRef = useRef(null);
     const animated = useRef(false);
@@ -71,7 +73,7 @@ export default function Lifestyle() {
                             <div className="absolute bottom-4 right-4 w-10 h-10 sm:w-12 sm:h-12 border-b border-r border-old-gold/40 z-10" />
 
                             <img
-                                src="https://images.unsplash.com/photo-1616949755610-8c9bbc08f138?w=800&h=1000&fit=crop"
+                                src={EassyMiyaki}
                                 alt="Luxury Lifestyle"
                                 loading="lazy"
                                 className="w-full h-full object-cover"
