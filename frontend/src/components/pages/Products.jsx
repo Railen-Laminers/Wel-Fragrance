@@ -3,19 +3,19 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 
 // Import your product images from the assets folder
-import jaimeImage from '@/assets/products/Jaime.webp';
-import dorzImage from '@/assets/products/Dorz.webp';
-import rupertImage from '@/assets/products/Rupert.webp';
-import vianImage from '@/assets/products/Vian.webp';
-import litzImage from '@/assets/products/Litz.webp';
-import iluminareImage from '@/assets/products/Iluminare.webp';
-import felyImage from '@/assets/products/Fely.webp';
-import lenskiImage from '@/assets/products/Lenski.webp';
-import reiImage from '@/assets/products/Rei.webp';
-import nicolImage from '@/assets/products/Nicol.webp';
-import joeImage from '@/assets/products/Joe.webp';
-import marImage from '@/assets/products/Mar.webp';
-import gregImage from '@/assets/products/Greg.webp';
+import jaimeImage from '@/assets/products/JAIME.webp';
+import dorzImage from '@/assets/products/DORZ.webp';
+import rupertImage from '@/assets/products/RUPERT.webp';
+import vianImage from '@/assets/products/VIAN.webp';
+import litzImage from '@/assets/products/LITZ.webp';
+import iluminareImage from '@/assets/products/ILUMINARE.webp';
+import felyImage from '@/assets/products/FELY.webp';
+import lenskiImage from '@/assets/products/LENSKI.webp';
+import reiImage from '@/assets/products/REI.webp';
+import nicolImage from '@/assets/products/NICOL.webp';
+import joeImage from '@/assets/products/JOE.webp';
+import marImage from '@/assets/products/MAR.webp';
+import gregImage from '@/assets/products/GREG.webp';
 
 const allProducts = [
     {

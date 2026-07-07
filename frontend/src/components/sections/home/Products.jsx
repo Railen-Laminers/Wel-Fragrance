@@ -2,10 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 // Local product images
-import jaimeImage from '@/assets/products/Jaime.webp';
-import dorzImage from '@/assets/products/Dorz.webp';
-import rupertImage from '@/assets/products/Rupert.webp';
-import vianImage from '@/assets/products/Vian.webp';
+import jaimeImage from '@/assets/products/JAIME.webp';
+import dorzImage from '@/assets/products/DORZ.webp';
+import rupertImage from '@/assets/products/RUPERT.webp';
+import vianImage from '@/assets/products/VIAN.webp';
 
 export default function Products() {
     const sectionRef = useRef(null);
