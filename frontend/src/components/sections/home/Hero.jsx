@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
-import Paradoxie from '@/assets/products/Paradoxie.png';
+import Paradoxie from '@/assets/products/Paradoxie.webp';
 
 export default function Hero() {
   const sectionRef = useRef(null);

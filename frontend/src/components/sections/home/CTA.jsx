@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
-import Litz from '@/assets/products/Litz.png';
+import Litz from '@/assets/products/Litz.webp';
 
 export default function CTA() {
     const sectionRef = useRef(null);

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-import MorningSwim from '@/assets/products/MorningSwim.png';
+import MorningSwim from '@/assets/products/MorningSwim.webp';
 
 export default function Lifestyle() {
     const sectionRef = useRef(null);

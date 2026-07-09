@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 // Local product images
-import jaimeImage from '@/assets/products/JAIME.webp';
+import Paradoxie2 from '@/assets/products/Paradoxie-2.webp';
 import dorzImage from '@/assets/products/DORZ.webp';
 import rupertImage from '@/assets/products/RUPERT.webp';
 import vianImage from '@/assets/products/VIAN.webp';
@@ -57,10 +57,10 @@ export default function Products() {
 
     const products = [
         {
-            name: 'Jaime',
+            name: 'Paradoxie',
             notes: 'Floral fruity • 100% pure oil fragrance',
             price: '₱1,500',
-            image: jaimeImage,
+            image: Paradoxie2,
             tag: 'New',
         },
         {

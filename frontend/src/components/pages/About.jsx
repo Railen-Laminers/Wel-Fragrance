@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 
 import DSC09790 from '@/assets/models/DSC09790.webp';
-import NicolHero from '@/assets/products/NicolHero.png';
+import NicolHero from '@/assets/products/NicolHero.webp';
 
 gsap.registerPlugin(ScrollTrigger);
 
