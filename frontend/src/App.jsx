@@ -1,17 +1,17 @@
 import React, { useEffect, lazy, Suspense, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Lenis from '@studio-freight/lenis';
-import Home from './components/pages/Home';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import CursorFollower from './components/common/CursorFollower';
 import GlobalParticles from './components/common/GlobalParticles';
 import { ThemeProvider } from './context/ThemeContext';
 
-const About = lazy(() => import('./components/pages/About'));
-const Contact = lazy(() => import('./components/pages/Contact'));
-const Products = lazy(() => import('./components/pages/Products'));
-const MagazineCatalog = lazy(() => import('./components/pages/MagazineCatalog'));
+import Home from './components/pages/public/Home';
+const About = lazy(() => import('./components/pages/public/About'));
+const Contact = lazy(() => import('./components/pages/public/Contact'));
+const Products = lazy(() => import('./components/pages/public/Products'));
+const MagazineCatalog = lazy(() => import('./components/pages/public/MagazineCatalog'));
 
 function AnimatedRoutes() {
   const location = useLocation();

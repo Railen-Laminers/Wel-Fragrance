@@ -103,16 +103,15 @@ const LINKS = [
   { label: 'CONTACT', to: '/contact' },
 ];
 
-const NAV_HEIGHT = 112; // matches h-28 (increased from 96)
-
 /**
- * Fixed top bar. Now h-28 (112px) – noticeably taller for better presence.
+ * Fixed top bar. Height scales: h-20 (80px) on mobile, h-24 (96px) on sm, h-28 (112px) on lg.
  * The full-screen menu lives in its own <MenuPanel/> that sits behind/under it.
  */
 const TopBar = ({ menuOpen, toggleMenu, scrolled, hideBar, theme, toggleTheme }) => (
   <header
     className={`
-      fixed top-0 left-0 right-0 z-50 h-28   /* changed from h-24 to h-28 */
+      fixed top-0 left-0 right-0 z-50
+      h-20 sm:h-24 lg:h-28
       flex items-center justify-between px-4 sm:px-8
       2xl:max-w-7xl 2xl:mx-auto 2xl:inset-x-0
       transition-transform duration-700 ease-out
@@ -123,7 +122,11 @@ const TopBar = ({ menuOpen, toggleMenu, scrolled, hideBar, theme, toggleTheme })
       }
     `}
   >
-    <Link to="/" className="h-14 flex items-center" onClick={() => menuOpen && toggleMenu()}> {/* h-12 → h-14 */}
+    <Link
+      to="/"
+      className="h-10 sm:h-12 lg:h-14 flex items-center"
+      onClick={() => menuOpen && toggleMenu()}
+    >
       <img src={webLogo} alt="Wel Fragrance" className="h-full w-auto object-contain" />
       <img
         src={webLogoText}
@@ -132,12 +135,12 @@ const TopBar = ({ menuOpen, toggleMenu, scrolled, hideBar, theme, toggleTheme })
       />
     </Link>
 
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-3 sm:gap-4">
       <button
         onClick={toggleTheme}
         aria-label="Toggle theme"
         className={`
-          relative w-10 h-10 rounded-full flex items-center justify-center
+          relative w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center
           transition-colors duration-300
           focus-visible:outline focus-visible:outline-2 focus-visible:outline-old-gold
           ${theme === 'dark' ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/5 hover:bg-black/10 text-dark-teal'}
@@ -162,7 +165,7 @@ const TopBar = ({ menuOpen, toggleMenu, scrolled, hideBar, theme, toggleTheme })
       <HamburgerButton
         checked={menuOpen}
         onToggle={toggleMenu}
-        className="text-black dark:text-white"
+        className="text-sm sm:text-base lg:text-lg text-black dark:text-white"
       />
     </div>
   </header>
@@ -172,6 +175,7 @@ const TopBar = ({ menuOpen, toggleMenu, scrolled, hideBar, theme, toggleTheme })
  * The full-screen menu, decoupled from the top bar.
  * Always mounted so it can animate in/out.
  * Now expands vertically from the top (navbar) using scaleY.
+ * Padding-top matches the header height via responsive classes.
  */
 const MenuPanel = ({ open, contentVisible, onNavigate, isActive }) => (
   <div
@@ -182,13 +186,18 @@ const MenuPanel = ({ open, contentVisible, onNavigate, isActive }) => (
       transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]
       ${open ? 'scale-y-100' : 'scale-y-0 pointer-events-none'}
     `}
-    style={{ paddingTop: NAV_HEIGHT }}
     aria-hidden={!open}
   >
-    <div className="h-full w-full overflow-y-auto px-4 sm:px-8 2xl:max-w-7xl 2xl:mx-auto">
+    <div
+      className={`
+        h-full w-full overflow-y-auto px-4 sm:px-8 2xl:max-w-7xl 2xl:mx-auto
+        pt-20 sm:pt-24 lg:pt-28 box-border
+      `}
+    >
       <div
         className={`
-          flex flex-col lg:flex-row h-full w-full gap-8 lg:gap-12 py-8 lg:py-12
+          flex flex-col lg:flex-row h-full w-full gap-6 sm:gap-8 lg:gap-12
+          py-6 sm:py-8 lg:py-12
           transition-transform duration-500 ease-out
           ${contentVisible ? 'translate-y-0' : 'translate-y-8'}
         `}
@@ -203,9 +212,10 @@ const MenuPanel = ({ open, contentVisible, onNavigate, isActive }) => (
                 onClick={onNavigate(link.to)}
                 className={`
                   group flex items-center gap-4 w-full
-                  text-3xl sm:text-4xl md:text-5xl font-light no-underline
+                  text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-light no-underline
                   border-b border-black/10 dark:border-white/10
-                  py-6 sm:py-7 mb-6 sm:mb-7   /* further increased spacing */
+                  py-4 sm:py-6 lg:py-7
+                  mb-4 sm:mb-6 lg:mb-7
                   transition-colors
                   ${active ? 'text-old-gold font-medium' : 'text-black dark:text-white hover:text-old-gold'}
                 `}
@@ -220,14 +230,11 @@ const MenuPanel = ({ open, contentVisible, onNavigate, isActive }) => (
         </nav>
 
         <div className="lg:w-[30%] flex items-center justify-center">
-          {/* Outer container: background, borders, and corners remain static */}
           <div className="relative aspect-[4/5] w-full max-w-sm lg:max-w-full overflow-hidden bg-warm-white/30 dark:bg-charcoal/30 backdrop-blur-sm">
-            {/* Decorative elements — always visible */}
             <div className="absolute inset-4 border border-old-gold/20 z-10 pointer-events-none" />
             <div className="absolute top-4 left-4 w-8 h-8 sm:w-10 sm:h-10 border-t border-l border-old-gold/50 z-10" />
             <div className="absolute bottom-4 right-4 w-8 h-8 sm:w-10 sm:h-10 border-b border-r border-old-gold/50 z-10" />
 
-            {/* Image reveal wrapper: clip‑path animates from top‑to‑bottom */}
             <div
               className="relative w-full h-full transition-[clip-path] duration-700 delay-300 ease-out"
               style={{
@@ -295,8 +302,6 @@ const Navbar = () => {
     }
     setContentVisible(false);
   }, [menuOpen]);
-
-  // Scroll lock removed — the main page scrollbar stays visible
 
   const toggleMenu = () => {
     if (isClosing) return;
