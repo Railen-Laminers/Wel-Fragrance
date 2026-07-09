@@ -118,7 +118,7 @@ const TopBar = ({ menuOpen, toggleMenu, scrolled, hideBar, theme, toggleTheme })
       transition-transform duration-700 ease-out
       ${hideBar ? '-translate-y-full' : 'translate-y-0'}
       ${menuOpen || scrolled
-        ? 'bg-white/90 dark:bg-dark-teal/90 backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-soft'
+        ? 'bg-warm-white/90 dark:bg-dark-teal/90 backdrop-blur-md border-b border-black/5 dark:border-white/5 shadow-soft'
         : 'bg-transparent border-b border-transparent'
       }
     `}

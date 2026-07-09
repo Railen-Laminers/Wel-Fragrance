@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
-import Jomalone from '@/assets/products/Jomalone.webp';
+import NicolHero from '@/assets/products/NicolHero.png';
 
 export default function Hero() {
   const sectionRef = useRef(null);
@@ -194,7 +194,7 @@ export default function Hero() {
                 className="absolute inset-0 transition-transform duration-300 ease-out"
               >
                 <img
-                  src={Jomalone}
+                  src={NicolHero}
                   alt="Luxury Perfume Collection"
                   className="hero-image w-full h-full object-cover scale-110"
                   fetchpriority="high"

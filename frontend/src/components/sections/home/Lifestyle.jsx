@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-import EassyMiyaki from '@/assets/products/EassyMiyaki.webp';
+import MorningSwim from '@/assets/products/MorningSwim.png';
 
 export default function Lifestyle() {
     const sectionRef = useRef(null);
@@ -73,7 +73,7 @@ export default function Lifestyle() {
                             <div className="absolute bottom-4 right-4 w-10 h-10 sm:w-12 sm:h-12 border-b border-r border-old-gold/40 z-10" />
 
                             <img
-                                src={EassyMiyaki}
+                                src={MorningSwim}
                                 alt="Luxury Lifestyle"
                                 loading="lazy"
                                 className="w-full h-full object-cover"

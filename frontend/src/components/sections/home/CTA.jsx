@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
-import DSC09749 from '@/assets/models/DSC09749.webp';
+import Litz from '@/assets/products/Litz.png';
 
 export default function CTA() {
     const sectionRef = useRef(null);
@@ -53,7 +53,7 @@ export default function CTA() {
                     {/* Background Image with lighter overlay */}
                     <div className="absolute inset-0">
                         <img
-                            src={DSC09749}
+                            src={Litz}
                             alt="Fragrance Background"
                             loading="lazy"
                             className="w-full h-full object-cover"
