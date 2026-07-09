@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 
-// Import your product images from the assets folder
+// Type 1 Products
 import jaimeImage from '@/assets/products/JAIME.webp';
 import dorzImage from '@/assets/products/DORZ.webp';
 import rupertImage from '@/assets/products/RUPERT.webp';
@@ -17,136 +17,178 @@ import joeImage from '@/assets/products/JOE.webp';
 import marImage from '@/assets/products/MAR.webp';
 import gregImage from '@/assets/products/GREG.webp';
 
+// Type 2 Products
+import Nicol2 from '@/assets/products/Nicol2.webp';
+import Litz3 from '@/assets/products/Litz3.webp';
+
 const allProducts = [
+    // ===== TYPE 1 =====
     {
         id: 1,
         name: 'Jaime',
         notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱1,500',
+        price: '₱500',
         image: jaimeImage,
         tag: 'New',
         gender: 'Women',
-        story: 'Jaime is a floral fruity fragrance for women with passionfruit and bitter orange opening into passion flower and gardenia. The name references the Brazilian paraiba tourmaline, bringing an exotic blue-green elegance to the scent.'
+        story: 'Jaime is a floral fruity fragrance for women with passionfruit and bitter orange opening into passion flower and gardenia. The name references the Brazilian paraiba tourmaline, bringing an exotic blue-green elegance to the scent.',
+        type: 1,
     },
     {
         id: 2,
         name: 'Dorz',
         notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱1,500',
+        price: '₱500',
         image: dorzImage,
         tag: 'Featured',
         gender: 'Women',
-        story: 'Dorz is an oriental floral fragrance for women with hyacinth, coconut, asafoetida, peach, mandarin orange and bergamot leading into a lush heart of carnation, tuberose, jasmine, ylang-ylang, narcissus, orange blossom, frangipani and iris. It finishes with vanilla, sandalwood, heliotrope, cedar, oakmoss and musk.'
+        story: 'Dorz is an oriental floral fragrance for women with hyacinth, coconut, asafoetida, peach, mandarin orange and bergamot leading into a lush heart of carnation, tuberose, jasmine, ylang-ylang, narcissus, orange blossom, frangipani and iris. It finishes with vanilla, sandalwood, heliotrope, cedar, oakmoss and musk.',
+        type: 1,
     },
     {
         id: 3,
         name: 'Rupert',
         notes: '100% Pure Oil Fragrance • For Men',
-        price: '₱1,500',
+        price: '₱500',
         image: rupertImage,
         tag: null,
         gender: 'Men',
-        story: 'Rupert opens with the juicy freshness of Calabrian bergamot and reveals a powerfully woody amber trail inspired by vast blue skies over a white-hot desert landscape.'
+        story: 'Rupert opens with the juicy freshness of Calabrian bergamot and reveals a powerfully woody amber trail inspired by vast blue skies over a white-hot desert landscape.',
+        type: 1,
     },
     {
         id: 4,
         name: 'Vian',
         notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱1,500',
+        price: '₱500',
         image: vianImage,
         tag: null,
         gender: 'Women',
-        story: 'Vian is a sweet fruity floral fragrance that blends luscious red berries, datura flower, white musk, and patchouli into a romantic, long-lasting scent that captures the passion of Paris.'
+        story: 'Vian is a sweet fruity floral fragrance that blends luscious red berries, datura flower, white musk, and patchouli into a romantic, long-lasting scent that captures the passion of Paris.',
+        type: 1,
     },
     {
         id: 5,
         name: 'Litz',
         notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱1,500',
+        price: '₱500',
         image: litzImage,
         tag: null,
         gender: 'Women',
-        story: 'Litz is a floral fruity fragrance with orange, peach, blood orange, coriander and cardamom in the opening, jasmine, coriander, cardamom, violet leaf and carrot seeds in the heart, and vanilla, musk and sandalwood at the base.'
+        story: 'Litz is a floral fruity fragrance with orange, peach, blood orange, coriander and cardamom in the opening, jasmine, coriander, cardamom, violet leaf and carrot seeds in the heart, and vanilla, musk and sandalwood at the base.',
+        type: 1,
     },
     {
         id: 6,
         name: 'Iluminare',
         notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱1,500',
+        price: '₱500',
         image: iluminareImage,
         tag: null,
         gender: 'Women',
-        story: 'Iluminare is a floral fragrance inspired by Gucci Bloom with jasmine at the top, tuberose in the heart, and rangoon creeper at the base for an elegant bloom.'
+        story: 'Iluminare is a floral fragrance inspired by Gucci Bloom with jasmine at the top, tuberose in the heart, and rangoon creeper at the base for an elegant bloom.',
+        type: 1,
     },
     {
         id: 7,
         name: 'Fely',
         notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱1,500',
+        price: '₱500',
         image: felyImage,
         tag: null,
         gender: 'Women',
-        story: 'Fely is a floral fruity fragrance for women with quince and grapefruit opening into rose and jasmine, resting on a white musk base.'
+        story: 'Fely is a floral fruity fragrance for women with quince and grapefruit opening into rose and jasmine, resting on a white musk base.',
+        type: 1,
     },
     {
         id: 8,
         name: 'Lenzki',
         notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱1,500',
+        price: '₱500',
         image: lenskiImage,
         tag: null,
         gender: 'Women',
-        story: 'Lenzki is a rich perfume extract that balances jasmine, ambergris and bitter almond in a luminous composition with vivid red shades and a mythical crystal-house elegance.'
+        story: 'Lenzki is a rich perfume extract that balances jasmine, ambergris and bitter almond in a luminous composition with vivid red shades and a mythical crystal-house elegance.',
+        type: 1,
     },
     {
         id: 9,
         name: 'Rei',
         notes: '100% Pure Oil Fragrance • For Men',
-        price: '₱1,500',
+        price: '₱500',
         image: reiImage,
         tag: null,
         gender: 'Men',
-        story: 'Rei blends bitter citrus and rosemary with salty sea notes and warm woody musk for a Mediterranean-inspired scent with sunny warmth and a crisp trail.'
+        story: 'Rei blends bitter citrus and rosemary with salty sea notes and warm woody musk for a Mediterranean-inspired scent with sunny warmth and a crisp trail.',
+        type: 1,
     },
     {
         id: 10,
         name: 'Nicol',
         notes: '100% Pure Oil Fragrance • For Men',
-        price: '₱1,500',
+        price: '₱500',
         image: nicolImage,
         tag: null,
         gender: 'Men',
-        story: 'Nicol is a modern and fresh fragrance that feels clean, clear and compelling, reflecting the changing moods of the ocean with confidence.'
+        story: 'Nicol is a modern and fresh fragrance that feels clean, clear and compelling, reflecting the changing moods of the ocean with confidence.',
+        type: 1,
     },
     {
         id: 11,
         name: 'Joe',
         notes: '100% Pure Oil Fragrance • For Men',
-        price: '₱1,500',
+        price: '₱500',
         image: joeImage,
         tag: null,
         gender: 'Men',
-        story: 'Joe is a citrus aromatic fragrance for men featuring lime, green notes, mandarin orange and lemon with a heart of freesia, jasmine, lily-of-the-valley and rose, finished with cypress, musk, guaiac wood and cedar.'
+        story: 'Joe is a citrus aromatic fragrance for men featuring lime, green notes, mandarin orange and lemon with a heart of freesia, jasmine, lily-of-the-valley and rose, finished with cypress, musk, guaiac wood and cedar.',
+        type: 1,
     },
     {
         id: 12,
         name: 'Mar',
         notes: '100% Pure Oil Fragrance • For Men',
-        price: '₱1,500',
+        price: '₱500',
         image: marImage,
         tag: null,
         gender: 'Men',
-        story: 'Mar is a tantalizing citrus fragrance with bergamot, black currant, red apple and pineapple opening into jasmine, rose and patchouli before settling into oak moss, amber and creamy vanilla.'
+        story: 'Mar is a tantalizing citrus fragrance with bergamot, black currant, red apple and pineapple opening into jasmine, rose and patchouli before settling into oak moss, amber and creamy vanilla.',
+        type: 1,
     },
     {
         id: 13,
         name: 'Greg',
         notes: '100% Pure Oil Fragrance • For Men',
-        price: '₱1,500',
+        price: '₱500',
         image: gregImage,
         tag: null,
         gender: 'Men',
-        story: 'Greg is an aromatic green fragrance with aldehydes, artemisia, lavender, mandarin orange, mint, neroli, bergamot and lemon leading into cyclamen, ginger, seagrass, jasmine, rose, Brazilian rosewood and geranium, and finishing with sandalwood, amber, musk, guaiac wood and cedar.'
+        story: 'Greg is an aromatic green fragrance with aldehydes, artemisia, lavender, mandarin orange, mint, neroli, bergamot and lemon leading into cyclamen, ginger, seagrass, jasmine, rose, Brazilian rosewood and geranium, and finishing with sandalwood, amber, musk, guaiac wood and cedar.',
+        type: 1,
+    },
+
+    // ===== TYPE 2 (variants with different images) =====
+    {
+        id: 14,
+        name: 'Nicol',
+        notes: '100% Pure Oil Fragrance • For Men',
+        price: '₱500',
+        image: Nicol2,
+        tag: null,
+        gender: 'Men',
+        story: 'Nicol is a modern and fresh fragrance that feels clean, clear and compelling, reflecting the changing moods of the ocean with confidence.',
+        type: 2,
+    },
+    {
+        id: 15,
+        name: 'Litz',
+        notes: '100% Pure Oil Fragrance • For Women',
+        price: '₱500',
+        image: Litz3,
+        tag: null,
+        gender: 'Women',
+        story: 'Litz is a floral fruity fragrance with orange, peach, blood orange, coriander and cardamom in the opening, jasmine, coriander, cardamom, violet leaf and carrot seeds in the heart, and vanilla, musk and sandalwood at the base.',
+        type: 2,
     },
 ];
 
@@ -159,18 +201,21 @@ export default function Products() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTag, setSelectedTag] = useState('All');
     const [selectedGender, setSelectedGender] = useState('All');
+    const [selectedType, setSelectedType] = useState('1');
 
     const [isLoaded, setIsLoaded] = useState(false);
 
     const uniqueTags = ['All', ...new Set(allProducts.map(p => p.tag).filter(Boolean))];
     const genderOptions = ['All', 'Men', 'Women'];
+    const typeOptions = ['1', '2'];
 
     const filteredProducts = allProducts.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             product.notes.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesTag = selectedTag === 'All' ? true : product.tag === selectedTag;
         const matchesGender = selectedGender === 'All' ? true : product.gender === selectedGender;
-        return matchesSearch && matchesTag && matchesGender;
+        const matchesType = product.type === parseInt(selectedType, 10);
+        return matchesSearch && matchesTag && matchesGender && matchesType;
     });
 
     useEffect(() => {
@@ -184,7 +229,6 @@ export default function Products() {
         requestAnimationFrame(() => {
             setModalVisible(true);
         });
-        // Scrollbar is NOT hidden – we keep the page scrollbar visible
     };
 
     const closeModal = () => {
@@ -226,10 +270,10 @@ export default function Products() {
                         </p>
                     </div>
 
-                    {/* Search & Filter Bar – responsive */}
-                    <div className="mb-10 sm:mb-12 flex flex-col md:flex-row gap-3">
-                        {/* Search – full width on small, fixed width on larger */}
-                        <div className="w-full md:w-64 flex-shrink-0">
+                    {/* Search & Filter Bar - Centered Layout */}
+                    <div className="mb-10 sm:mb-12 flex flex-col items-center gap-4">
+                        {/* Search - Centered, wider */}
+                        <div className="w-full max-w-xl">
                             <div className="relative">
                                 <input
                                     type="text"
@@ -249,8 +293,27 @@ export default function Products() {
                             </div>
                         </div>
 
-                        {/* Filter buttons – wrap on small, row on larger */}
-                        <div className="flex-1 flex flex-wrap items-center gap-1.5">
+                        {/* Filters - Centered below search with more gaps and separators */}
+                        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+                            {/* Type filter */}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                                {typeOptions.map((type) => (
+                                    <button
+                                        key={type}
+                                        onClick={() => setSelectedType(type)}
+                                        className={`font-jost text-[10px] sm:text-xs tracking-[0.15em] uppercase px-3 py-1.5 border transition-all duration-300 whitespace-nowrap ${selectedType === type
+                                            ? 'bg-old-gold text-warm-white dark:text-dark-teal border-old-gold'
+                                            : 'border-old-gold/20 text-dark-teal dark:text-warm-white/70 hover:border-old-gold/60 hover:text-old-gold'
+                                            }`}
+                                    >
+                                        Type {type}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Separator */}
+                            <span className="text-old-gold/30 font-light select-none">|</span>
+
                             {/* Gender filters */}
                             <div className="flex items-center gap-1.5 flex-wrap">
                                 {genderOptions.map((gender) => (
@@ -267,7 +330,10 @@ export default function Products() {
                                 ))}
                             </div>
 
-                            {/* Tag filters – wrap and scrollable */}
+                            {/* Separator */}
+                            <span className="text-old-gold/30 font-light select-none">|</span>
+
+                            {/* Tag filters */}
                             <div className="flex items-center gap-1.5 flex-wrap overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-old-gold/20 scrollbar-track-transparent">
                                 {uniqueTags.map((tag) => (
                                     <button
@@ -324,6 +390,13 @@ export default function Products() {
                                                 </span>
                                             </div>
                                         )}
+
+                                        {/* Type badge (optional) */}
+                                        <div className="absolute bottom-4 left-4 z-20">
+                                            <span className="font-jost text-[9px] tracking-[0.1em] uppercase bg-black/30 backdrop-blur-sm text-white px-2 py-0.5 rounded">
+                                                Type {product.type}
+                                            </span>
+                                        </div>
 
                                         <div className={`absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 z-20 transition-all duration-500 ${hoveredIndex === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                                             <button

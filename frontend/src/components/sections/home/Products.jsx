@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 // Local product images
-import Paradoxie2 from '@/assets/products/Paradoxie-2.webp';
-import Litz2 from '@/assets/products/Litz2.webp';
+import Paradoxie2 from '@/assets/products/Paradoxie2.webp';
+import Litz3 from '@/assets/products/Litz3.webp';
 import Nicol2 from '@/assets/products/Nicol2.webp';
 import Greedy_choco from '@/assets/products/Greedy_choco.webp';
 
@@ -67,7 +67,7 @@ export default function Products() {
             name: 'Litz',
             notes: 'Oriental floral • For women',
             price: '₱500',
-            image: Litz2,
+            image: Litz3,
             tag: 'Featured',
         },
         {
@@ -78,7 +78,7 @@ export default function Products() {
             tag: null,
         },
         {
-            name: 'Greedy_choco',
+            name: 'Greedy Choco',
             notes: 'Sweet fruity floral • For women',
             price: '₱500',
             image: Greedy_choco,
