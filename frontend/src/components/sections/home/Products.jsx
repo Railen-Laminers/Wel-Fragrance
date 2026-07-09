@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 
 // Local product images
 import Paradoxie2 from '@/assets/products/Paradoxie-2.webp';
-import dorzImage from '@/assets/products/DORZ.webp';
-import rupertImage from '@/assets/products/RUPERT.webp';
-import vianImage from '@/assets/products/VIAN.webp';
+import Litz2 from '@/assets/products/Litz2.webp';
+import Nicol2 from '@/assets/products/Nicol2.webp';
+import Greedy_choco from '@/assets/products/Greedy_choco.webp';
 
 export default function Products() {
     const sectionRef = useRef(null);
@@ -59,29 +59,29 @@ export default function Products() {
         {
             name: 'Paradoxie',
             notes: 'Floral fruity • 100% pure oil fragrance',
-            price: '₱1,500',
+            price: '₱500',
             image: Paradoxie2,
             tag: 'New',
         },
         {
-            name: 'Dorz',
+            name: 'Litz',
             notes: 'Oriental floral • For women',
-            price: '₱1,500',
-            image: dorzImage,
+            price: '₱500',
+            image: Litz2,
             tag: 'Featured',
         },
         {
-            name: 'Rupert',
+            name: 'Nicol',
             notes: 'Woody citrus • For men',
-            price: '₱1,500',
-            image: rupertImage,
+            price: '₱500',
+            image: Nicol2,
             tag: null,
         },
         {
-            name: 'Vian',
+            name: 'Greedy_choco',
             notes: 'Sweet fruity floral • For women',
-            price: '₱1,500',
-            image: vianImage,
+            price: '₱500',
+            image: Greedy_choco,
             tag: null,
         },
     ];
