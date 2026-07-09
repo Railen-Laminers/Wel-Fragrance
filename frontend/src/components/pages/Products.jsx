@@ -391,12 +391,7 @@ export default function Products() {
                                             </div>
                                         )}
 
-                                        {/* Type badge (optional) */}
-                                        <div className="absolute bottom-4 left-4 z-20">
-                                            <span className="font-jost text-[9px] tracking-[0.1em] uppercase bg-black/30 backdrop-blur-sm text-white px-2 py-0.5 rounded">
-                                                Type {product.type}
-                                            </span>
-                                        </div>
+                                        {/* Type badge REMOVED — no longer displayed */}
 
                                         <div className={`absolute bottom-4 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 z-20 transition-all duration-500 ${hoveredIndex === index ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                                             <button
