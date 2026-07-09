@@ -18,7 +18,7 @@ const HAMBURGER_STYLES = `
   .wf-hamburger { cursor: pointer; display: inline-flex; }
   .wf-hamburger input { display: none; }
   .wf-hamburger svg {
-    height: 1.7em;
+    height: 2.1em;  /* increased further from 1.9em */
     color: inherit;
     transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -103,16 +103,16 @@ const LINKS = [
   { label: 'CONTACT', to: '/contact' },
 ];
 
-const NAV_HEIGHT = 80; // px, matches h-20
+const NAV_HEIGHT = 112; // matches h-28 (increased from 96)
 
 /**
- * Fixed top bar. Always h-20 — it never grows to fill the screen.
+ * Fixed top bar. Now h-28 (112px) – noticeably taller for better presence.
  * The full-screen menu lives in its own <MenuPanel/> that sits behind/under it.
  */
 const TopBar = ({ menuOpen, toggleMenu, scrolled, hideBar, theme, toggleTheme }) => (
   <header
     className={`
-      fixed top-0 left-0 right-0 z-50 h-20
+      fixed top-0 left-0 right-0 z-50 h-28   /* changed from h-24 to h-28 */
       flex items-center justify-between px-4 sm:px-8
       2xl:max-w-7xl 2xl:mx-auto 2xl:inset-x-0
       transition-transform duration-700 ease-out
@@ -123,7 +123,7 @@ const TopBar = ({ menuOpen, toggleMenu, scrolled, hideBar, theme, toggleTheme })
       }
     `}
   >
-    <Link to="/" className="h-10 flex items-center" onClick={() => menuOpen && toggleMenu()}>
+    <Link to="/" className="h-14 flex items-center" onClick={() => menuOpen && toggleMenu()}> {/* h-12 → h-14 */}
       <img src={webLogo} alt="Wel Fragrance" className="h-full w-auto object-contain" />
       <img
         src={webLogoText}
@@ -205,7 +205,8 @@ const MenuPanel = ({ open, contentVisible, onNavigate, isActive }) => (
                   group flex items-center gap-4 w-full
                   text-3xl sm:text-4xl md:text-5xl font-light no-underline
                   border-b border-black/10 dark:border-white/10
-                  py-4 sm:py-5 mb-4 sm:mb-5 transition-colors
+                  py-6 sm:py-7 mb-6 sm:mb-7   /* further increased spacing */
+                  transition-colors
                   ${active ? 'text-old-gold font-medium' : 'text-black dark:text-white hover:text-old-gold'}
                 `}
               >
