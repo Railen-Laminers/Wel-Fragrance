@@ -177,7 +177,7 @@ const MenuPanel = ({ open, contentVisible, onNavigate, isActive }) => (
   <div
     className={`
       fixed inset-0 z-40
-      bg-white dark:bg-dark-teal
+      bg-[#F2EDE6] dark:bg-dark-teal
       origin-top overflow-hidden
       transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]
       ${open ? 'scale-y-100' : 'scale-y-0 pointer-events-none'}

@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Link } from 'react-router-dom';
 
 import DSC09790 from '@/assets/models/DSC09790.webp';
-import Paradoxie from '@/assets/products/Paradoxie.png';
+import NicolHero from '@/assets/products/NicolHero.png';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -160,7 +160,7 @@ export default function About() {
                             <div className="absolute bottom-4 right-4 w-8 h-8 sm:w-10 sm:h-10 border-b border-r border-old-gold/50 z-10" />
 
                             <img
-                                src={Paradoxie}
+                                src={NicolHero}
                                 alt="Wel Fragrance Atelier"
                                 className="about-hero-img-inner w-full h-full object-cover scale-110 max-w-full"
                             />
