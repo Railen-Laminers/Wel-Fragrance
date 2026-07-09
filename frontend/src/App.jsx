@@ -1,17 +1,28 @@
-import React, { useEffect, lazy, Suspense, useRef } from 'react';
+// src/App.js
+import React, { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Lenis from '@studio-freight/lenis';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import CursorFollower from './components/common/CursorFollower';
 import GlobalParticles from './components/common/GlobalParticles';
+import ProtectedRoute from './components/common/ProtectedRoute';
+import PublicRoute from './components/common/PublicRoute';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
+// Public pages
 import Home from './components/pages/public/Home';
 const About = lazy(() => import('./components/pages/public/About'));
 const Contact = lazy(() => import('./components/pages/public/Contact'));
 const Products = lazy(() => import('./components/pages/public/Products'));
 const MagazineCatalog = lazy(() => import('./components/pages/public/MagazineCatalog'));
+const Login = lazy(() => import('./components/pages/public/Login'));
+const NotFound = lazy(() => import('./components/pages/public/NotFound'));
+
+// Private pages
+const AdminDashboard = lazy(() => import('./components/pages/private/admin/AdminDashboard'));
+const CustomerDashboard = lazy(() => import('./components/pages/private/customer/CustomerDashboard'));
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -19,7 +30,6 @@ function AnimatedRoutes() {
   useEffect(() => {
     const lenis = window.__lenis;
     if (lenis) {
-      // Instant teleport to top – no animation
       lenis.scrollTo(0, { immediate: true });
     }
   }, [location]);
@@ -28,20 +38,97 @@ function AnimatedRoutes() {
     <main className="relative">
       <Suspense fallback={<div className="min-h-screen" />}>
         <Routes location={location}>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/catalog" element={<MagazineCatalog />} />
+          {/* All public routes are wrapped with PublicRoute */}
+          <Route
+            path="/"
+            element={
+              <PublicRoute>
+                <Home />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <PublicRoute>
+                <About />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <PublicRoute>
+                <Contact />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/products"
+            element={
+              <PublicRoute>
+                <Products />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/catalog"
+            element={
+              <PublicRoute>
+                <MagazineCatalog />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+
+          {/* Protected routes – wrapped with ProtectedRoute (which adds AuthenticatedNavbar) */}
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/customer/dashboard"
+            element={
+              <ProtectedRoute>
+                <CustomerDashboard />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Suspense>
     </main>
   );
 }
 
+function AppContent() {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <div className="min-h-screen bg-transparent transition-colors duration-500 flex flex-col">
+      <CursorFollower />
+      {/* Show public navbar ONLY when NOT authenticated */}
+      {!isAuthenticated && <Navbar />}
+      <AnimatedRoutes />
+      {/* Show public footer ONLY when NOT authenticated */}
+      {!isAuthenticated && <Footer />}
+    </div>
+  );
+}
+
 export default function App() {
   useEffect(() => {
-    // Initialize Lenis with smooth scrolling for wheel/touch
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -53,7 +140,6 @@ export default function App() {
 
     window.__lenis = lenis;
 
-    // RAF loop for Lenis
     const raf = (time) => {
       lenis.raf(time);
       requestAnimationFrame(raf);
@@ -68,15 +154,12 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <Router>
-        <GlobalParticles />
-        <div className="min-h-screen bg-transparent transition-colors duration-500 flex flex-col">
-          <CursorFollower />
-          <Navbar />
-          <AnimatedRoutes />
-          <Footer />
-        </div>
-      </Router>
+      <AuthProvider>
+        <Router>
+          <GlobalParticles />
+          <AppContent />
+        </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
