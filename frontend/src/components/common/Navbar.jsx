@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import webLogo from '/webLogo.webp';
@@ -9,16 +9,13 @@ import welStore from '../../assets/bg/welStore.webp';
 
 /**
  * Animated hamburger / close toggle.
- * Adapted from the Uiverse.io "hamburger" by talhabangyal — same morph
- * animation (top/bottom bars rotate into an X, middle bar fades away),
- * but wired up as a controlled component and recolored via currentColor
- * so it follows the navbar's light/dark text color automatically.
+ * Height increased to 2.1em for a larger, more prominent button.
  */
 const HAMBURGER_STYLES = `
   .wf-hamburger { cursor: pointer; display: inline-flex; }
   .wf-hamburger input { display: none; }
   .wf-hamburger svg {
-    height: 1.7em;
+    height: 2.1em;
     color: inherit;
     transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -94,6 +91,7 @@ const IconScentDark = () => (
     <line x1="6.5" y1="17" x2="13.5" y2="17" stroke="currentColor" strokeWidth="0.6" opacity="0.5" />
   </svg>
 );
+
 // -------------------------------------------------
 
 const LINKS = [
@@ -103,12 +101,16 @@ const LINKS = [
   { label: 'CONTACT', to: '/contact' },
 ];
 
-const NAV_HEIGHT = 80;
-
+/**
+ * Top bar – now scales responsively:
+ *   h-20 (80px) on mobile, h-24 (96px) on sm, h-28 (112px) on lg.
+ * Logo and hamburger also scale up.
+ */
 const TopBar = ({ menuOpen, toggleMenu, scrolled, hideBar, theme, toggleTheme }) => (
   <header
     className={`
-      fixed top-0 left-0 right-0 z-50 h-20
+      fixed top-0 left-0 right-0 z-50
+      h-20 sm:h-24 lg:h-28
       flex items-center justify-between px-4 sm:px-8
       2xl:max-w-7xl 2xl:mx-auto 2xl:inset-x-0
       transition-transform duration-700 ease-out
@@ -119,7 +121,11 @@ const TopBar = ({ menuOpen, toggleMenu, scrolled, hideBar, theme, toggleTheme })
       }
     `}
   >
-    <Link to="/" className="h-10 flex items-center" onClick={() => menuOpen && toggleMenu()}>
+    <Link
+      to="/"
+      className="h-10 sm:h-12 lg:h-14 flex items-center"
+      onClick={() => menuOpen && toggleMenu()}
+    >
       <img src={webLogo} alt="Wel Fragrance" className="h-full w-auto object-contain" />
       <img
         src={webLogoText}
@@ -128,12 +134,12 @@ const TopBar = ({ menuOpen, toggleMenu, scrolled, hideBar, theme, toggleTheme })
       />
     </Link>
 
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-3 sm:gap-4">
       <button
         onClick={toggleTheme}
         aria-label="Toggle theme"
         className={`
-          relative w-10 h-10 rounded-full flex items-center justify-center
+          relative w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center
           transition-colors duration-300
           focus-visible:outline focus-visible:outline-2 focus-visible:outline-old-gold
           ${theme === 'dark' ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/5 hover:bg-black/10 text-dark-teal'}
@@ -158,14 +164,20 @@ const TopBar = ({ menuOpen, toggleMenu, scrolled, hideBar, theme, toggleTheme })
       <HamburgerButton
         checked={menuOpen}
         onToggle={toggleMenu}
-        className="text-black dark:text-white"
+        className="text-sm sm:text-base lg:text-lg text-black dark:text-white"
       />
     </div>
   </header>
 );
 
-const MenuPanel = ({ open, contentVisible, onNavigate, isActive }) => (
+/**
+ * Full‑screen menu panel.
+ * Uses responsive padding‑top to match header height.
+ * Menu links are larger (2xl–4xl on lg).
+ */
+const MenuPanel = ({ open, contentVisible, onNavigate, isActive, menuRef }) => (
   <div
+    ref={menuRef}
     className={`
       fixed inset-0 z-40
       bg-[#F2EDE6] dark:bg-dark-teal
@@ -173,13 +185,18 @@ const MenuPanel = ({ open, contentVisible, onNavigate, isActive }) => (
       transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]
       ${open ? 'scale-y-100' : 'scale-y-0 pointer-events-none'}
     `}
-    style={{ paddingTop: NAV_HEIGHT }}
     aria-hidden={!open}
   >
-    <div className="h-full w-full overflow-y-auto px-4 sm:px-8 2xl:max-w-7xl 2xl:mx-auto">
+    <div
+      className={`
+        h-full w-full overflow-y-auto px-4 sm:px-8 2xl:max-w-7xl 2xl:mx-auto
+        pt-20 sm:pt-24 lg:pt-28 box-border
+      `}
+    >
       <div
         className={`
-          flex flex-col lg:flex-row h-full w-full gap-8 lg:gap-12 py-8 lg:py-12
+          flex flex-col lg:flex-row h-full w-full gap-6 sm:gap-8 lg:gap-12
+          py-6 sm:py-8 lg:py-12
           transition-transform duration-500 ease-out
           ${contentVisible ? 'translate-y-0' : 'translate-y-8'}
         `}
@@ -194,9 +211,11 @@ const MenuPanel = ({ open, contentVisible, onNavigate, isActive }) => (
                 onClick={onNavigate(link.to)}
                 className={`
                   group flex items-center gap-4 w-full
-                  text-3xl sm:text-4xl md:text-5xl font-light no-underline
+                  text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-light no-underline
                   border-b border-black/10 dark:border-white/10
-                  py-4 sm:py-5 mb-4 sm:mb-5 transition-colors
+                  py-4 sm:py-6 lg:py-7
+                  mb-4 sm:mb-6 lg:mb-7
+                  transition-colors
                   ${active ? 'text-old-gold font-medium' : 'text-black dark:text-white hover:text-old-gold'}
                 `}
               >
@@ -208,6 +227,7 @@ const MenuPanel = ({ open, contentVisible, onNavigate, isActive }) => (
             );
           })}
         </nav>
+
         <div className="lg:w-[30%] flex items-center justify-center">
           <div className="relative aspect-[4/5] w-full max-w-sm lg:max-w-full overflow-hidden bg-warm-white/30 dark:bg-charcoal/30 backdrop-blur-sm">
             <div className="absolute inset-4 border border-old-gold/20 z-10 pointer-events-none" />
@@ -244,7 +264,9 @@ const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
+  const menuRef = useRef(null);
 
+  // Scroll effect: background tint & "hide near bottom" detection
   useEffect(() => {
     const handleScroll = () => {
       if (menuOpen) return;
@@ -271,6 +293,7 @@ const Navbar = () => {
     };
   }, [menuOpen]);
 
+  // Stagger the menu content in slightly after the panel expands
   useEffect(() => {
     if (menuOpen) {
       setContentVisible(false);
@@ -278,6 +301,20 @@ const Navbar = () => {
       return () => clearTimeout(timer);
     }
     setContentVisible(false);
+  }, [menuOpen]);
+
+  // ---- Fix aria-hidden focus warning ----
+  useEffect(() => {
+    if (!menuOpen) {
+      // If the menu is closed, blur any element that might still have focus inside the panel
+      const panel = menuRef.current;
+      if (panel) {
+        const active = document.activeElement;
+        if (active && panel.contains(active)) {
+          active.blur();
+        }
+      }
+    }
   }, [menuOpen]);
 
   const toggleMenu = () => {
@@ -310,6 +347,7 @@ const Navbar = () => {
         toggleTheme={toggleTheme}
       />
       <MenuPanel
+        ref={menuRef}
         open={menuOpen}
         contentVisible={contentVisible}
         onNavigate={handleNavigate}

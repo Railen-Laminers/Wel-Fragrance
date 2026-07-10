@@ -26,6 +26,17 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => getStoredAuth().token);
   const [loading, setLoading] = useState(true);
 
+  const persistAuth = (nextUser, nextToken) => {
+    setUser(nextUser);
+    setToken(nextToken);
+    window.localStorage.setItem('wf-auth-user', JSON.stringify(nextUser));
+    if (nextToken) {
+      window.localStorage.setItem('wf-auth-token', nextToken);
+    } else {
+      window.localStorage.removeItem('wf-auth-token');
+    }
+  };
+
   useEffect(() => {
     const verifySession = async () => {
       const storedAuth = getStoredAuth();
@@ -39,14 +50,9 @@ export function AuthProvider({ children }) {
         setAuthToken(storedAuth.token);
         const response = await api.get('/api/auth/me');
 
-        setUser(response.data.user);
-        setToken(storedAuth.token);
-        window.localStorage.setItem('wf-auth-user', JSON.stringify(response.data.user));
+        persistAuth(response.data.user, storedAuth.token);
       } catch {
-        setUser(null);
-        setToken(null);
-        window.localStorage.removeItem('wf-auth-token');
-        window.localStorage.removeItem('wf-auth-user');
+        persistAuth(null, null);
       } finally {
         setLoading(false);
       }
@@ -65,20 +71,31 @@ export function AuthProvider({ children }) {
     const nextToken = response.data.token;
 
     setAuthToken(nextToken);
-    setUser(nextUser);
-    setToken(nextToken);
-    window.localStorage.setItem('wf-auth-token', nextToken);
-    window.localStorage.setItem('wf-auth-user', JSON.stringify(nextUser));
+    persistAuth(nextUser, nextToken);
 
     return response.data;
   };
 
   const logout = () => {
     setAuthToken(null);
-    setUser(null);
-    setToken(null);
-    window.localStorage.removeItem('wf-auth-token');
-    window.localStorage.removeItem('wf-auth-user');
+    persistAuth(null, null);
+  };
+
+  const refreshUser = async () => {
+    const response = await api.get('/api/auth/me');
+    persistAuth(response.data.user, token);
+    return response.data.user;
+  };
+
+  const updateProfile = async (payload) => {
+    const response = await api.put('/api/auth/profile', payload);
+    persistAuth(response.data.user, token);
+    return response.data;
+  };
+
+  const changePassword = async (payload) => {
+    const response = await api.put('/api/auth/change-password', payload);
+    return response.data;
   };
 
   const value = useMemo(
@@ -90,6 +107,9 @@ export function AuthProvider({ children }) {
       isAdmin: user?.role === 'admin',
       login,
       logout,
+      refreshUser,
+      updateProfile,
+      changePassword,
     }),
     [loading, token, user]
   );

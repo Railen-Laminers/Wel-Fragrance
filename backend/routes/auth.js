@@ -5,12 +5,40 @@ const { protect, adminOnly } = require("../middleware/auth");
 
 const router = express.Router();
 
+const serializeUser = (user) => ({
+  id: user._id,
+  firstName: user.firstName,
+  middleInitial: user.middleInitial,
+  lastName: user.lastName,
+  email: user.email,
+  role: user.role,
+  businessName: user.businessName || "",
+  emailAddresses: user.emailAddresses || [],
+  contactNumbers: user.contactNumbers || [],
+  instagramAccounts: user.instagramAccounts || [],
+  facebookPages: user.facebookPages || [],
+  businessLocations: user.businessLocations || [],
+});
+
 const signToken = (user) =>
   jwt.sign(
     { id: user._id, role: user.role },
     process.env.JWT_SECRET || "wel-fragrance-secret",
     { expiresIn: "7d" }
   );
+
+const normalizeList = (value) => {
+  if (!Array.isArray(value)) {
+    return typeof value === "string"
+      ? value
+          .split("\n")
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : [];
+  }
+
+  return value.map((item) => String(item).trim()).filter(Boolean);
+};
 
 router.post("/register", async (req, res) => {
   try {
@@ -20,7 +48,8 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Please provide firstName, lastName, email and password" });
     }
 
-    const existingUser = await User.findOne({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(409).json({ message: "Email already registered" });
     }
@@ -29,21 +58,14 @@ router.post("/register", async (req, res) => {
       firstName,
       middleInitial,
       lastName,
-      email,
+      email: normalizedEmail,
       password,
       role: role === "admin" ? "admin" : "customer",
     });
 
     res.status(201).json({
       message: "User registered successfully",
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        middleInitial: user.middleInitial,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-      },
+      user: serializeUser(user),
       token: signToken(user),
     });
   } catch (error) {
@@ -59,7 +81,8 @@ router.post("/register-admin", protect, adminOnly, async (req, res) => {
       return res.status(400).json({ message: "Please provide firstName, lastName, email and password" });
     }
 
-    const existingUser = await User.findOne({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(409).json({ message: "Email already registered" });
     }
@@ -68,21 +91,14 @@ router.post("/register-admin", protect, adminOnly, async (req, res) => {
       firstName,
       middleInitial,
       lastName,
-      email,
+      email: normalizedEmail,
       password,
       role: "admin",
     });
 
     res.status(201).json({
       message: "Admin registered successfully",
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        middleInitial: user.middleInitial,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-      },
+      user: serializeUser(user),
       token: signToken(user),
     });
   } catch (error) {
@@ -98,7 +114,8 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Please provide email and password" });
     }
 
-    const user = await User.findOne({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
@@ -110,14 +127,7 @@ router.post("/login", async (req, res) => {
 
     res.json({
       message: "Login successful",
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        middleInitial: user.middleInitial,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-      },
+      user: serializeUser(user),
       token: signToken(user),
     });
   } catch (error) {
@@ -126,7 +136,126 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/me", protect, async (req, res) => {
-  res.json({ user: req.user });
+  const user = await User.findById(req.user._id);
+  res.json({ user: serializeUser(user) });
+});
+
+router.get("/contact-info", async (req, res) => {
+  try {
+    const admin = await User.findOne({ role: "admin" }).sort({ createdAt: 1 });
+
+    if (!admin) {
+      return res.json({
+        businessName: "Wel Fragrance Collection",
+        emailAddresses: ["wel.fragrancecollection@gmail.com"],
+        contactNumbers: ["+1 7782219055"],
+        instagramAccounts: ["@Wel_FragranceCollection"],
+        facebookPages: [],
+        businessLocations: ["Farcon Ville, San Cristobal, Calamba Laguna"],
+      });
+    }
+
+    res.json({
+      businessName: admin.businessName || "Wel Fragrance Collection",
+      emailAddresses: admin.emailAddresses || ["wel.fragrancecollection@gmail.com"],
+      contactNumbers: admin.contactNumbers || ["+1 7782219055"],
+      instagramAccounts: admin.instagramAccounts || ["@Wel_FragranceCollection"],
+      facebookPages: admin.facebookPages || [],
+      businessLocations: admin.businessLocations || ["Farcon Ville, San Cristobal, Calamba Laguna"],
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to load contact information", error: error.message });
+  }
+});
+
+router.put("/profile", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const {
+      firstName,
+      middleInitial,
+      lastName,
+      email,
+      businessName,
+      emailAddresses,
+      contactNumbers,
+      instagramAccounts,
+      facebookPages,
+      businessLocations,
+    } = req.body;
+
+    if (firstName !== undefined) user.firstName = firstName.trim();
+    if (middleInitial !== undefined) user.middleInitial = middleInitial.trim();
+    if (lastName !== undefined) user.lastName = lastName.trim();
+
+    if (email !== undefined) {
+      const normalizedEmail = email.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+        return res.status(400).json({ message: "Please enter a valid email address" });
+      }
+
+      const existingUser = await User.findOne({ email: normalizedEmail, _id: { $ne: user._id } });
+      if (existingUser) {
+        return res.status(409).json({ message: "Email already registered" });
+      }
+
+      user.email = normalizedEmail;
+    }
+
+    if (user.role === "admin") {
+      if (businessName !== undefined) user.businessName = businessName.trim();
+      if (emailAddresses !== undefined) user.emailAddresses = normalizeList(emailAddresses);
+      if (contactNumbers !== undefined) user.contactNumbers = normalizeList(contactNumbers);
+      if (instagramAccounts !== undefined) user.instagramAccounts = normalizeList(instagramAccounts);
+      if (facebookPages !== undefined) user.facebookPages = normalizeList(facebookPages);
+      if (businessLocations !== undefined) user.businessLocations = normalizeList(businessLocations);
+    }
+
+    await user.save();
+
+    res.json({
+      message: "Profile updated successfully",
+      user: serializeUser(user),
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update profile", error: error.message });
+  }
+});
+
+router.put("/change-password", protect, async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ message: "Current password, new password, and confirmation are required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "New password and confirmation must match" });
+    }
+
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update password", error: error.message });
+  }
 });
 
 module.exports = router;

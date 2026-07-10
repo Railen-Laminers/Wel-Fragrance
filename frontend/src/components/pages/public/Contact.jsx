@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { FaInstagram, FaEnvelope, FaPhone, FaStore, FaMapPin } from 'react-icons/fa';
+import { FaInstagram, FaFacebook, FaEnvelope, FaPhone, FaStore, FaMapPin } from 'react-icons/fa';
+import api from '../../../api/axios';
 import { submitInquiry, submitTestimonial } from '../../../api/testimonials';
 
 const initialInquiryValues = {
@@ -34,10 +35,31 @@ export default function Contact() {
     const [formError, setFormError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [previewUrl, setPreviewUrl] = useState('');
+    const [contactInfo, setContactInfo] = useState({
+        businessName: 'Wel Fragrance Collection',
+        emailAddresses: ['wel.fragrancecollection@gmail.com'],
+        contactNumbers: ['+1 7782219055'],
+        instagramAccounts: ['@Wel_FragranceCollection'],
+        facebookPages: [],
+        businessLocations: ['Farcon Ville, San Cristobal, Calamba Laguna'],
+    });
 
     useEffect(() => {
         const timer = setTimeout(() => setIsLoaded(true), 100);
         return () => clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
+        const loadContactInfo = async () => {
+            try {
+                const response = await api.get('/api/auth/contact-info');
+                setContactInfo((prev) => ({ ...prev, ...response.data }));
+            } catch {
+                setContactInfo((prev) => ({ ...prev }));
+            }
+        };
+
+        loadContactInfo();
     }, []);
 
     useEffect(() => {
@@ -199,6 +221,15 @@ export default function Contact() {
         `transition-all duration-700 ease-out transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`;
     const animStyle = (delay) => ({ transitionDelay: `${delay}ms` });
 
+    const hasAnyContactInfo = Boolean(
+        contactInfo.businessName?.trim() ||
+        contactInfo.emailAddresses?.some((item) => item?.trim()) ||
+        contactInfo.contactNumbers?.some((item) => item?.trim()) ||
+        contactInfo.instagramAccounts?.some((item) => item?.trim()) ||
+        contactInfo.facebookPages?.some((item) => item?.trim()) ||
+        contactInfo.businessLocations?.some((item) => item?.trim())
+    );
+
     return (
         <div className="min-h-screen bg-transparent pt-20 sm:pt-24 md:pt-32">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20">
@@ -219,43 +250,88 @@ export default function Contact() {
                             <span className="italic text-old-gold">Connect</span>
                         </h2>
 
-                        <div className={`contact-details space-y-4 border-b border-old-gold/20 pb-4 mb-6 sm:mb-8 ${animClass(200)}`} style={animStyle(200)}>
-                            <div className="flex items-start gap-3">
-                                <FaStore className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
-                                <div>
-                                    <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">Business</p>
-                                    <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">Wel Fragrance Collection</p>
-                                </div>
+                        {hasAnyContactInfo ? (
+                            <div className={`contact-details space-y-4 border-b border-old-gold/20 pb-4 mb-6 sm:mb-8 ${animClass(200)}`} style={animStyle(200)}>
+                                {contactInfo.businessName?.trim() && (
+                                    <div className="flex items-start gap-3">
+                                        <FaStore className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">Business</p>
+                                            <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">{contactInfo.businessName}</p>
+                                        </div>
+                                    </div>
+                                )}
+                                {contactInfo.emailAddresses?.some((item) => item?.trim()) && (
+                                    <div className="flex items-start gap-3">
+                                        <FaEnvelope className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">Email</p>
+                                            <div className="space-y-1">
+                                                {contactInfo.emailAddresses.filter(Boolean).map((item) => (
+                                                    <p key={item} className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">{item}</p>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                {contactInfo.contactNumbers?.some((item) => item?.trim()) && (
+                                    <div className="flex items-start gap-3">
+                                        <FaPhone className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">Phone</p>
+                                            <div className="space-y-1">
+                                                {contactInfo.contactNumbers.filter(Boolean).map((item) => (
+                                                    <p key={item} className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">{item}</p>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                {contactInfo.instagramAccounts?.some((item) => item?.trim()) && (
+                                    <div className="flex items-start gap-3">
+                                        <FaInstagram className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">Instagram</p>
+                                            <div className="space-y-1">
+                                                {contactInfo.instagramAccounts.filter(Boolean).map((item) => (
+                                                    <p key={item} className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">{item}</p>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                {contactInfo.facebookPages?.some((item) => item?.trim()) && (
+                                    <div className="flex items-start gap-3">
+                                        <FaFacebook className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">Facebook</p>
+                                            <div className="space-y-1">
+                                                {contactInfo.facebookPages.filter(Boolean).map((item) => (
+                                                    <p key={item} className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">{item}</p>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                {contactInfo.businessLocations?.some((item) => item?.trim()) && (
+                                    <div className="flex items-start gap-3">
+                                        <FaMapPin className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">Location</p>
+                                            <div className="space-y-1">
+                                                {contactInfo.businessLocations.filter(Boolean).map((item) => (
+                                                    <p key={item} className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">{item}</p>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                            <div className="flex items-start gap-3">
-                                <FaEnvelope className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
-                                <div>
-                                    <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">Email</p>
-                                    <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">wel.fragrancecollection@gmail.com</p>
-                                </div>
+                        ) : (
+                            <div className={`border-b border-old-gold/20 pb-4 mb-6 sm:mb-8 ${animClass(200)}`} style={animStyle(200)}>
+                                <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">No contact information available.</p>
                             </div>
-                            <div className="flex items-start gap-3">
-                                <FaPhone className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
-                                <div>
-                                    <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">Phone</p>
-                                    <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">+1 7782219055</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <FaInstagram className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
-                                <div>
-                                    <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">Instagram</p>
-                                    <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">@Wel_FragranceCollection</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <FaMapPin className="text-old-gold/70 dark:text-old-gold/60 text-base sm:text-lg mt-0.5 flex-shrink-0" />
-                                <div>
-                                    <p className="font-jost text-[0.58rem] tracking-[0.2em] text-warm-gray dark:text-warm-white/60 uppercase">Location</p>
-                                    <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-base sm:text-lg">Farcon Ville, San Cristobal, Calamba Laguna</p>
-                                </div>
-                            </div>
-                        </div>
+                        )}
 
                         <div className={`contact-sticky ${animClass(300)}`} style={animStyle(300)}>
                             <div className="relative p-4 sm:p-6 border border-old-gold/30 bg-warm-white dark:bg-charcoal backdrop-blur-sm transform -rotate-0.5 hover:rotate-0 transition-transform duration-500">
@@ -304,7 +380,6 @@ export default function Contact() {
                                 </div>
 
                                 {formType === 'inquiry' ? (
-                                    // Added key to force remount when switching forms
                                     <div key="inquiry-form" className="space-y-5 sm:space-y-6">
                                         <div className={animClass(500)} style={animStyle(500)}>
                                             <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">First Name</label>
@@ -396,7 +471,6 @@ export default function Contact() {
                                         </div>
                                         <div className={animClass(800)} style={animStyle(800)}>
                                             <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Profile Picture</label>
-                                            {/* File input – uncontrolled, no value prop */}
                                             <input
                                                 type="file"
                                                 accept="image/*"

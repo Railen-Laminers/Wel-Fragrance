@@ -35,13 +35,37 @@ const userSchema = new mongoose.Schema(
             enum: ["customer", "admin"],
             default: "customer",
         },
+        businessName: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+        emailAddresses: {
+            type: [String],
+            default: [],
+        },
+        contactNumbers: {
+            type: [String],
+            default: [],
+        },
+        instagramAccounts: {
+            type: [String],
+            default: [],
+        },
+        facebookPages: {
+            type: [String],
+            default: [],
+        },
+        businessLocations: {
+            type: [String],
+            default: [],
+        },
     },
     {
         timestamps: true,
     }
 );
 
-// removed the `next` parameter (not needed with async)
 userSchema.pre("save", async function () {
     if (!this.isModified("password")) return;
     this.password = await bcrypt.hash(this.password, 12);
