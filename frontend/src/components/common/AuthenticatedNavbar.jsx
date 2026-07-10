@@ -355,11 +355,18 @@ export default function AuthenticatedNavbar({ children }) {
                         flex flex-col
                     `}
                 >
-                    {/* Collapse button */}
-                    <div className="flex items-center justify-end p-1">
+                    {/* Sidebar Header: Role Panel + Collapse Button */}
+                    <div className="flex items-center h-12 px-2 border-b border-black/10 dark:border-white/10">
+                        {/* Role label - only shown when expanded */}
+                        {sidebarExpanded && (
+                            <span className="text-xs font-semibold uppercase tracking-wider text-old-gold">
+                                {isAdmin ? 'Admin Panel' : 'Customer Panel'}
+                            </span>
+                        )}
+                        {/* Collapse button - always visible, pushed to right */}
                         <button
                             onClick={toggleExpand}
-                            className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-black/70 dark:text-white/70"
+                            className={`p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-black/70 dark:text-white/70 ${sidebarExpanded ? 'ml-auto' : 'mx-auto'}`}
                             title={sidebarExpanded ? 'Collapse' : 'Expand'}
                         >
                             {sidebarExpanded ? <IconCollapse /> : <IconExpand />}

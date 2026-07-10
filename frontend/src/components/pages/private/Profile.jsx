@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 
 const toListValue = (value) => (Array.isArray(value) ? value.join('\n') : value || '');
+const parseListValue = (value) => value.split('\n').map((item) => item.trim()).filter(Boolean);
 
 export default function Profile() {
   const { user, logout, updateProfile, changePassword, refreshUser } = useAuth();
   const navigate = useNavigate();
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const [profileForm, setProfileForm] = useState({
     firstName: '',
@@ -20,11 +22,25 @@ export default function Profile() {
     facebookPages: '',
     businessLocations: '',
   });
-  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
+  const [showPasswordFields, setShowPasswordFields] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
+
+  // Validation errors
+  const [profileErrors, setProfileErrors] = useState({});
+  const [passwordErrors, setPasswordErrors] = useState({});
 
   useEffect(() => {
     if (user) {
@@ -41,7 +57,51 @@ export default function Profile() {
         businessLocations: toListValue(user.businessLocations),
       });
     }
+    setTimeout(() => setIsLoaded(true), 100);
   }, [user]);
+
+  // Validate profile form
+  const validateProfile = () => {
+    const errors = {};
+    const firstName = profileForm.firstName.trim();
+    const lastName = profileForm.lastName.trim();
+    const email = profileForm.email.trim();
+
+    if (!firstName) errors.firstName = 'First name is required';
+    if (!lastName) errors.lastName = 'Last name is required';
+    if (!email) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    if (isAdmin && profileForm.businessName.trim() && profileForm.businessName.trim().length > 80) {
+      errors.businessName = 'Business name must be 80 characters or less';
+    }
+
+    setProfileErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Validate password form
+  const validatePassword = () => {
+    const errors = {};
+    if (!passwordForm.currentPassword) errors.currentPassword = 'Current password is required';
+    if (!passwordForm.newPassword) {
+      errors.newPassword = 'New password is required';
+    } else if (passwordForm.newPassword.length < 6) {
+      errors.newPassword = 'Password must be at least 6 characters';
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+    setPasswordErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const togglePasswordVisibility = (field) => {
+    setShowPasswordFields((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
 
   const handleLogout = () => {
     logout();
@@ -52,25 +112,27 @@ export default function Profile() {
     event.preventDefault();
     setMessage('');
     setError('');
-    setSaving(true);
+    if (!validateProfile()) return;
 
+    setSaving(true);
     try {
       const payload = {
-        firstName: profileForm.firstName,
-        middleInitial: profileForm.middleInitial,
-        lastName: profileForm.lastName,
-        email: profileForm.email,
-        businessName: profileForm.businessName,
-        emailAddresses: profileForm.emailAddresses,
-        contactNumbers: profileForm.contactNumbers,
-        instagramAccounts: profileForm.instagramAccounts,
-        facebookPages: profileForm.facebookPages,
-        businessLocations: profileForm.businessLocations,
+        firstName: profileForm.firstName.trim(),
+        middleInitial: profileForm.middleInitial.trim(),
+        lastName: profileForm.lastName.trim(),
+        email: profileForm.email.trim(),
+        businessName: profileForm.businessName.trim(),
+        emailAddresses: parseListValue(profileForm.emailAddresses),
+        contactNumbers: parseListValue(profileForm.contactNumbers),
+        instagramAccounts: parseListValue(profileForm.instagramAccounts),
+        facebookPages: parseListValue(profileForm.facebookPages),
+        businessLocations: parseListValue(profileForm.businessLocations),
       };
 
       await updateProfile(payload);
       await refreshUser();
       setMessage('Profile updated successfully.');
+      setProfileErrors({});
     } catch (err) {
       setError(err.response?.data?.message || 'Could not update profile.');
     } finally {
@@ -82,8 +144,9 @@ export default function Profile() {
     event.preventDefault();
     setMessage('');
     setError('');
-    setPasswordSaving(true);
+    if (!validatePassword()) return;
 
+    setPasswordSaving(true);
     try {
       await changePassword({
         currentPassword: passwordForm.currentPassword,
@@ -91,6 +154,7 @@ export default function Profile() {
         confirmPassword: passwordForm.confirmPassword,
       });
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setPasswordErrors({});
       setMessage('Password updated successfully.');
     } catch (err) {
       setError(err.response?.data?.message || 'Could not update password.');
@@ -103,106 +167,322 @@ export default function Profile() {
 
   return (
     <section className="min-h-screen px-6 py-24 text-black dark:text-white">
-      <div className="mx-auto max-w-6xl rounded-3xl border border-black/10 bg-white/80 p-8 shadow-xl backdrop-blur dark:border-white/10 dark:bg-dark-teal/80">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-old-gold">Profile</p>
-            <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Your account</h1>
-            <p className="mt-3 max-w-2xl text-base text-black/70 dark:text-white/70">Manage your account details and security settings.</p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="rounded-full border border-old-gold/50 px-5 py-3 text-sm font-medium transition hover:bg-old-gold hover:text-black"
+      <div className="mx-auto max-w-6xl rounded-lg border border-black/10 bg-white/80 p-8 shadow-xl backdrop-blur transition-opacity duration-700 dark:border-white/10 dark:bg-dark-teal/80">
+        {/* Header – no eyebrow, no logout button */}
+        <div>
+          <h1
+            className={`text-3xl font-semibold sm:text-4xl font-cormorant transition-all duration-700 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
           >
-            Logout
-          </button>
+            Your <span className="text-old-gold">Account</span>
+          </h1>
+          <p
+            className={`mt-2 max-w-2xl text-base text-black/70 dark:text-white/70 transition-all duration-700 delay-100 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
+          >
+            Manage your account details and security settings.
+          </p>
         </div>
 
         {(message || error) && (
-          <div className={`mt-8 rounded-2xl border px-4 py-3 text-sm ${error ? 'border-rose-400/30 bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300' : 'border-emerald-400/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'}`}>
+          <div
+            className={`mt-8 rounded-lg border px-4 py-3 text-sm ${error
+              ? 'border-rose-400/30 bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'
+              : 'border-emerald-400/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
+              }`}
+          >
             {error || message}
           </div>
         )}
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <form onSubmit={handleProfileSubmit} className="rounded-2xl border border-black/10 bg-black/5 p-6 dark:border-white/10 dark:bg-white/5">
-            <h2 className="text-xl font-semibold">Profile Information</h2>
-            <p className="mt-2 text-sm text-black/70 dark:text-white/70">Keep your name, email, and business contact details up to date.</p>
+        <div
+          className={`mt-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] transition-all duration-700 delay-200 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            }`}
+        >
+          {/* Profile Form */}
+          <form onSubmit={handleProfileSubmit} className="rounded-lg border border-black/10 bg-black/5 p-6 dark:border-white/10 dark:bg-white/5">
+            <h2 className="text-xl font-semibold font-cormorant">Profile Information</h2>
+            <p className="mt-1 text-sm text-black/70 dark:text-white/70">Keep your name, email, and business contact details up to date.</p>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <label className="text-sm">
-                <span className="mb-2 block text-black/70 dark:text-white/70">First Name</span>
-                <input value={profileForm.firstName} onChange={(event) => setProfileForm((prev) => ({ ...prev, firstName: event.target.value }))} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-dark-teal" required />
-              </label>
-              <label className="text-sm">
-                <span className="mb-2 block text-black/70 dark:text-white/70">Middle Initial</span>
-                <input value={profileForm.middleInitial} onChange={(event) => setProfileForm((prev) => ({ ...prev, middleInitial: event.target.value }))} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-dark-teal" maxLength={1} />
-              </label>
-              <label className="text-sm">
-                <span className="mb-2 block text-black/70 dark:text-white/70">Last Name</span>
-                <input value={profileForm.lastName} onChange={(event) => setProfileForm((prev) => ({ ...prev, lastName: event.target.value }))} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-dark-teal" required />
-              </label>
-              <label className="text-sm">
-                <span className="mb-2 block text-black/70 dark:text-white/70">Email Address</span>
-                <input type="email" value={profileForm.email} onChange={(event) => setProfileForm((prev) => ({ ...prev, email: event.target.value }))} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-dark-teal" required />
-              </label>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="text-sm">
+                  <span className="mb-1 block text-black/70 dark:text-white/70">First Name *</span>
+                  <input
+                    value={profileForm.firstName}
+                    onChange={(e) => {
+                      setProfileForm((prev) => ({ ...prev, firstName: e.target.value }));
+                      if (profileErrors.firstName) setProfileErrors((prev) => ({ ...prev, firstName: '' }));
+                    }}
+                    placeholder="e.g. Joel"
+                    className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal ${profileErrors.firstName ? 'border-rose-500' : 'border-black/10'
+                      }`}
+                  />
+                  {profileErrors.firstName && (
+                    <p className="mt-1 text-sm text-rose-500">{profileErrors.firstName}</p>
+                  )}
+                </label>
+              </div>
+              <div>
+                <label className="text-sm">
+                  <span className="mb-1 block text-black/70 dark:text-white/70">Middle Initial</span>
+                  <input
+                    value={profileForm.middleInitial}
+                    onChange={(e) => setProfileForm((prev) => ({ ...prev, middleInitial: e.target.value }))}
+                    placeholder="e.g. M"
+                    maxLength={1}
+                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
+                  />
+                </label>
+              </div>
+              <div>
+                <label className="text-sm">
+                  <span className="mb-1 block text-black/70 dark:text-white/70">Last Name *</span>
+                  <input
+                    value={profileForm.lastName}
+                    onChange={(e) => {
+                      setProfileForm((prev) => ({ ...prev, lastName: e.target.value }));
+                      if (profileErrors.lastName) setProfileErrors((prev) => ({ ...prev, lastName: '' }));
+                    }}
+                    placeholder="e.g. Malabo"
+                    className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal ${profileErrors.lastName ? 'border-rose-500' : 'border-black/10'
+                      }`}
+                  />
+                  {profileErrors.lastName && (
+                    <p className="mt-1 text-sm text-rose-500">{profileErrors.lastName}</p>
+                  )}
+                </label>
+              </div>
+              <div>
+                <label className="text-sm">
+                  <span className="mb-1 block text-black/70 dark:text-white/70">Email Address *</span>
+                  <input
+                    type="email"
+                    value={profileForm.email}
+                    onChange={(e) => {
+                      setProfileForm((prev) => ({ ...prev, email: e.target.value }));
+                      if (profileErrors.email) setProfileErrors((prev) => ({ ...prev, email: '' }));
+                    }}
+                    placeholder="e.g. admin@welfragrance.com"
+                    className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal ${profileErrors.email ? 'border-rose-500' : 'border-black/10'
+                      }`}
+                  />
+                  {profileErrors.email && (
+                    <p className="mt-1 text-sm text-rose-500">{profileErrors.email}</p>
+                  )}
+                </label>
+              </div>
             </div>
 
             {isAdmin && (
               <div className="mt-6 space-y-4">
                 <label className="text-sm block">
-                  <span className="mb-2 block text-black/70 dark:text-white/70">Business Name</span>
-                  <input value={profileForm.businessName} onChange={(event) => setProfileForm((prev) => ({ ...prev, businessName: event.target.value }))} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-dark-teal" />
+                  <span className="mb-1 block text-black/70 dark:text-white/70">Business Name</span>
+                  <input
+                    value={profileForm.businessName}
+                    onChange={(e) => {
+                      setProfileForm((prev) => ({ ...prev, businessName: e.target.value }));
+                      if (profileErrors.businessName) setProfileErrors((prev) => ({ ...prev, businessName: '' }));
+                    }}
+                    placeholder="e.g. Wel Fragrance Collection"
+                    className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal ${profileErrors.businessName ? 'border-rose-500' : 'border-black/10'}`}
+                  />
+                  {profileErrors.businessName && (
+                    <p className="mt-1 text-sm text-rose-500">{profileErrors.businessName}</p>
+                  )}
                 </label>
                 <label className="text-sm block">
-                  <span className="mb-2 block text-black/70 dark:text-white/70">Email Addresses (one per line)</span>
-                  <textarea rows={3} value={profileForm.emailAddresses} onChange={(event) => setProfileForm((prev) => ({ ...prev, emailAddresses: event.target.value }))} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-dark-teal" />
+                  <span className="mb-1 block text-black/70 dark:text-white/70">Email Addresses (one per line)</span>
+                  <textarea
+                    rows={2}
+                    value={profileForm.emailAddresses}
+                    onChange={(e) => setProfileForm((prev) => ({ ...prev, emailAddresses: e.target.value }))}
+                    placeholder="contact@domain.com&#10;support@domain.com"
+                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
+                  />
                 </label>
                 <label className="text-sm block">
-                  <span className="mb-2 block text-black/70 dark:text-white/70">Contact Numbers (one per line)</span>
-                  <textarea rows={3} value={profileForm.contactNumbers} onChange={(event) => setProfileForm((prev) => ({ ...prev, contactNumbers: event.target.value }))} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-dark-teal" />
+                  <span className="mb-1 block text-black/70 dark:text-white/70">Contact Numbers (one per line)</span>
+                  <textarea
+                    rows={2}
+                    value={profileForm.contactNumbers}
+                    onChange={(e) => setProfileForm((prev) => ({ ...prev, contactNumbers: e.target.value }))}
+                    placeholder="+1 123 456 7890&#10;+63 123 456 7890"
+                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
+                  />
                 </label>
                 <label className="text-sm block">
-                  <span className="mb-2 block text-black/70 dark:text-white/70">Instagram Accounts (one per line)</span>
-                  <textarea rows={3} value={profileForm.instagramAccounts} onChange={(event) => setProfileForm((prev) => ({ ...prev, instagramAccounts: event.target.value }))} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-dark-teal" />
+                  <span className="mb-1 block text-black/70 dark:text-white/70">Instagram Accounts (one per line)</span>
+                  <textarea
+                    rows={2}
+                    value={profileForm.instagramAccounts}
+                    onChange={(e) => setProfileForm((prev) => ({ ...prev, instagramAccounts: e.target.value }))}
+                    placeholder="@wel_fragrance&#10;@wel_canada"
+                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
+                  />
                 </label>
                 <label className="text-sm block">
-                  <span className="mb-2 block text-black/70 dark:text-white/70">Facebook Pages (one per line)</span>
-                  <textarea rows={3} value={profileForm.facebookPages} onChange={(event) => setProfileForm((prev) => ({ ...prev, facebookPages: event.target.value }))} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-dark-teal" />
+                  <span className="mb-1 block text-black/70 dark:text-white/70">Facebook Pages (one per line)</span>
+                  <textarea
+                    rows={2}
+                    value={profileForm.facebookPages}
+                    onChange={(e) => setProfileForm((prev) => ({ ...prev, facebookPages: e.target.value }))}
+                    placeholder="https://facebook.com/welfragrance"
+                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
+                  />
                 </label>
                 <label className="text-sm block">
-                  <span className="mb-2 block text-black/70 dark:text-white/70">Business Locations (one per line)</span>
-                  <textarea rows={3} value={profileForm.businessLocations} onChange={(event) => setProfileForm((prev) => ({ ...prev, businessLocations: event.target.value }))} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-dark-teal" />
+                  <span className="mb-1 block text-black/70 dark:text-white/70">Business Locations (one per line)</span>
+                  <textarea
+                    rows={2}
+                    value={profileForm.businessLocations}
+                    onChange={(e) => setProfileForm((prev) => ({ ...prev, businessLocations: e.target.value }))}
+                    placeholder="Farcon Ville, San Cristobal, Calamba Laguna"
+                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
+                  />
                 </label>
               </div>
             )}
 
-            <button type="submit" disabled={saving} className="mt-6 rounded-full bg-old-gold px-5 py-3 text-sm font-medium text-black transition hover:bg-old-gold/90 disabled:opacity-70">
-              {saving ? 'Saving…' : 'Save Profile'}
+            <button
+              type="submit"
+              disabled={saving}
+              className="group relative mt-6 overflow-hidden bg-old-gold px-5 py-3 text-sm font-medium text-warm-white dark:text-dark-teal transition-all hover:shadow-[0_0_30px_rgba(199,159,72,0.3)] disabled:opacity-70"
+            >
+              <span className="relative z-10">{saving ? 'Saving…' : 'Save Profile'}</span>
+              <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
             </button>
           </form>
 
-          <form onSubmit={handlePasswordSubmit} className="rounded-2xl border border-black/10 bg-black/5 p-6 dark:border-white/10 dark:bg-white/5">
-            <h2 className="text-xl font-semibold">Change Password</h2>
-            <p className="mt-2 text-sm text-black/70 dark:text-white/70">Your password is stored securely and never exposed.</p>
+          {/* Password Form */}
+          <form onSubmit={handlePasswordSubmit} className="rounded-lg border border-black/10 bg-black/5 p-6 dark:border-white/10 dark:bg-white/5">
+            <h2 className="text-xl font-semibold font-cormorant">Change Password</h2>
+            <p className="mt-1 text-sm text-black/70 dark:text-white/70">Your password is stored securely and never exposed.</p>
 
             <div className="mt-6 space-y-4">
-              <label className="text-sm block">
-                <span className="mb-2 block text-black/70 dark:text-white/70">Current Password</span>
-                <input type="password" value={passwordForm.currentPassword} onChange={(event) => setPasswordForm((prev) => ({ ...prev, currentPassword: event.target.value }))} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-dark-teal" required />
-              </label>
-              <label className="text-sm block">
-                <span className="mb-2 block text-black/70 dark:text-white/70">New Password</span>
-                <input type="password" value={passwordForm.newPassword} onChange={(event) => setPasswordForm((prev) => ({ ...prev, newPassword: event.target.value }))} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-dark-teal" required minLength={6} />
-              </label>
-              <label className="text-sm block">
-                <span className="mb-2 block text-black/70 dark:text-white/70">Confirm New Password</span>
-                <input type="password" value={passwordForm.confirmPassword} onChange={(event) => setPasswordForm((prev) => ({ ...prev, confirmPassword: event.target.value }))} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-dark-teal" required minLength={6} />
-              </label>
+              <div>
+                <label className="text-sm block">
+                  <span className="mb-1 block text-black/70 dark:text-white/70">Current Password *</span>
+                  <div className="relative">
+                    <input
+                      type={showPasswordFields.current ? 'text' : 'password'}
+                      value={passwordForm.currentPassword}
+                      onChange={(e) => {
+                        setPasswordForm((prev) => ({ ...prev, currentPassword: e.target.value }));
+                        if (passwordErrors.currentPassword) setPasswordErrors((prev) => ({ ...prev, currentPassword: '' }));
+                      }}
+                      placeholder="••••••••"
+                      className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal pr-12 ${passwordErrors.currentPassword ? 'border-rose-500' : 'border-black/10'
+                        }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('current')}
+                      className="absolute inset-y-0 right-0 px-3 flex items-center justify-center text-gray-500 hover:text-old-gold dark:text-gray-400 dark:hover:text-old-gold transition-colors"
+                      tabIndex="-1"
+                    >
+                      {showPasswordFields.current ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  {passwordErrors.currentPassword && (
+                    <p className="mt-1 text-sm text-rose-500">{passwordErrors.currentPassword}</p>
+                  )}
+                </label>
+              </div>
+              <div>
+                <label className="text-sm block">
+                  <span className="mb-1 block text-black/70 dark:text-white/70">New Password *</span>
+                  <div className="relative">
+                    <input
+                      type={showPasswordFields.new ? 'text' : 'password'}
+                      value={passwordForm.newPassword}
+                      onChange={(e) => {
+                        setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }));
+                        if (passwordErrors.newPassword) setPasswordErrors((prev) => ({ ...prev, newPassword: '' }));
+                      }}
+                      placeholder="Min 6 characters"
+                      className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal pr-12 ${passwordErrors.newPassword ? 'border-rose-500' : 'border-black/10'
+                        }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('new')}
+                      className="absolute inset-y-0 right-0 px-3 flex items-center justify-center text-gray-500 hover:text-old-gold dark:text-gray-400 dark:hover:text-old-gold transition-colors"
+                      tabIndex="-1"
+                    >
+                      {showPasswordFields.new ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  {passwordErrors.newPassword && (
+                    <p className="mt-1 text-sm text-rose-500">{passwordErrors.newPassword}</p>
+                  )}
+                </label>
+              </div>
+              <div>
+                <label className="text-sm block">
+                  <span className="mb-1 block text-black/70 dark:text-white/70">Confirm New Password *</span>
+                  <div className="relative">
+                    <input
+                      type={showPasswordFields.confirm ? 'text' : 'password'}
+                      value={passwordForm.confirmPassword}
+                      onChange={(e) => {
+                        setPasswordForm((prev) => ({ ...prev, confirmPassword: e.target.value }));
+                        if (passwordErrors.confirmPassword) setPasswordErrors((prev) => ({ ...prev, confirmPassword: '' }));
+                      }}
+                      placeholder="Re-enter new password"
+                      className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal pr-12 ${passwordErrors.confirmPassword ? 'border-rose-500' : 'border-black/10'
+                        }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('confirm')}
+                      className="absolute inset-y-0 right-0 px-3 flex items-center justify-center text-gray-500 hover:text-old-gold dark:text-gray-400 dark:hover:text-old-gold transition-colors"
+                      tabIndex="-1"
+                    >
+                      {showPasswordFields.confirm ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  {passwordErrors.confirmPassword && (
+                    <p className="mt-1 text-sm text-rose-500">{passwordErrors.confirmPassword}</p>
+                  )}
+                </label>
+              </div>
             </div>
 
-            <button type="submit" disabled={passwordSaving} className="mt-6 rounded-full border border-old-gold/50 px-5 py-3 text-sm font-medium transition hover:bg-old-gold hover:text-black disabled:opacity-70">
-              {passwordSaving ? 'Updating…' : 'Update Password'}
+            <button
+              type="submit"
+              disabled={passwordSaving}
+              className="group relative mt-6 overflow-hidden border border-old-gold/50 px-5 py-3 text-sm font-medium transition-all hover:shadow-[0_0_20px_rgba(199,159,72,0.2)] disabled:opacity-70"
+            >
+              <span className="relative z-10">{passwordSaving ? 'Updating…' : 'Update Password'}</span>
+              <div className="absolute inset-0 bg-old-gold/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
             </button>
           </form>
         </div>

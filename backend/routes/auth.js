@@ -41,6 +41,11 @@ const normalizeList = (value) => {
   return value.map((item) => String(item).trim()).filter(Boolean);
 };
 
+const normalizeString = (value) => {
+  if (typeof value !== "string") return "";
+  return value.trim();
+};
+
 router.post("/register", async (req, res) => {
   try {
     const { firstName, middleInitial, lastName, email, password, role } = req.body;
@@ -238,26 +243,43 @@ router.put("/profile", protect, async (req, res) => {
       businessLocations,
     } = req.body;
 
-    if (firstName !== undefined) user.firstName = firstName.trim();
-    if (middleInitial !== undefined) user.middleInitial = middleInitial.trim();
-    if (lastName !== undefined) user.lastName = lastName.trim();
+    const trimmedFirstName = normalizeString(firstName);
+    const trimmedLastName = normalizeString(lastName);
+    const trimmedEmail = normalizeString(email);
+
+    if (firstName !== undefined && !trimmedFirstName) {
+      return res.status(400).json({ message: "First name is required" });
+    }
+
+    if (lastName !== undefined && !trimmedLastName) {
+      return res.status(400).json({ message: "Last name is required" });
+    }
 
     if (email !== undefined) {
-      const normalizedEmail = email.trim().toLowerCase();
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      if (!trimmedEmail) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail.toLowerCase())) {
         return res.status(400).json({ message: "Please enter a valid email address" });
       }
 
-      const existingUser = await User.findOne({ email: normalizedEmail, _id: { $ne: user._id } });
+      const existingUser = await User.findOne({ email: trimmedEmail.toLowerCase(), _id: { $ne: user._id } });
       if (existingUser) {
         return res.status(409).json({ message: "Email already registered" });
       }
+    }
 
-      user.email = normalizedEmail;
+    if (firstName !== undefined) user.firstName = trimmedFirstName;
+    if (middleInitial !== undefined) user.middleInitial = normalizeString(middleInitial);
+    if (lastName !== undefined) user.lastName = trimmedLastName;
+
+    if (email !== undefined) {
+      user.email = trimmedEmail.toLowerCase();
     }
 
     if (user.role === "admin") {
-      if (businessName !== undefined) user.businessName = businessName.trim();
+      if (businessName !== undefined) user.businessName = normalizeString(businessName);
       if (emailAddresses !== undefined) user.emailAddresses = normalizeList(emailAddresses);
       if (contactNumbers !== undefined) user.contactNumbers = normalizeList(contactNumbers);
       if (instagramAccounts !== undefined) user.instagramAccounts = normalizeList(instagramAccounts);
@@ -287,11 +309,20 @@ router.put("/profile", protect, async (req, res) => {
 
 router.put("/change-password", protect, async (req, res) => {
   try {
-    const { currentPassword, newPassword, confirmPassword } = req.body;
-    const user = await User.findById(req.user._id);
+    const { currentPassword, newPassword, confirmPassword, userId } = req.body;
+    const targetUserId = userId || req.user._id;
 
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      return res.status(400).json({ message: "Current password, new password, and confirmation are required" });
+    if (String(targetUserId) !== String(req.user._id) && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Only the account owner or an admin can change this password" });
+    }
+
+    const targetUser = await User.findById(targetUserId);
+    if (!targetUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!newPassword || !confirmPassword) {
+      return res.status(400).json({ message: "New password and confirmation are required" });
     }
 
     if (newPassword.length < 6) {
@@ -302,32 +333,41 @@ router.put("/change-password", protect, async (req, res) => {
       return res.status(400).json({ message: "New password and confirmation must match" });
     }
 
-    const isMatch = await user.comparePassword(currentPassword);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Current password is incorrect" });
+    if (String(targetUserId) === String(req.user._id)) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: "Current password is required" });
+      }
+
+      const isMatch = await targetUser.comparePassword(currentPassword);
+      if (!isMatch) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
     }
 
-    user.password = newPassword;
-    await user.save();
+    targetUser.password = newPassword;
+    await targetUser.save();
 
     await logActivity({
       req,
-      user,
+      user: req.user,
       action: "Update",
       module: "Profile",
-      description: `${user.firstName} ${user.lastName} changed their password`,
-      resourceId: user._id.toString(),
+      description:
+        req.user.role === "admin" && String(targetUser._id) !== String(req.user._id)
+          ? `${req.user.firstName} ${req.user.lastName} changed the password for ${targetUser.firstName} ${targetUser.lastName}`
+          : `${targetUser.firstName} ${targetUser.lastName} changed their password`,
+      resourceId: targetUser._id.toString(),
     });
 
     await createNotification({
-      recipientUserIds: [user._id],
+      recipientUserIds: [targetUser._id],
       title: "Password updated",
       message: "Your password was changed successfully.",
       link: "/profile",
       type: "warning",
     });
 
-    res.json({ message: "Password updated successfully" });
+    res.json({ message: "Password updated successfully", user: serializeUser(targetUser) });
   } catch (error) {
     res.status(500).json({ message: "Failed to update password", error: error.message });
   }

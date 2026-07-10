@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import { createProduct, deleteProduct, getAdminProducts, updateProduct } from '../../../../api/products';
+import Paradoxie from '@/assets/products/Paradoxie.webp';
 
 const initialForm = {
     name: '',
@@ -31,10 +33,16 @@ export default function AdminProducts() {
     const [error, setError] = useState('');
     const [form, setForm] = useState(initialForm);
     const [editingId, setEditingId] = useState(null);
-
-    // Image file state (for preview and conversion)
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    // Modal state
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [isModalMounted, setIsModalMounted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [validationErrors, setValidationErrors] = useState({});
 
     const loadProducts = async () => {
         try {
@@ -50,11 +58,11 @@ export default function AdminProducts() {
 
     useEffect(() => {
         loadProducts();
+        setTimeout(() => setIsLoaded(true), 100);
     }, []);
 
     const sortedProducts = useMemo(() => [...products].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), [products]);
 
-    // Fixed tag options
     const tagOptions = [
         { value: '', label: 'No tag' },
         { value: 'Featured', label: 'Featured' },
@@ -66,13 +74,71 @@ export default function AdminProducts() {
         setEditingId(null);
         setImageFile(null);
         setImagePreview('');
+        setValidationErrors({});
+    };
+
+    const openModal = (product = null) => {
+        if (product) {
+            setEditingId(product._id);
+            setForm({
+                name: product.name || '',
+                notes: product.notes || '',
+                price: product.price || '',
+                image: product.image || '',
+                tag: product.tag || '',
+                featured: Boolean(product.featured),
+                gender: product.gender || 'Unisex',
+                story: product.story || '',
+                type: Number(product.type || 1),
+                isActive: product.isActive !== false,
+            });
+            setImagePreview(getImageUrl(product.image));
+        } else {
+            resetForm();
+        }
+        setImageFile(null);
+        setValidationErrors({});
+        setIsModalMounted(true);
+        requestAnimationFrame(() => {
+            setModalVisible(true);
+        });
+    };
+
+    const closeModal = () => {
+        if (!modalVisible) return;
+        setModalVisible(false);
+        setTimeout(() => {
+            setIsModalMounted(false);
+            resetForm();
+            setSubmitting(false);
+        }, 300);
+    };
+
+    const handleBackdropClick = (e) => {
+        if (e.target === e.currentTarget) closeModal();
+    };
+
+    const validateForm = () => {
+        const errors = {};
+        if (!form.name.trim()) {
+            errors.name = 'Product name is required';
+        }
+        // Optionally validate price format (allow empty or numeric with currency symbol?)
+        // We'll just check if price is provided and doesn't contain only spaces
+        if (form.price && !form.price.trim()) {
+            errors.price = 'Price cannot be empty spaces';
+        }
+        // Additional fields could be validated if needed
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        if (!validateForm()) return;
 
+        setSubmitting(true);
         try {
-            // If we have an image file, convert to base64 data URL and set it in form.image
             let payload = { ...form };
             if (imageFile) {
                 const reader = new FileReader();
@@ -89,29 +155,17 @@ export default function AdminProducts() {
                 await createProduct(payload);
             }
 
-            resetForm();
+            closeModal();
             await loadProducts();
         } catch (err) {
             setError(err.response?.data?.message || 'Unable to save product.');
+        } finally {
+            setSubmitting(false);
         }
     };
 
     const handleEdit = (product) => {
-        setEditingId(product._id);
-        setForm({
-            name: product.name || '',
-            notes: product.notes || '',
-            price: product.price || '',
-            image: product.image || '',
-            tag: product.tag || '',
-            featured: Boolean(product.featured),
-            gender: product.gender || 'Unisex',
-            story: product.story || '',
-            type: Number(product.type || 1),
-            isActive: product.isActive !== false,
-        });
-        setImageFile(null);
-        setImagePreview(getImageUrl(product.image));
+        openModal(product);
     };
 
     const handleDelete = async (id) => {
@@ -139,151 +193,349 @@ export default function AdminProducts() {
         }
     };
 
-    return (
-        <section className="min-h-screen px-6 py-24 text-black dark:text-white">
-            <div className="mx-auto max-w-7xl rounded-3xl border border-black/10 bg-white/80 p-8 shadow-xl backdrop-blur dark:border-white/10 dark:bg-dark-teal/80">
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <p className="text-sm uppercase tracking-[0.3em] text-old-gold">Admin Panel</p>
-                        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Products</h1>
-                        <p className="mt-3 max-w-2xl text-base text-black/70 dark:text-white/70">
-                            Create, update, and remove fragrances directly from the database so the public pages stay in sync.
-                        </p>
-                    </div>
-                    <div className="rounded-full border border-old-gold/40 px-4 py-2 text-sm text-black/70 dark:text-white/70">
-                        Signed in as {user?.firstName || 'Admin'}
-                    </div>
-                </div>
+    // Render modal
+    const renderModal = () => {
+        if (!isModalMounted) return null;
+        return createPortal(
+            <div
+                className={`fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md transition-opacity duration-300 ${modalVisible ? 'opacity-100' : 'opacity-0'}`}
+                onClick={handleBackdropClick}
+            >
+                <div
+                    className={`relative max-w-2xl w-full max-h-[90vh] bg-warm-white dark:bg-dark-teal border border-old-gold/20 shadow-2xl overflow-y-auto transition-all duration-300 ease-out transform ${modalVisible ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-4'}`}
+                >
+                    <button
+                        onClick={closeModal}
+                        className="absolute top-4 right-4 z-20 w-10 h-10 flex items-center justify-center bg-warm-white/80 dark:bg-dark-teal/80 backdrop-blur-sm border border-old-gold/20 text-dark-teal dark:text-warm-white hover:bg-old-gold hover:text-warm-white dark:hover:text-dark-teal transition-colors duration-300"
+                        aria-label="Close"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
 
-                {error && <div className="mt-8 rounded-2xl border border-rose-400/30 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-900/20 dark:text-rose-300">{error}</div>}
+                    <div className="p-6 sm:p-8">
+                        <h2 className="text-2xl font-semibold font-cormorant mb-4">
+                            {editingId ? 'Edit Product' : 'Add New Product'}
+                        </h2>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                {/* Name */}
+                                <div className="sm:col-span-2">
+                                    <label className="text-sm">
+                                        <span className="mb-1 block text-black/70 dark:text-white/70">Name *</span>
+                                        <input
+                                            value={form.name}
+                                            onChange={(e) => {
+                                                setForm({ ...form, name: e.target.value });
+                                                if (validationErrors.name) setValidationErrors({ ...validationErrors, name: '' });
+                                            }}
+                                            placeholder="e.g. Paradoxie"
+                                            className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal ${validationErrors.name ? 'border-rose-500' : 'border-black/10'
+                                                }`}
+                                        />
+                                        {validationErrors.name && (
+                                            <p className="mt-1 text-sm text-rose-500">{validationErrors.name}</p>
+                                        )}
+                                    </label>
+                                </div>
 
-                <div className="mt-10 grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-4 rounded-3xl border border-black/10 bg-black/5 p-6 dark:border-white/10 dark:bg-white/5">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-semibold">{editingId ? 'Edit product' : 'Add a new product'}</h2>
-                            {editingId && <button type="button" onClick={resetForm} className="text-sm text-old-gold">Cancel</button>}
-                        </div>
+                                {/* Price */}
+                                <div>
+                                    <label className="text-sm">
+                                        <span className="mb-1 block text-black/70 dark:text-white/70">Price</span>
+                                        <input
+                                            value={form.price}
+                                            onChange={(e) => {
+                                                setForm({ ...form, price: e.target.value });
+                                                if (validationErrors.price) setValidationErrors({ ...validationErrors, price: '' });
+                                            }}
+                                            placeholder="e.g. ₱1,200"
+                                            className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal ${validationErrors.price ? 'border-rose-500' : 'border-black/10'
+                                                }`}
+                                        />
+                                        {validationErrors.price && (
+                                            <p className="mt-1 text-sm text-rose-500">{validationErrors.price}</p>
+                                        )}
+                                    </label>
+                                </div>
 
-                        <div className="grid gap-4 md:grid-cols-2">
-                            <label className="text-sm">
-                                <span className="mb-1 block text-black/70 dark:text-white/70">Name</span>
-                                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-dark-teal" />
-                            </label>
-                            <label className="text-sm">
-                                <span className="mb-1 block text-black/70 dark:text-white/70">Price</span>
-                                <input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-dark-teal" />
-                            </label>
+                                {/* Tag */}
+                                <div>
+                                    <label className="text-sm">
+                                        <span className="mb-1 block text-black/70 dark:text-white/70">Tag</span>
+                                        <select
+                                            value={form.tag}
+                                            onChange={(e) => setForm({ ...form, tag: e.target.value })}
+                                            className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
+                                        >
+                                            {tagOptions.map(({ value, label }) => (
+                                                <option key={value} value={value}>{label}</option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                </div>
 
-                            {/* Image upload */}
-                            <div className="md:col-span-2">
-                                <label className="text-sm block mb-1 text-black/70 dark:text-white/70">Image</label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                    className="w-full text-sm text-black/70 dark:text-white/70 file:mr-4 file:rounded-xl file:border-0 file:bg-old-gold/20 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-old-gold hover:file:bg-old-gold/30"
-                                />
-                                {imagePreview && (
-                                    <div className="mt-2 relative w-32 h-32 rounded-xl overflow-hidden border border-black/10 dark:border-white/10">
-                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                    </div>
-                                )}
+                                {/* Gender */}
+                                <div>
+                                    <label className="text-sm">
+                                        <span className="mb-1 block text-black/70 dark:text-white/70">Gender</span>
+                                        <select
+                                            value={form.gender}
+                                            onChange={(e) => setForm({ ...form, gender: e.target.value })}
+                                            className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
+                                        >
+                                            <option value="Unisex">Unisex</option>
+                                            <option value="Men">Men</option>
+                                            <option value="Women">Women</option>
+                                        </select>
+                                    </label>
+                                </div>
+
+                                {/* Type */}
+                                <div>
+                                    <label className="text-sm">
+                                        <span className="mb-1 block text-black/70 dark:text-white/70">Type</span>
+                                        <select
+                                            value={form.type}
+                                            onChange={(e) => setForm({ ...form, type: Number(e.target.value) })}
+                                            className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
+                                        >
+                                            <option value={1}>Type 1</option>
+                                            <option value={2}>Type 2</option>
+                                        </select>
+                                    </label>
+                                </div>
+
+                                {/* Image upload */}
+                                <div className="sm:col-span-2">
+                                    <label className="text-sm block mb-1 text-black/70 dark:text-white/70">Image</label>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="w-full text-sm text-black/70 dark:text-white/70 file:mr-4 file:rounded-lg file:border-0 file:bg-old-gold/20 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-old-gold hover:file:bg-old-gold/30"
+                                    />
+                                    {imagePreview && (
+                                        <div className="mt-2 relative w-24 h-24 rounded-lg overflow-hidden border border-black/10 dark:border-white/10">
+                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Notes */}
+                                <div className="sm:col-span-2">
+                                    <label className="block text-sm">
+                                        <span className="mb-1 block text-black/70 dark:text-white/70">Notes</span>
+                                        <textarea
+                                            value={form.notes}
+                                            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                                            rows="2"
+                                            placeholder="Short description (e.g. Woody, floral)"
+                                            className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
+                                        />
+                                    </label>
+                                </div>
+
+                                {/* Story */}
+                                <div className="sm:col-span-2">
+                                    <label className="block text-sm">
+                                        <span className="mb-1 block text-black/70 dark:text-white/70">Story</span>
+                                        <textarea
+                                            value={form.story}
+                                            onChange={(e) => setForm({ ...form, story: e.target.value })}
+                                            rows="2"
+                                            placeholder="The inspiration behind this fragrance…"
+                                            className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
+                                        />
+                                    </label>
+                                </div>
                             </div>
 
-                            {/* Tag select - fixed options */}
-                            <label className="text-sm">
-                                <span className="mb-1 block text-black/70 dark:text-white/70">Tag</span>
-                                <select
-                                    value={form.tag}
-                                    onChange={(e) => setForm({ ...form, tag: e.target.value })}
-                                    className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-dark-teal"
+                            {/* Checkboxes */}
+                            <div className="flex flex-wrap gap-4 text-sm">
+                                <label className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={form.featured}
+                                        onChange={(e) => setForm({ ...form, featured: e.target.checked })}
+                                    />
+                                    Featured on home page
+                                </label>
+                                <label className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={form.isActive}
+                                        onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+                                    />
+                                    Active product
+                                </label>
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={closeModal}
+                                    className="group relative overflow-hidden px-4 py-2 border border-black/10 dark:border-white/10 text-black dark:text-white text-sm font-medium transition-all"
                                 >
-                                    {tagOptions.map(({ value, label }) => (
-                                        <option key={value} value={value}>{label}</option>
-                                    ))}
-                                </select>
-                            </label>
-
-                            <label className="text-sm">
-                                <span className="mb-1 block text-black/70 dark:text-white/70">Gender</span>
-                                <select value={form.gender} onChange={(e) => setForm({ ...form, gender: e.target.value })} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-dark-teal">
-                                    <option value="Unisex">Unisex</option>
-                                    <option value="Men">Men</option>
-                                    <option value="Women">Women</option>
-                                </select>
-                            </label>
-                            <label className="text-sm">
-                                <span className="mb-1 block text-black/70 dark:text-white/70">Type</span>
-                                <select value={form.type} onChange={(e) => setForm({ ...form, type: Number(e.target.value) })} className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-dark-teal">
-                                    <option value={1}>Type 1</option>
-                                    <option value={2}>Type 2</option>
-                                </select>
-                            </label>
-                        </div>
-
-                        <label className="block text-sm">
-                            <span className="mb-1 block text-black/70 dark:text-white/70">Notes</span>
-                            <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows="3" className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-dark-teal" />
-                        </label>
-
-                        <label className="block text-sm">
-                            <span className="mb-1 block text-black/70 dark:text-white/70">Story</span>
-                            <textarea value={form.story} onChange={(e) => setForm({ ...form, story: e.target.value })} rows="3" className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-dark-teal" />
-                        </label>
-
-                        <div className="flex flex-wrap gap-4 text-sm">
-                            <label className="flex items-center gap-2">
-                                <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} />
-                                Featured on home page
-                            </label>
-                            <label className="flex items-center gap-2">
-                                <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
-                                Active product
-                            </label>
-                        </div>
-
-                        <button type="submit" className="rounded-xl bg-old-gold px-4 py-2 text-sm font-medium text-white transition hover:opacity-90">
-                            {editingId ? 'Save changes' : 'Create product'}
-                        </button>
-                    </form>
-
-                    {/* Product list */}
-                    <div className="space-y-4">
-                        <h2 className="text-xl font-semibold">Current products</h2>
-                        {loading ? (
-                            <div className="rounded-2xl border border-dashed border-black/10 p-6 text-sm text-black/60 dark:border-white/10 dark:text-white/60">Loading products…</div>
-                        ) : sortedProducts.length === 0 ? (
-                            <div className="rounded-2xl border border-dashed border-black/10 p-6 text-sm text-black/60 dark:border-white/10 dark:text-white/60">No products yet.</div>
-                        ) : (
-                            sortedProducts.map((product) => (
-                                <div key={product._id} className="rounded-2xl border border-black/10 bg-black/5 p-4 dark:border-white/10 dark:bg-white/5">
-                                    <div className="flex gap-3">
-                                        {product.image ? (
-                                            <img src={getImageUrl(product.image)} alt={product.name} className="h-16 w-16 rounded-xl object-cover" />
-                                        ) : (
-                                            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-old-gold/20 text-sm font-semibold text-old-gold">{product.name?.charAt(0) || 'P'}</div>
-                                        )}
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <h3 className="font-semibold">{product.name}</h3>
-                                                {product.featured && <span className="rounded-full bg-old-gold/20 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-old-gold">Featured</span>}
-                                                {!product.isActive && <span className="rounded-full border border-black/10 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-black/60 dark:border-white/10">Inactive</span>}
-                                            </div>
-                                            <p className="mt-1 text-sm text-black/60 dark:text-white/60">{product.notes}</p>
-                                            <p className="mt-1 text-sm text-old-gold">{product.price}</p>
-                                        </div>
-                                    </div>
-                                    <div className="mt-4 flex gap-2">
-                                        <button onClick={() => handleEdit(product)} className="rounded-xl border border-black/10 px-3 py-2 text-sm dark:border-white/10">Edit</button>
-                                        <button onClick={() => handleDelete(product._id)} className="rounded-xl border border-rose-400/30 px-3 py-2 text-sm text-rose-600 dark:text-rose-300">Delete</button>
-                                    </div>
-                                </div>
-                            ))
-                        )}
+                                    <span className="relative z-10">Cancel</span>
+                                    <div className="absolute inset-0 bg-black/5 dark:bg-white/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submitting}
+                                    className="group relative overflow-hidden px-4 py-2 bg-old-gold text-warm-white dark:text-dark-teal text-sm font-medium transition-all hover:shadow-[0_0_30px_rgba(199,159,72,0.3)] disabled:opacity-70"
+                                >
+                                    <span className="relative z-10">
+                                        {submitting ? 'Saving…' : (editingId ? 'Save Changes' : 'Create Product')}
+                                    </span>
+                                    <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
+            </div>,
+            document.body
+        );
+    };
+
+    return (
+        <section className="min-h-screen px-6 py-24 text-black dark:text-white">
+            <div className="mx-auto max-w-7xl rounded-lg border border-black/10 bg-white/80 p-8 shadow-xl backdrop-blur transition-opacity duration-700 dark:border-white/10 dark:bg-dark-teal/80">
+                {/* Header */}
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h1
+                            className={`text-3xl font-semibold sm:text-4xl font-cormorant transition-all duration-700 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                                }`}
+                        >
+                            Product <span className="text-old-gold">Management</span>
+                        </h1>
+                        <p
+                            className={`mt-2 max-w-2xl text-base text-black/70 dark:text-white/70 transition-all duration-700 delay-100 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                                }`}
+                        >
+                            Create, update, and remove fragrances directly from the database.
+                        </p>
+                    </div>
+                    <div
+                        className={`transition-all duration-700 delay-150 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                            }`}
+                    >
+                        <button
+                            onClick={() => openModal()}
+                            className="group relative overflow-hidden px-5 py-2 bg-old-gold text-warm-white dark:text-dark-teal text-sm font-medium transition-all hover:shadow-[0_0_30px_rgba(199,159,72,0.3)]"
+                        >
+                            <span className="relative z-10 flex items-center gap-2">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+                                </svg>
+                                Add Fragrance
+                            </span>
+                            <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                        </button>
+                    </div>
+                </div>
+
+                {error && (
+                    <div className="mt-8 rounded-lg border border-rose-400/30 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-900/20 dark:text-rose-300">
+                        {error}
+                    </div>
+                )}
+
+                {/* Product Grid */}
+                <div
+                    className={`mt-10 transition-all duration-700 delay-200 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                        }`}
+                >
+                    {loading ? (
+                        <div className="rounded-lg border border-dashed border-black/10 p-10 text-center text-sm text-black/60 dark:border-white/10 dark:text-white/60">
+                            Loading products…
+                        </div>
+                    ) : sortedProducts.length === 0 ? (
+                        <div className="rounded-lg border border-dashed border-black/10 p-10 text-center text-sm text-black/60 dark:border-white/10 dark:text-white/60">
+                            No products yet. Click "Add Fragrance" to create your first one.
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {sortedProducts.map((product) => (
+                                <div
+                                    key={product._id}
+                                    className="group relative rounded-lg border border-black/10 bg-black/5 overflow-hidden transition-all hover:border-old-gold/30 dark:border-white/10 dark:bg-white/5"
+                                >
+                                    {/* Product Image */}
+                                    <div className="relative aspect-[3/4] overflow-hidden bg-warm-white/50 dark:bg-charcoal/50">
+                                        <img
+                                            src={product.image ? getImageUrl(product.image) : Paradoxie}
+                                            alt={product.name}
+                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
+                                        {/* Status badges */}
+                                        <div className="absolute top-4 left-4 z-10 flex flex-col gap-1">
+                                            {product.tag && (
+                                                <span className="font-jost text-[10px] tracking-[0.2em] uppercase bg-old-gold text-warm-white dark:text-dark-teal px-2 py-1">
+                                                    {product.tag}
+                                                </span>
+                                            )}
+                                            {!product.isActive && (
+                                                <span className="font-jost text-[10px] tracking-[0.2em] uppercase bg-black/60 text-white px-2 py-1">
+                                                    Inactive
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="absolute top-4 right-4 z-10">
+                                            <span className={`font-jost text-[10px] tracking-[0.1em] uppercase px-2 py-1 rounded-full border ${product.gender === 'Men'
+                                                    ? 'bg-blue-900/20 border-blue-400/40 text-blue-200'
+                                                    : product.gender === 'Women'
+                                                        ? 'bg-pink-900/20 border-pink-400/40 text-pink-200'
+                                                        : 'bg-amber-900/20 border-amber-400/40 text-amber-200'
+                                                }`}>
+                                                {product.gender === 'Men' ? '♂' : product.gender === 'Women' ? '♀' : '✦'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Product Info */}
+                                    <div className="p-4">
+                                        <h3 className="font-cormorant text-xl text-dark-teal dark:text-warm-white group-hover:text-old-gold transition-colors">
+                                            {product.name}
+                                        </h3>
+                                        <p className="font-inter text-warm-gray dark:text-warm-white/70 text-xs tracking-wide mt-1">
+                                            {product.notes}
+                                        </p>
+                                        <p className="font-jost text-old-gold text-sm tracking-wider mt-1">
+                                            {product.price}
+                                        </p>
+                                    </div>
+
+                                    {/* Admin Actions */}
+                                    <div className="p-4 pt-0 flex gap-2">
+                                        <button
+                                            onClick={() => handleEdit(product)}
+                                            className="group/btn relative flex-1 overflow-hidden px-3 py-1.5 border border-old-gold/40 text-sm font-medium transition-all hover:shadow-[0_0_20px_rgba(199,159,72,0.2)]"
+                                        >
+                                            <span className="relative z-10">Edit</span>
+                                            <div className="absolute inset-0 bg-old-gold/10 transform translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-out" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(product._id)}
+                                            className="group/btn relative flex-1 overflow-hidden px-3 py-1.5 border border-rose-400/40 text-rose-600 dark:text-rose-300 text-sm font-medium transition-all hover:shadow-[0_0_20px_rgba(244,63,94,0.2)]"
+                                        >
+                                            <span className="relative z-10">Delete</span>
+                                            <div className="absolute inset-0 bg-rose-50 dark:bg-rose-900/20 transform translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-out" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
+
+            {/* Modal Portal */}
+            {renderModal()}
         </section>
     );
 }
