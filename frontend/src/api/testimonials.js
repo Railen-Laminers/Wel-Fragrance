@@ -24,3 +24,23 @@ export const deleteTestimonial = async (id) => {
   const response = await api.delete(`/api/testimonials/${id}`);
   return response.data;
 };
+
+export const getAdminInquiries = async () => {
+  const response = await api.get('/api/inquiries');
+  return response.data;
+};
+
+export const submitInquiry = async (payload) => {
+  const response = await api.post('/api/inquiries', payload);
+  return response.data;
+};
+
+export const markInquiryAsRead = async (id) => {
+  const response = await api.patch(`/api/inquiries/${id}/read`);
+  return response.data;
+};
+
+export const deleteInquiry = async (id) => {
+  const response = await api.delete(`/api/inquiries/${id}`);
+  return response.data;
+};

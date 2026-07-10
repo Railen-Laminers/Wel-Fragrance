@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { FaInstagram, FaEnvelope, FaPhone, FaStore, FaMapPin } from 'react-icons/fa';
-import { submitTestimonial } from '../../../api/testimonials';
+import { submitInquiry, submitTestimonial } from '../../../api/testimonials';
 
-const initialValues = {
+const initialInquiryValues = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    facebookLink: '',
+    message: '',
+};
+
+const initialTestimonialValues = {
     firstName: '',
     lastName: '',
     email: '',
@@ -14,10 +23,14 @@ const initialValues = {
 };
 
 export default function Contact() {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [isLoaded, setIsLoaded] = useState(false);
     const [sent, setSent] = useState(false);
-    const [values, setValues] = useState(initialValues);
-    const [privacyAgreed, setPrivacyAgreed] = useState(false);
+    const [formType, setFormType] = useState(() => (searchParams.get('form') === 'testimonial' ? 'testimonial' : 'inquiry'));
+    const [inquiryValues, setInquiryValues] = useState(initialInquiryValues);
+    const [testimonialValues, setTestimonialValues] = useState(initialTestimonialValues);
+    const [inquiryConsent, setInquiryConsent] = useState(false);
+    const [testimonialConsent, setTestimonialConsent] = useState(false);
     const [formError, setFormError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [previewUrl, setPreviewUrl] = useState('');
@@ -27,21 +40,53 @@ export default function Contact() {
         return () => clearTimeout(timer);
     }, []);
 
+    useEffect(() => {
+        const requestedForm = searchParams.get('form');
+        if (requestedForm === 'testimonial' || requestedForm === 'inquiry') {
+            setFormType(requestedForm);
+        } else {
+            setFormType('inquiry');
+        }
+    }, [searchParams]);
+
     const resetForm = () => {
-        setValues(initialValues);
-        setPrivacyAgreed(false);
+        setInquiryValues(initialInquiryValues);
+        setTestimonialValues(initialTestimonialValues);
+        setInquiryConsent(false);
+        setTestimonialConsent(false);
         setFormError('');
         setSent(false);
         setPreviewUrl('');
     };
 
-    const handleFieldChange = (key, value) => {
-        setValues((prev) => ({ ...prev, [key]: value }));
+    const selectForm = (nextForm) => {
+        setFormType(nextForm);
+        setFormError('');
+        setSent(false);
+        setSearchParams((prev) => {
+            const next = new URLSearchParams(prev);
+            next.set('form', nextForm);
+            return next;
+        });
+    };
+
+    const handleInquiryChange = (key, value) => {
+        setInquiryValues((prev) => ({ ...prev, [key]: value }));
         if (formError) setFormError('');
     };
 
-    const handlePrivacyChange = (checked) => {
-        setPrivacyAgreed(checked);
+    const handleTestimonialChange = (key, value) => {
+        setTestimonialValues((prev) => ({ ...prev, [key]: value }));
+        if (formError) setFormError('');
+    };
+
+    const handleInquiryConsentChange = (checked) => {
+        setInquiryConsent(checked);
+        if (formError) setFormError('');
+    };
+
+    const handleTestimonialConsentChange = (checked) => {
+        setTestimonialConsent(checked);
         if (formError) setFormError('');
     };
 
@@ -51,7 +96,7 @@ export default function Contact() {
 
         const reader = new FileReader();
         reader.onloadend = () => {
-            setValues((prev) => ({
+            setTestimonialValues((prev) => ({
                 ...prev,
                 profilePicture: reader.result,
                 profilePictureName: file.name,
@@ -62,21 +107,63 @@ export default function Contact() {
         reader.readAsDataURL(file);
     };
 
-    const handleSubmit = async () => {
+    const handleInquirySubmit = async () => {
         setFormError('');
 
-        if (!values.firstName.trim() || !values.lastName.trim() || !values.email.trim() || !values.message.trim()) {
+        if (!inquiryValues.firstName.trim() || !inquiryValues.lastName.trim() || !inquiryValues.email.trim() || !inquiryValues.facebookLink.trim() || !inquiryValues.message.trim()) {
+            setFormError('First name, last name, email, Facebook link, and message are all required.');
+            return;
+        }
+
+        if (!inquiryConsent) {
+            setFormError('Please confirm your consent before sending your inquiry.');
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(inquiryValues.email.trim())) {
+            setFormError('Please enter a valid email address.');
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            await submitInquiry({
+                firstName: inquiryValues.firstName.trim(),
+                lastName: inquiryValues.lastName.trim(),
+                email: inquiryValues.email.trim(),
+                facebookLink: inquiryValues.facebookLink.trim(),
+                message: inquiryValues.message.trim(),
+                consent: true,
+            });
+
+            setSent(true);
+            setInquiryValues(initialInquiryValues);
+            setInquiryConsent(false);
+            setFormError('');
+        } catch (error) {
+            setFormError(error.response?.data?.message || 'We could not submit your inquiry right now.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleTestimonialSubmit = async () => {
+        setFormError('');
+
+        if (!testimonialValues.firstName.trim() || !testimonialValues.lastName.trim() || !testimonialValues.email.trim() || !testimonialValues.message.trim()) {
             setFormError('First name, last name, email, and testimonial message are all required.');
             return;
         }
 
-        if (!privacyAgreed) {
+        if (!testimonialConsent) {
             setFormError('You must consent to the testimonial privacy terms to continue.');
             return;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(values.email.trim())) {
+        if (!emailRegex.test(testimonialValues.email.trim())) {
             setFormError('Please enter a valid email address.');
             return;
         }
@@ -85,20 +172,20 @@ export default function Contact() {
 
         try {
             await submitTestimonial({
-                firstName: values.firstName.trim(),
-                lastName: values.lastName.trim(),
-                email: values.email.trim(),
-                profilePicture: values.profilePicture || '',
-                profilePictureName: values.profilePictureName || '',
-                profilePictureType: values.profilePictureType || 'image',
-                rating: Number(values.rating),
-                message: values.message.trim(),
+                firstName: testimonialValues.firstName.trim(),
+                lastName: testimonialValues.lastName.trim(),
+                email: testimonialValues.email.trim(),
+                profilePicture: testimonialValues.profilePicture || '',
+                profilePictureName: testimonialValues.profilePictureName || '',
+                profilePictureType: testimonialValues.profilePictureType || 'image',
+                rating: Number(testimonialValues.rating),
+                message: testimonialValues.message.trim(),
                 consent: true,
             });
 
             setSent(true);
-            setValues(initialValues);
-            setPrivacyAgreed(false);
+            setTestimonialValues(initialTestimonialValues);
+            setTestimonialConsent(false);
             setPreviewUrl('');
             setFormError('');
         } catch (error) {
@@ -122,7 +209,7 @@ export default function Contact() {
                                 <div className="absolute top-0 left-0 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-l-2 border-old-gold/60" />
                                 <div className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-r-2 border-old-gold/60" />
                                 <span className="font-jost text-[10px] sm:text-xs tracking-[0.3em] text-old-gold uppercase whitespace-nowrap">
-                                    Share Your Story
+                                    {formType === 'testimonial' ? 'Share Your Story' : 'Contact Us'}
                                 </span>
                             </div>
                         </div>
@@ -186,7 +273,9 @@ export default function Contact() {
                             <div className="text-center py-12 sm:py-16">
                                 <p className="font-cormorant italic text-dark-teal dark:text-warm-white text-3xl sm:text-4xl md:text-5xl mb-4">Received.</p>
                                 <p className="font-inter italic text-warm-gray dark:text-warm-white/70 text-sm sm:text-base">
-                                    Your testimonial has been received and is now pending review. It will appear publicly once approved.
+                                    {formType === 'testimonial'
+                                        ? 'Your testimonial has been received and is now pending review. It will appear publicly once approved.'
+                                        : 'Your inquiry has been received. We will get back to you shortly.'}
                                 </p>
                                 <button onClick={resetForm} className="group flex items-center gap-2 font-jost text-xs sm:text-sm tracking-[0.15em] text-dark-teal dark:text-warm-white uppercase hover:text-old-gold transition-colors mt-6 sm:mt-8">
                                     <span>submit another</span>
@@ -197,51 +286,177 @@ export default function Contact() {
                             </div>
                         ) : (
                             <div className="space-y-5 sm:space-y-6">
-                                <div className={animClass(400)} style={animStyle(400)}>
-                                    <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">First Name</label>
-                                    <input type="text" value={values.firstName} onChange={(e) => handleFieldChange('firstName', e.target.value)} className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300" />
-                                </div>
-                                <div className={animClass(500)} style={animStyle(500)}>
-                                    <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Last Name</label>
-                                    <input type="text" value={values.lastName} onChange={(e) => handleFieldChange('lastName', e.target.value)} className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300" />
-                                </div>
-                                <div className={animClass(600)} style={animStyle(600)}>
-                                    <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Email Address</label>
-                                    <input type="email" value={values.email} onChange={(e) => handleFieldChange('email', e.target.value)} className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300" />
-                                </div>
-                                <div className={animClass(700)} style={animStyle(700)}>
-                                    <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Profile Picture</label>
-                                    <input type="file" accept="image/*" onChange={handleProfilePicture} className="w-full text-sm text-warm-gray dark:text-warm-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-old-gold file:text-warm-white hover:file:bg-old-gold/80" />
-                                    {previewUrl && <img src={previewUrl} alt="Preview" className="mt-3 h-24 w-24 rounded-full object-cover border border-old-gold/30" />}
-                                </div>
-                                <div className={animClass(800)} style={animStyle(800)}>
-                                    <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Rating</label>
-                                    <select value={values.rating} onChange={(e) => handleFieldChange('rating', e.target.value)} className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300">
-                                        {[1, 2, 3, 4, 5].map((option) => <option key={option} value={option}>{option} star{option > 1 ? 's' : ''}</option>)}
-                                    </select>
-                                </div>
-                                <div className={animClass(900)} style={animStyle(900)}>
-                                    <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Testimonial Message</label>
-                                    <textarea rows={5} value={values.message} onChange={(e) => handleFieldChange('message', e.target.value)} className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300 resize-none" />
-                                </div>
-                                <div className={animClass(1000)} style={animStyle(1000)}>
-                                    <label className="flex items-start gap-3 cursor-pointer group">
-                                        <input type="checkbox" checked={privacyAgreed} onChange={(e) => handlePrivacyChange(e.target.checked)} className="mt-0.5 w-4 h-4 accent-old-gold bg-warm-white/70 dark:bg-charcoal/70 border-old-gold/30 rounded-sm focus:ring-0 focus:ring-offset-0" />
-                                        <span className="font-inter text-xs text-warm-gray dark:text-warm-white/70 leading-relaxed">
-                                            I consent to the collection, storage, and public display of my testimonial and submitted information.
-                                        </span>
-                                    </label>
+                                <div className={`flex flex-wrap gap-3 ${animClass(400)}`} style={animStyle(400)}>
+                                    <button
+                                        type="button"
+                                        onClick={() => selectForm('inquiry')}
+                                        className={`px-4 py-2 text-xs sm:text-sm font-jost uppercase tracking-[0.15em] transition-colors ${formType === 'inquiry' ? 'bg-old-gold text-warm-white' : 'border border-old-gold/30 text-dark-teal dark:text-warm-white hover:border-old-gold/60'}`}
+                                    >
+                                        Inquiry Form
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => selectForm('testimonial')}
+                                        className={`px-4 py-2 text-xs sm:text-sm font-jost uppercase tracking-[0.15em] transition-colors ${formType === 'testimonial' ? 'bg-old-gold text-warm-white' : 'border border-old-gold/30 text-dark-teal dark:text-warm-white hover:border-old-gold/60'}`}
+                                    >
+                                        Testimonial Form
+                                    </button>
                                 </div>
 
+                                {formType === 'inquiry' ? (
+                                    // Added key to force remount when switching forms
+                                    <div key="inquiry-form" className="space-y-5 sm:space-y-6">
+                                        <div className={animClass(500)} style={animStyle(500)}>
+                                            <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">First Name</label>
+                                            <input
+                                                type="text"
+                                                value={inquiryValues.firstName ?? ''}
+                                                onChange={(e) => handleInquiryChange('firstName', e.target.value)}
+                                                className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300"
+                                            />
+                                        </div>
+                                        <div className={animClass(600)} style={animStyle(600)}>
+                                            <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Last Name</label>
+                                            <input
+                                                type="text"
+                                                value={inquiryValues.lastName ?? ''}
+                                                onChange={(e) => handleInquiryChange('lastName', e.target.value)}
+                                                className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300"
+                                            />
+                                        </div>
+                                        <div className={animClass(700)} style={animStyle(700)}>
+                                            <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Email Address</label>
+                                            <input
+                                                type="email"
+                                                value={inquiryValues.email ?? ''}
+                                                onChange={(e) => handleInquiryChange('email', e.target.value)}
+                                                className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300"
+                                            />
+                                        </div>
+                                        <div className={animClass(800)} style={animStyle(800)}>
+                                            <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Facebook Profile / Link</label>
+                                            <input
+                                                type="url"
+                                                value={inquiryValues.facebookLink ?? ''}
+                                                onChange={(e) => handleInquiryChange('facebookLink', e.target.value)}
+                                                className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300"
+                                            />
+                                        </div>
+                                        <div className={animClass(900)} style={animStyle(900)}>
+                                            <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Message</label>
+                                            <textarea
+                                                rows={5}
+                                                value={inquiryValues.message ?? ''}
+                                                onChange={(e) => handleInquiryChange('message', e.target.value)}
+                                                className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300 resize-none"
+                                            />
+                                        </div>
+                                        <div className={animClass(1000)} style={animStyle(1000)}>
+                                            <label className="flex items-start gap-3 cursor-pointer group">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={inquiryConsent}
+                                                    onChange={(e) => handleInquiryConsentChange(e.target.checked)}
+                                                    className="mt-0.5 w-4 h-4 accent-old-gold bg-warm-white/70 dark:bg-charcoal/70 border-old-gold/30 rounded-sm focus:ring-0 focus:ring-offset-0"
+                                                />
+                                                <span className="font-inter text-xs text-warm-gray dark:text-warm-white/70 leading-relaxed">
+                                                    I consent to the collection and use of the information submitted through this inquiry form.
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div key="testimonial-form" className="space-y-5 sm:space-y-6">
+                                        <div className={animClass(500)} style={animStyle(500)}>
+                                            <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">First Name</label>
+                                            <input
+                                                type="text"
+                                                value={testimonialValues.firstName ?? ''}
+                                                onChange={(e) => handleTestimonialChange('firstName', e.target.value)}
+                                                className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300"
+                                            />
+                                        </div>
+                                        <div className={animClass(600)} style={animStyle(600)}>
+                                            <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Last Name</label>
+                                            <input
+                                                type="text"
+                                                value={testimonialValues.lastName ?? ''}
+                                                onChange={(e) => handleTestimonialChange('lastName', e.target.value)}
+                                                className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300"
+                                            />
+                                        </div>
+                                        <div className={animClass(700)} style={animStyle(700)}>
+                                            <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Email Address</label>
+                                            <input
+                                                type="email"
+                                                value={testimonialValues.email ?? ''}
+                                                onChange={(e) => handleTestimonialChange('email', e.target.value)}
+                                                className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300"
+                                            />
+                                        </div>
+                                        <div className={animClass(800)} style={animStyle(800)}>
+                                            <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Profile Picture</label>
+                                            {/* File input – uncontrolled, no value prop */}
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleProfilePicture}
+                                                className="w-full text-sm text-warm-gray dark:text-warm-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-old-gold file:text-warm-white hover:file:bg-old-gold/80"
+                                            />
+                                            {previewUrl && <img src={previewUrl} alt="Preview" className="mt-3 h-24 w-24 rounded-full object-cover border border-old-gold/30" />}
+                                        </div>
+                                        <div className={animClass(900)} style={animStyle(900)}>
+                                            <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Rating</label>
+                                            <select
+                                                value={testimonialValues.rating ?? '5'}
+                                                onChange={(e) => handleTestimonialChange('rating', e.target.value)}
+                                                className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300"
+                                            >
+                                                {[1, 2, 3, 4, 5].map((option) => (
+                                                    <option key={option} value={option}>
+                                                        {option} star{option > 1 ? 's' : ''}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className={animClass(1000)} style={animStyle(1000)}>
+                                            <label className="block text-sm font-medium text-dark-teal dark:text-warm-white mb-2">Testimonial Message</label>
+                                            <textarea
+                                                rows={5}
+                                                value={testimonialValues.message ?? ''}
+                                                onChange={(e) => handleTestimonialChange('message', e.target.value)}
+                                                className="w-full px-4 py-3 bg-warm-white dark:bg-charcoal border border-old-gold/30 focus:border-old-gold/60 hover:border-old-gold/50 transition-colors duration-300 resize-none"
+                                            />
+                                        </div>
+                                        <div className={animClass(1100)} style={animStyle(1100)}>
+                                            <label className="flex items-start gap-3 cursor-pointer group">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={testimonialConsent}
+                                                    onChange={(e) => handleTestimonialConsentChange(e.target.checked)}
+                                                    className="mt-0.5 w-4 h-4 accent-old-gold bg-warm-white/70 dark:bg-charcoal/70 border-old-gold/30 rounded-sm focus:ring-0 focus:ring-offset-0"
+                                                />
+                                                <span className="font-inter text-xs text-warm-gray dark:text-warm-white/70 leading-relaxed">
+                                                    I consent to the collection, storage, and public display of my testimonial and submitted information.
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {formError && (
-                                    <div className={animClass(1100)} style={animStyle(1100)}>
+                                    <div className={animClass(1200)} style={animStyle(1200)}>
                                         <p className="font-inter text-sm text-rose-600/80 dark:text-rose-400/80 border-l-2 border-rose-600/50 dark:border-rose-400/50 pl-3 italic">{formError}</p>
                                     </div>
                                 )}
 
-                                <div className={animClass(1200)} style={animStyle(1200)}>
-                                    <button onClick={handleSubmit} disabled={isSubmitting} className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-old-gold text-warm-white dark:text-dark-teal font-jost text-xs sm:text-sm tracking-[0.15em] uppercase font-medium overflow-hidden transition-all hover:shadow-[0_0_40px_rgba(199,159,72,0.3)] disabled:opacity-70">
-                                        <span className="relative z-10">{isSubmitting ? 'Submitting...' : 'Submit Testimonial'}</span>
+                                <div className={animClass(1300)} style={animStyle(1300)}>
+                                    <button
+                                        onClick={formType === 'inquiry' ? handleInquirySubmit : handleTestimonialSubmit}
+                                        disabled={isSubmitting}
+                                        className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-old-gold text-warm-white dark:text-dark-teal font-jost text-xs sm:text-sm tracking-[0.15em] uppercase font-medium overflow-hidden transition-all hover:shadow-[0_0_40px_rgba(199,159,72,0.3)] disabled:opacity-70"
+                                    >
+                                        <span className="relative z-10">{isSubmitting ? 'Submitting...' : formType === 'inquiry' ? 'Send Inquiry' : 'Submit Testimonial'}</span>
                                         <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
                                     </button>
                                 </div>

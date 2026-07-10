@@ -114,7 +114,7 @@ export default function AuthenticatedNavbar({ children }) {
                 { to: '/admin/dashboard', icon: <IconDashboard />, label: 'Dashboard' },
                 { to: '/admin/products', icon: <IconProducts />, label: 'Products' },
                 { to: '/admin/testimonials', icon: <IconTestimonials />, label: 'Testimonials' },
-                { to: '/admin/mails', icon: <IconMails />, label: 'Mails' },
+                { to: '/admin/inquiries', icon: <IconMails />, label: 'Inquiries' },
             ];
         } else {
             return [

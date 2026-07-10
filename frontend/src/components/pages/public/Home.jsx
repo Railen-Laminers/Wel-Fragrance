@@ -902,7 +902,7 @@ function Testimonials() {
 
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
                 <Link
-                  to="/contact"
+                  to="/contact?form=testimonial"
                   className="pointer-events-auto group relative px-8 sm:px-12 py-4 sm:py-5 bg-old-gold text-warm-white dark:text-dark-teal font-jost text-sm sm:text-base tracking-[0.15em] uppercase font-medium overflow-hidden transition-all hover:shadow-[0_0_40px_rgba(199,159,72,0.3)]"
                 >
                   <span className="relative z-10">Share Your Story</span>
