@@ -22,6 +22,7 @@ const NotFound = lazy(() => import('./components/pages/public/NotFound'));
 
 // Private pages
 const AdminDashboard = lazy(() => import('./components/pages/private/admin/AdminDashboard'));
+const AdminProducts = lazy(() => import('./components/pages/private/admin/AdminProducts'));
 const AdminTestimonials = lazy(() => import('./components/pages/private/admin/AdminTestimonials'));
 const CustomerDashboard = lazy(() => import('./components/pages/private/customer/CustomerDashboard'));
 
@@ -96,6 +97,14 @@ function AnimatedRoutes() {
             element={
               <ProtectedRoute requireAdmin>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/products"
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminProducts />
               </ProtectedRoute>
             }
           />

@@ -3,13 +3,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { getFeaturedProducts } from '../../../api/products';
 
 // Local product images (adjust paths if needed)
 import Paradoxie from '@/assets/products/Paradoxie.webp';
-import Paradoxie2 from '@/assets/products/Paradoxie2.webp';
-import Litz3 from '@/assets/products/Litz3.webp';
-import Nicol2 from '@/assets/products/Nicol2.webp';
-import Greedy_choco from '@/assets/products/Greedy_choco.webp';
 import MorningSwim from '@/assets/products/MorningSwim.webp';
 import Litz2 from '@/assets/products/Litz2.webp';
 
@@ -366,6 +363,8 @@ function Philosophy() {
 function Products() {
   const sectionRef = useRef(null);
   const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const animated = useRef(false);
 
   useEffect(() => {
@@ -411,36 +410,20 @@ function Products() {
     return () => observer.disconnect();
   }, []);
 
-  const products = [
-    {
-      name: 'Paradoxie',
-      notes: 'Floral fruity • 100% pure oil fragrance',
-      price: '₱500',
-      image: Paradoxie2,
-      tag: 'New',
-    },
-    {
-      name: 'Litz',
-      notes: 'Oriental floral • For women',
-      price: '₱500',
-      image: Litz3,
-      tag: 'Featured',
-    },
-    {
-      name: 'Nicol',
-      notes: 'Woody citrus • For men',
-      price: '₱500',
-      image: Nicol2,
-      tag: null,
-    },
-    {
-      name: 'Greedy Choco',
-      notes: 'Sweet fruity floral • For women',
-      price: '₱500',
-      image: Greedy_choco,
-      tag: null,
-    },
-  ];
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const data = await getFeaturedProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error('Failed to load featured products', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   return (
     <section
@@ -487,9 +470,13 @@ function Products() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-          {products.map((product, index) => (
+          {loading ? (
+            <div className="col-span-full rounded-2xl border border-dashed border-black/10 p-8 text-center text-sm text-black/60 dark:border-white/10 dark:text-white/60">Loading featured fragrances…</div>
+          ) : products.length === 0 ? (
+            <div className="col-span-full rounded-2xl border border-dashed border-black/10 p-8 text-center text-sm text-black/60 dark:border-white/10 dark:text-white/60">No featured fragrances available right now.</div>
+          ) : products.map((product, index) => (
             <div
-              key={product.name}
+              key={product._id || product.name}
               className="product-card group relative opacity-0 translate-y-20"
               onMouseEnter={() => setHoveredIndex(index)}
               onMouseLeave={() => setHoveredIndex(null)}
@@ -497,7 +484,7 @@ function Products() {
               <div className="relative aspect-[3/4] overflow-hidden mb-4 sm:mb-6 bg-warm-white/50 dark:bg-charcoal/50 backdrop-blur-sm">
                 <div className="absolute inset-4 border border-old-gold/10 z-10 pointer-events-none group-hover:border-old-gold/30 transition-colors duration-500" />
                 <img
-                  src={product.image}
+                  src={product.image || Paradoxie}
                   alt={product.name}
                   loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"

@@ -1,196 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-
-// Type 1 Products
-import jaimeImage from '@/assets/products/JAIME.webp';
-import dorzImage from '@/assets/products/DORZ.webp';
-import rupertImage from '@/assets/products/RUPERT.webp';
-import vianImage from '@/assets/products/VIAN.webp';
-import litzImage from '@/assets/products/LITZ.webp';
-import iluminareImage from '@/assets/products/ILUMINARE.webp';
-import felyImage from '@/assets/products/FELY.webp';
-import lenskiImage from '@/assets/products/LENSKI.webp';
-import reiImage from '@/assets/products/REI.webp';
-import nicolImage from '@/assets/products/NICOL.webp';
-import joeImage from '@/assets/products/JOE.webp';
-import marImage from '@/assets/products/MAR.webp';
-import gregImage from '@/assets/products/GREG.webp';
-
-// Type 2 Products
-import Nicol2 from '@/assets/products/Nicol2.webp';
-import Litz3 from '@/assets/products/Litz3.webp';
-
-const allProducts = [
-    // ===== TYPE 1 =====
-    {
-        id: 1,
-        name: 'Jaime',
-        notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱500',
-        image: jaimeImage,
-        tag: 'New',
-        gender: 'Women',
-        story: 'Jaime is a floral fruity fragrance for women with passionfruit and bitter orange opening into passion flower and gardenia. The name references the Brazilian paraiba tourmaline, bringing an exotic blue-green elegance to the scent.',
-        type: 1,
-    },
-    {
-        id: 2,
-        name: 'Dorz',
-        notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱500',
-        image: dorzImage,
-        tag: 'Featured',
-        gender: 'Women',
-        story: 'Dorz is an oriental floral fragrance for women with hyacinth, coconut, asafoetida, peach, mandarin orange and bergamot leading into a lush heart of carnation, tuberose, jasmine, ylang-ylang, narcissus, orange blossom, frangipani and iris. It finishes with vanilla, sandalwood, heliotrope, cedar, oakmoss and musk.',
-        type: 1,
-    },
-    {
-        id: 3,
-        name: 'Rupert',
-        notes: '100% Pure Oil Fragrance • For Men',
-        price: '₱500',
-        image: rupertImage,
-        tag: null,
-        gender: 'Men',
-        story: 'Rupert opens with the juicy freshness of Calabrian bergamot and reveals a powerfully woody amber trail inspired by vast blue skies over a white-hot desert landscape.',
-        type: 1,
-    },
-    {
-        id: 4,
-        name: 'Vian',
-        notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱500',
-        image: vianImage,
-        tag: null,
-        gender: 'Women',
-        story: 'Vian is a sweet fruity floral fragrance that blends luscious red berries, datura flower, white musk, and patchouli into a romantic, long-lasting scent that captures the passion of Paris.',
-        type: 1,
-    },
-    {
-        id: 5,
-        name: 'Litz',
-        notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱500',
-        image: litzImage,
-        tag: null,
-        gender: 'Women',
-        story: 'Litz is a floral fruity fragrance with orange, peach, blood orange, coriander and cardamom in the opening, jasmine, coriander, cardamom, violet leaf and carrot seeds in the heart, and vanilla, musk and sandalwood at the base.',
-        type: 1,
-    },
-    {
-        id: 6,
-        name: 'Iluminare',
-        notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱500',
-        image: iluminareImage,
-        tag: null,
-        gender: 'Women',
-        story: 'Iluminare is a floral fragrance inspired by Gucci Bloom with jasmine at the top, tuberose in the heart, and rangoon creeper at the base for an elegant bloom.',
-        type: 1,
-    },
-    {
-        id: 7,
-        name: 'Fely',
-        notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱500',
-        image: felyImage,
-        tag: null,
-        gender: 'Women',
-        story: 'Fely is a floral fruity fragrance for women with quince and grapefruit opening into rose and jasmine, resting on a white musk base.',
-        type: 1,
-    },
-    {
-        id: 8,
-        name: 'Lenzki',
-        notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱500',
-        image: lenskiImage,
-        tag: null,
-        gender: 'Women',
-        story: 'Lenzki is a rich perfume extract that balances jasmine, ambergris and bitter almond in a luminous composition with vivid red shades and a mythical crystal-house elegance.',
-        type: 1,
-    },
-    {
-        id: 9,
-        name: 'Rei',
-        notes: '100% Pure Oil Fragrance • For Men',
-        price: '₱500',
-        image: reiImage,
-        tag: null,
-        gender: 'Men',
-        story: 'Rei blends bitter citrus and rosemary with salty sea notes and warm woody musk for a Mediterranean-inspired scent with sunny warmth and a crisp trail.',
-        type: 1,
-    },
-    {
-        id: 10,
-        name: 'Nicol',
-        notes: '100% Pure Oil Fragrance • For Men',
-        price: '₱500',
-        image: nicolImage,
-        tag: null,
-        gender: 'Men',
-        story: 'Nicol is a modern and fresh fragrance that feels clean, clear and compelling, reflecting the changing moods of the ocean with confidence.',
-        type: 1,
-    },
-    {
-        id: 11,
-        name: 'Joe',
-        notes: '100% Pure Oil Fragrance • For Men',
-        price: '₱500',
-        image: joeImage,
-        tag: null,
-        gender: 'Men',
-        story: 'Joe is a citrus aromatic fragrance for men featuring lime, green notes, mandarin orange and lemon with a heart of freesia, jasmine, lily-of-the-valley and rose, finished with cypress, musk, guaiac wood and cedar.',
-        type: 1,
-    },
-    {
-        id: 12,
-        name: 'Mar',
-        notes: '100% Pure Oil Fragrance • For Men',
-        price: '₱500',
-        image: marImage,
-        tag: null,
-        gender: 'Men',
-        story: 'Mar is a tantalizing citrus fragrance with bergamot, black currant, red apple and pineapple opening into jasmine, rose and patchouli before settling into oak moss, amber and creamy vanilla.',
-        type: 1,
-    },
-    {
-        id: 13,
-        name: 'Greg',
-        notes: '100% Pure Oil Fragrance • For Men',
-        price: '₱500',
-        image: gregImage,
-        tag: null,
-        gender: 'Men',
-        story: 'Greg is an aromatic green fragrance with aldehydes, artemisia, lavender, mandarin orange, mint, neroli, bergamot and lemon leading into cyclamen, ginger, seagrass, jasmine, rose, Brazilian rosewood and geranium, and finishing with sandalwood, amber, musk, guaiac wood and cedar.',
-        type: 1,
-    },
-
-    // ===== TYPE 2 (variants with different images) =====
-    {
-        id: 14,
-        name: 'Nicol',
-        notes: '100% Pure Oil Fragrance • For Men',
-        price: '₱500',
-        image: Nicol2,
-        tag: null,
-        gender: 'Men',
-        story: 'Nicol is a modern and fresh fragrance that feels clean, clear and compelling, reflecting the changing moods of the ocean with confidence.',
-        type: 2,
-    },
-    {
-        id: 15,
-        name: 'Litz',
-        notes: '100% Pure Oil Fragrance • For Women',
-        price: '₱500',
-        image: Litz3,
-        tag: null,
-        gender: 'Women',
-        story: 'Litz is a floral fruity fragrance with orange, peach, blood orange, coriander and cardamom in the opening, jasmine, coriander, cardamom, violet leaf and carrot seeds in the heart, and vanilla, musk and sandalwood at the base.',
-        type: 2,
-    },
-];
+import { getPublicProducts } from '../../../api/products';
+import Paradoxie from '@/assets/products/Paradoxie.webp';
 
 export default function Products() {
     const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -202,16 +14,35 @@ export default function Products() {
     const [selectedTag, setSelectedTag] = useState('All');
     const [selectedGender, setSelectedGender] = useState('All');
     const [selectedType, setSelectedType] = useState('1');
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     const [isLoaded, setIsLoaded] = useState(false);
 
-    const uniqueTags = ['All', ...new Set(allProducts.map(p => p.tag).filter(Boolean))];
-    const genderOptions = ['All', 'Men', 'Women'];
+    const uniqueTags = ['All', ...new Set(products.map(p => p.tag).filter(Boolean))];
+    const genderOptions = ['All', 'Men', 'Women', 'Unisex'];
     const typeOptions = ['1', '2'];
 
-    const filteredProducts = allProducts.filter(product => {
-        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            product.notes.toLowerCase().includes(searchQuery.toLowerCase());
+    useEffect(() => {
+        const loadProducts = async () => {
+            try {
+                setLoading(true);
+                const data = await getPublicProducts();
+                setProducts(data);
+            } catch (err) {
+                setError(err.response?.data?.message || 'Unable to load products.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadProducts();
+    }, []);
+
+    const filteredProducts = products.filter(product => {
+        const matchesSearch = (product.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (product.notes || '').toLowerCase().includes(searchQuery.toLowerCase());
         const matchesTag = selectedTag === 'All' ? true : product.tag === selectedTag;
         const matchesGender = selectedGender === 'All' ? true : product.gender === selectedGender;
         const matchesType = product.type === parseInt(selectedType, 10);
@@ -351,12 +182,16 @@ export default function Products() {
                         </div>
                     </div>
 
+                    {error && <div className="mb-8 rounded-2xl border border-rose-400/30 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-900/20 dark:text-rose-300">{error}</div>}
+
                     {/* Product Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-                        {filteredProducts.length > 0 ? (
+                        {loading ? (
+                            <div className="col-span-full rounded-2xl border border-dashed border-black/10 p-10 text-center text-sm text-black/60 dark:border-white/10 dark:text-white/60">Loading fragrances…</div>
+                        ) : filteredProducts.length > 0 ? (
                             filteredProducts.map((product, index) => (
                                 <div
-                                    key={product.id}
+                                    key={product._id || product.name}
                                     className={`group relative cursor-pointer transition-all duration-700 ease-out transform ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
                                         }`}
                                     style={{ transitionDelay: `${index * 80}ms` }}
@@ -367,7 +202,7 @@ export default function Products() {
                                     <div className="relative aspect-[3/4] overflow-hidden mb-4 sm:mb-6 bg-warm-white/50 dark:bg-charcoal/50 backdrop-blur-sm">
                                         <div className="absolute inset-4 border border-old-gold/10 z-10 pointer-events-none group-hover:border-old-gold/30 transition-colors duration-500" />
                                         <img
-                                            src={product.image}
+                                            src={product.image || Paradoxie}
                                             alt={product.name}
                                             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                                         />
@@ -377,9 +212,11 @@ export default function Products() {
                                         <div className="absolute top-4 right-4 z-20">
                                             <span className={`font-jost text-[10px] tracking-[0.1em] uppercase px-2 py-1 rounded-full border ${product.gender === 'Men'
                                                 ? 'bg-blue-900/20 border-blue-400/40 text-blue-200'
-                                                : 'bg-pink-900/20 border-pink-400/40 text-pink-200'
+                                                : product.gender === 'Women'
+                                                    ? 'bg-pink-900/20 border-pink-400/40 text-pink-200'
+                                                    : 'bg-amber-900/20 border-amber-400/40 text-amber-200'
                                                 }`}>
-                                                {product.gender === 'Men' ? '♂' : '♀'}
+                                                {product.gender === 'Men' ? '♂' : product.gender === 'Women' ? '♀' : '✦'}
                                             </span>
                                         </div>
 
@@ -466,7 +303,7 @@ export default function Products() {
                         <div className="grid md:grid-cols-2 gap-0">
                             <div className="relative aspect-[4/5] md:aspect-auto md:h-full overflow-hidden bg-warm-white/30 dark:bg-charcoal/30">
                                 <img
-                                    src={selectedProduct.image}
+                                    src={selectedProduct.image || Paradoxie}
                                     alt={selectedProduct.name}
                                     className="w-full h-full object-cover"
                                 />
@@ -481,9 +318,11 @@ export default function Products() {
                                 <div className="absolute top-4 right-4 z-10">
                                     <span className={`font-jost text-[10px] tracking-[0.1em] uppercase px-2 py-1 rounded-full border ${selectedProduct.gender === 'Men'
                                         ? 'bg-blue-900/20 border-blue-400/40 text-blue-200'
-                                        : 'bg-pink-900/20 border-pink-400/40 text-pink-200'
+                                        : selectedProduct.gender === 'Women'
+                                            ? 'bg-pink-900/20 border-pink-400/40 text-pink-200'
+                                            : 'bg-amber-900/20 border-amber-400/40 text-amber-200'
                                         }`}>
-                                        {selectedProduct.gender === 'Men' ? '♂' : '♀'}
+                                        {selectedProduct.gender === 'Men' ? '♂' : selectedProduct.gender === 'Women' ? '♀' : '✦'}
                                     </span>
                                 </div>
                             </div>
