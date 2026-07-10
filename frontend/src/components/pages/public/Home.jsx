@@ -695,36 +695,40 @@ function Lifestyle() {
 }
 
 // ---------- TESTIMONIALS Section ----------
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return '';
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('data:')) {
+    return imagePath;
+  }
+
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  return `${baseUrl}${imagePath.startsWith('/') ? imagePath : `/${imagePath}`}`;
+};
+
 function Testimonials() {
   const sectionRef = useRef(null);
   const headingRef = useRef(null);
   const imageRefs = useRef([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
+  const [testimonialsData, setTestimonialsData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const testimonialsData = [
-    {
-      author: 'Isabella Reyes',
-      location: 'Manila, Philippines',
-      quote:
-        "Wel Fragrance Collection has completely transformed how I approach my daily ritual. The Midnight Orchid is now my signature scent — people always ask what I'm wearing.",
-      rating: 5,
-    },
-    {
-      author: 'Marcus Chen',
-      location: 'Vancouver, Canada',
-      quote:
-        "I discovered Wel in Toronto and was immediately captivated. The craftsmanship is extraordinary — each fragrance tells a story that feels deeply personal.",
-      rating: 5,
-    },
-    {
-      author: 'Sofia Alonzo',
-      location: 'Cebu, Philippines',
-      quote:
-        "Gifting a Wel fragrance has become my go-to for every special occasion. The packaging alone is a work of art, but the scent... unforgettable.",
-      rating: 5,
-    },
-  ];
+  useEffect(() => {
+    const loadTestimonials = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/testimonials/public`);
+        const data = await response.json();
+        setTestimonialsData(data);
+      } catch (error) {
+        console.error('Failed to load testimonials', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTestimonials();
+  }, []);
 
   const testimonialsImages = [
     { imgSrc: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=300', alt: 'Professional Man' },
@@ -776,8 +780,7 @@ function Testimonials() {
         },
       });
 
-      imageRefs.current.forEach((el, i) => {
-        if (!el) return;
+      imageRefs.current.filter(Boolean).forEach((el, i) => {
         const delay = 0.1 + i * 0.08;
         gsap.from(el, {
           opacity: 0,
@@ -794,7 +797,7 @@ function Testimonials() {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [testimonialsData.length, loading]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -813,7 +816,8 @@ function Testimonials() {
     }
   };
 
-  const selectedTestimonial = selectedIndex !== null ? testimonialsData[selectedIndex % testimonialsData.length] : null;
+  const displayedTestimonials = testimonialsData.slice(0, imagePositions.length);
+  const selectedTestimonial = selectedIndex !== null ? displayedTestimonials[selectedIndex] : null;
   const selectedImage = selectedIndex !== null ? testimonialsImages[selectedIndex % testimonialsImages.length] : null;
 
   return (
@@ -838,78 +842,88 @@ function Testimonials() {
         </div>
 
         <div className="relative w-full" style={{ minHeight: '650px' }}>
-          <div className="absolute inset-0">
-            {imagePositions.map((pos, index) => {
-              const image = testimonialsImages[index % testimonialsImages.length];
-              const testimonial = testimonialsData[index % testimonialsData.length];
-              const floatDuration = 4 + Math.random() * 5;
-              const floatDelay = Math.random() * 2;
-              const floatStyle = {
-                animation: `float ${floatDuration}s ease-in-out ${floatDelay}s infinite alternate`,
-                willChange: 'transform',
-              };
+          {loading ? (
+            <div className="absolute inset-0 flex items-center justify-center text-sm text-warm-gray dark:text-warm-white/70">Loading testimonials…</div>
+          ) : testimonialsData.length === 0 ? (
+            <div className="absolute inset-0 flex items-center justify-center text-center text-sm text-warm-gray dark:text-warm-white/70 px-6">
+              No approved testimonials yet. Be the first to share your story.
+            </div>
+          ) : (
+            <>
+              <div className="absolute inset-0">
+                {displayedTestimonials.map((testimonial, index) => {
+                  const pos = imagePositions[index];
+                  const image = testimonialsImages[index % testimonialsImages.length];
+                  const floatDuration = 4 + Math.random() * 5;
+                  const floatDelay = Math.random() * 2;
+                  const floatStyle = {
+                    animation: `float ${floatDuration}s ease-in-out ${floatDelay}s infinite alternate`,
+                    willChange: 'transform',
+                  };
 
-              return (
-                <div
-                  key={index}
-                  ref={(el) => (imageRefs.current[index] = el)}
-                  className={cn(
-                    'absolute rounded-lg shadow-xl border-2 border-old-gold/10 hover:border-old-gold/30 transition-all duration-300 group cursor-pointer',
-                    pos.className
-                  )}
-                  style={{
-                    top: pos.top,
-                    left: pos.left,
-                    right: pos.right,
-                    bottom: pos.bottom,
-                    ...floatStyle,
-                  }}
-                  onClick={() => handleImageClick(index)}
-                >
-                  <img
-                    src={image.imgSrc}
-                    alt={image.alt}
-                    loading="lazy"
-                    className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110"
-                  />
+                  return (
+                    <div
+                      key={testimonial._id || `${testimonial.firstName}-${index}`}
+                      ref={(el) => (imageRefs.current[index] = el)}
+                      className={cn(
+                        'absolute rounded-lg shadow-xl border-2 border-old-gold/10 hover:border-old-gold/30 transition-all duration-300 group cursor-pointer',
+                        pos.className
+                      )}
+                      style={{
+                        top: pos.top,
+                        left: pos.left,
+                        right: pos.right,
+                        bottom: pos.bottom,
+                        ...floatStyle,
+                      }}
+                      onClick={() => handleImageClick(index)}
+                    >
+                      <img
+                        src={getImageUrl(testimonial.profilePicture) || image.imgSrc}
+                        alt={testimonial.firstName || image.alt}
+                        loading="lazy"
+                        className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110"
+                      />
 
-                  <div
-                    className={cn(
-                      'hidden lg:block absolute z-30 w-56 p-3 rounded-lg bg-warm-white/95 dark:bg-charcoal/95 backdrop-blur-sm border border-old-gold/20 shadow-xl transition-all duration-300',
-                      'bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2',
-                      'opacity-0 pointer-events-none',
-                      'group-hover:opacity-100 group-hover:pointer-events-auto group-hover:-translate-y-1'
-                    )}
-                    style={{ transformOrigin: 'bottom center' }}
-                  >
-                    <Stars count={testimonial.rating} />
-                    <blockquote className="mt-1.5 font-cormorant italic text-xs sm:text-sm text-dark-teal dark:text-warm-white leading-snug text-center">
-                      "{testimonial.quote}"
-                    </blockquote>
-                    <div className="mt-2 text-center">
-                      <p className="font-jost text-[9px] sm:text-[10px] tracking-[0.15em] text-old-gold uppercase">
-                        {testimonial.author}
-                      </p>
-                      <p className="font-inter text-warm-gray dark:text-warm-white/60 text-[9px] sm:text-[10px] mt-0.5">
-                        {testimonial.location}
-                      </p>
+                      <div
+                        className={cn(
+                          'hidden lg:block absolute z-30 w-56 p-3 rounded-lg bg-warm-white/95 dark:bg-charcoal/95 backdrop-blur-sm border border-old-gold/20 shadow-xl transition-all duration-300',
+                          'bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2',
+                          'opacity-0 pointer-events-none',
+                          'group-hover:opacity-100 group-hover:pointer-events-auto group-hover:-translate-y-1'
+                        )}
+                        style={{ transformOrigin: 'bottom center' }}
+                      >
+                        <Stars count={testimonial.rating} />
+                        <blockquote className="mt-1.5 font-cormorant italic text-xs sm:text-sm text-dark-teal dark:text-warm-white leading-snug text-center">
+                          "{testimonial.message}"
+                        </blockquote>
+                        <div className="mt-2 text-center">
+                          <p className="font-jost text-[9px] sm:text-[10px] tracking-[0.15em] text-old-gold uppercase">
+                            {testimonial.firstName} {testimonial.lastName}
+                          </p>
+                          <p className="font-inter text-warm-gray dark:text-warm-white/60 text-[9px] sm:text-[10px] mt-0.5">
+                            {testimonial.email}
+                          </p>
+                        </div>
+                        <div className="absolute left-1/2 -bottom-1.5 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-warm-white/95 dark:bg-charcoal/95 border-r border-b border-old-gold/20" />
+                      </div>
                     </div>
-                    <div className="absolute left-1/2 -bottom-1.5 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-warm-white/95 dark:bg-charcoal/95 border-r border-b border-old-gold/20" />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                  );
+                })}
+              </div>
 
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-            <Link
-              to="/contact"
-              className="pointer-events-auto group relative px-8 sm:px-12 py-4 sm:py-5 bg-old-gold text-warm-white dark:text-dark-teal font-jost text-sm sm:text-base tracking-[0.15em] uppercase font-medium overflow-hidden transition-all hover:shadow-[0_0_40px_rgba(199,159,72,0.3)]"
-            >
-              <span className="relative z-10">Share Your Story</span>
-              <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
-            </Link>
-          </div>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                <Link
+                  to="/contact"
+                  className="pointer-events-auto group relative px-8 sm:px-12 py-4 sm:py-5 bg-old-gold text-warm-white dark:text-dark-teal font-jost text-sm sm:text-base tracking-[0.15em] uppercase font-medium overflow-hidden transition-all hover:shadow-[0_0_40px_rgba(199,159,72,0.3)]"
+                >
+                  <span className="relative z-10">Share Your Story</span>
+                  <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -934,21 +948,21 @@ function Testimonials() {
 
             <div className="flex flex-col items-center text-center">
               <img
-                src={selectedImage.imgSrc}
-                alt={selectedImage.alt}
+                src={getImageUrl(selectedTestimonial.profilePicture) || selectedImage.imgSrc}
+                alt={selectedTestimonial.firstName || selectedImage.alt}
                 loading="lazy"
                 className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover border-4 border-old-gold/20 shadow-lg mb-4"
               />
               <Stars count={selectedTestimonial.rating} />
               <blockquote className="mt-4 font-cormorant italic text-lg sm:text-xl text-dark-teal dark:text-warm-white leading-relaxed">
-                "{selectedTestimonial.quote}"
+                "{selectedTestimonial.message}"
               </blockquote>
               <div className="mt-4">
                 <p className="font-jost text-xs sm:text-sm tracking-[0.15em] text-old-gold uppercase">
-                  {selectedTestimonial.author}
+                  {selectedTestimonial.firstName} {selectedTestimonial.lastName}
                 </p>
                 <p className="font-inter text-warm-gray dark:text-warm-white/60 text-xs sm:text-sm mt-0.5">
-                  {selectedTestimonial.location}
+                  {selectedTestimonial.email}
                 </p>
               </div>
             </div>
