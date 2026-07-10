@@ -76,9 +76,17 @@ export function AuthProvider({ children }) {
     return response.data;
   };
 
-  const logout = () => {
-    setAuthToken(null);
-    persistAuth(null, null);
+  const logout = async () => {
+    try {
+      if (token) {
+        await api.post('/api/auth/logout');
+      }
+    } catch {
+      // Ignore logout errors and clear local session state.
+    } finally {
+      setAuthToken(null);
+      persistAuth(null, null);
+    }
   };
 
   const refreshUser = async () => {

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
 const { protect, adminOnly } = require("../middleware/auth");
+const { logActivity } = require("../utils/audit");
 
 const serializeProduct = (product) => ({
   _id: product._id,
@@ -81,6 +82,15 @@ router.post("/", protect, adminOnly, async (req, res) => {
       isActive: payload.isActive !== false,
     });
 
+    await logActivity({
+      req,
+      user: req.user,
+      action: "Create",
+      module: "Products",
+      description: `Created product ${product.name}`,
+      resourceId: product._id.toString(),
+    });
+
     res.status(201).json(serializeProduct(product));
   } catch (error) {
     res.status(500).json({ message: "Failed to create product", error: error.message });
@@ -109,6 +119,16 @@ router.put("/:id", protect, adminOnly, async (req, res) => {
     });
 
     await product.save();
+
+    await logActivity({
+      req,
+      user: req.user,
+      action: "Update",
+      module: "Products",
+      description: `Updated product ${product.name}`,
+      resourceId: product._id.toString(),
+    });
+
     res.json(serializeProduct(product));
   } catch (error) {
     res.status(500).json({ message: "Failed to update product", error: error.message });
@@ -122,6 +142,15 @@ router.delete("/:id", protect, adminOnly, async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    await logActivity({
+      req,
+      user: req.user,
+      action: "Delete",
+      module: "Products",
+      description: `Deleted product ${product.name}`,
+      resourceId: product._id.toString(),
+    });
 
     res.json({ message: "Product deleted successfully" });
   } catch (error) {

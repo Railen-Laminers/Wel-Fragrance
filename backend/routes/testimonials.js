@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Testimonial = require("../models/Testimonial");
 const { protect, adminOnly } = require("../middleware/auth");
+const { logActivity, createNotification } = require("../utils/audit");
 
 const serializeTestimonial = (testimonial) => ({
   _id: testimonial._id,
@@ -100,6 +101,23 @@ router.post("/", async (req, res) => {
       status: "Pending",
     });
 
+    await logActivity({
+      req,
+      user: null,
+      action: "Create",
+      module: "Testimonials",
+      description: `New testimonial submitted by ${firstName.trim()} ${lastName.trim()}`,
+      resourceId: testimonial._id.toString(),
+    });
+
+    await createNotification({
+      recipientUserIds: [],
+      title: "Pending testimonial",
+      message: `A new testimonial from ${firstName.trim()} ${lastName.trim()} is waiting for approval.`,
+      link: "/admin/testimonials",
+      type: "info",
+    });
+
     res.status(201).json(serializeTestimonial(testimonial));
   } catch (error) {
     res.status(500).json({ message: "Failed to submit testimonial", error: error.message });
@@ -122,6 +140,16 @@ router.put("/:id", protect, adminOnly, async (req, res) => {
     });
 
     await testimonial.save();
+
+    await logActivity({
+      req,
+      user: req.user,
+      action: "Update",
+      module: "Testimonials",
+      description: `Updated testimonial ${testimonial._id}`,
+      resourceId: testimonial._id.toString(),
+    });
+
     res.json(serializeTestimonial(testimonial));
   } catch (error) {
     res.status(500).json({ message: "Failed to update testimonial", error: error.message });
@@ -145,6 +173,15 @@ router.patch("/:id/status", protect, adminOnly, async (req, res) => {
     testimonial.status = status;
     await testimonial.save();
 
+    await logActivity({
+      req,
+      user: req.user,
+      action: status === "Approved" ? "Approve" : status === "Rejected" ? "Reject" : "Update",
+      module: "Testimonials",
+      description: `Set testimonial ${testimonial._id} to ${status}`,
+      resourceId: testimonial._id.toString(),
+    });
+
     res.json(serializeTestimonial(testimonial));
   } catch (error) {
     res.status(500).json({ message: "Failed to update testimonial status", error: error.message });
@@ -158,6 +195,15 @@ router.delete("/:id", protect, adminOnly, async (req, res) => {
     if (!testimonial) {
       return res.status(404).json({ message: "Testimonial not found" });
     }
+
+    await logActivity({
+      req,
+      user: req.user,
+      action: "Delete",
+      module: "Testimonials",
+      description: `Deleted testimonial ${req.params.id}`,
+      resourceId: req.params.id,
+    });
 
     res.json({ message: "Testimonial deleted successfully" });
   } catch (error) {

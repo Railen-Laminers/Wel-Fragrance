@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Inquiry = require("../models/Inquiry");
 const { protect, adminOnly } = require("../middleware/auth");
+const { logActivity, createNotification } = require("../utils/audit");
 
 const serializeInquiry = (inquiry) => ({
   _id: inquiry._id,
@@ -61,6 +62,23 @@ router.post("/", async (req, res) => {
       status: "New",
     });
 
+    await logActivity({
+      req,
+      user: null,
+      action: "Create",
+      module: "Inquiries",
+      description: `New inquiry submitted by ${firstName.trim()} ${lastName.trim()}`,
+      resourceId: inquiry._id.toString(),
+    });
+
+    await createNotification({
+      recipientUserIds: [],
+      title: "New inquiry received",
+      message: `A new inquiry from ${firstName.trim()} ${lastName.trim()} is awaiting review.`,
+      link: "/admin/inquiries",
+      type: "info",
+    });
+
     res.status(201).json(serializeInquiry(inquiry));
   } catch (error) {
     res.status(500).json({ message: "Failed to submit inquiry", error: error.message });
@@ -78,6 +96,15 @@ router.patch("/:id/read", protect, adminOnly, async (req, res) => {
     inquiry.status = "Read";
     await inquiry.save();
 
+    await logActivity({
+      req,
+      user: req.user,
+      action: "Update",
+      module: "Inquiries",
+      description: `Marked inquiry ${inquiry._id} as read`,
+      resourceId: inquiry._id.toString(),
+    });
+
     res.json(serializeInquiry(inquiry));
   } catch (error) {
     res.status(500).json({ message: "Failed to update inquiry", error: error.message });
@@ -91,6 +118,15 @@ router.delete("/:id", protect, adminOnly, async (req, res) => {
     if (!inquiry) {
       return res.status(404).json({ message: "Inquiry not found" });
     }
+
+    await logActivity({
+      req,
+      user: req.user,
+      action: "Delete",
+      module: "Inquiries",
+      description: `Deleted inquiry ${req.params.id}`,
+      resourceId: req.params.id,
+    });
 
     res.json({ message: "Inquiry deleted successfully" });
   } catch (error) {

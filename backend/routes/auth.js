@@ -2,6 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { protect, adminOnly } = require("../middleware/auth");
+const { logActivity, createNotification } = require("../utils/audit");
 
 const router = express.Router();
 
@@ -63,6 +64,16 @@ router.post("/register", async (req, res) => {
       role: role === "admin" ? "admin" : "customer",
     });
 
+    await logActivity({
+      req,
+      user,
+      action: "Create",
+      module: "Users",
+      description: `Registered a new customer account for ${user.firstName} ${user.lastName}`,
+      resourceId: user._id.toString(),
+      metadata: { role: user.role },
+    });
+
     res.status(201).json({
       message: "User registered successfully",
       user: serializeUser(user),
@@ -96,6 +107,16 @@ router.post("/register-admin", protect, adminOnly, async (req, res) => {
       role: "admin",
     });
 
+    await logActivity({
+      req,
+      user: req.user,
+      action: "Create",
+      module: "Users",
+      description: `Created a new admin account for ${user.firstName} ${user.lastName}`,
+      resourceId: user._id.toString(),
+      metadata: { role: user.role },
+    });
+
     res.status(201).json({
       message: "Admin registered successfully",
       user: serializeUser(user),
@@ -125,6 +146,16 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    await logActivity({
+      req,
+      user,
+      action: "Login",
+      module: "Auth",
+      description: `${user.firstName} ${user.lastName} signed in`,
+      resourceId: user._id.toString(),
+      metadata: { role: user.role },
+    });
+
     res.json({
       message: "Login successful",
       user: serializeUser(user),
@@ -138,6 +169,24 @@ router.post("/login", async (req, res) => {
 router.get("/me", protect, async (req, res) => {
   const user = await User.findById(req.user._id);
   res.json({ user: serializeUser(user) });
+});
+
+router.post("/logout", protect, async (req, res) => {
+  try {
+    await logActivity({
+      req,
+      user: req.user,
+      action: "Logout",
+      module: "Auth",
+      description: `${req.user.firstName} ${req.user.lastName} signed out`,
+      resourceId: req.user._id.toString(),
+      metadata: { role: req.user.role },
+    });
+
+    res.json({ message: "Logout successful" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to complete logout", error: error.message });
+  }
 });
 
 router.get("/contact-info", async (req, res) => {
@@ -218,6 +267,15 @@ router.put("/profile", protect, async (req, res) => {
 
     await user.save();
 
+    await logActivity({
+      req,
+      user,
+      action: "Update",
+      module: "Profile",
+      description: `${user.firstName} ${user.lastName} updated profile information`,
+      resourceId: user._id.toString(),
+    });
+
     res.json({
       message: "Profile updated successfully",
       user: serializeUser(user),
@@ -251,6 +309,23 @@ router.put("/change-password", protect, async (req, res) => {
 
     user.password = newPassword;
     await user.save();
+
+    await logActivity({
+      req,
+      user,
+      action: "Update",
+      module: "Profile",
+      description: `${user.firstName} ${user.lastName} changed their password`,
+      resourceId: user._id.toString(),
+    });
+
+    await createNotification({
+      recipientUserIds: [user._id],
+      title: "Password updated",
+      message: "Your password was changed successfully.",
+      link: "/profile",
+      type: "warning",
+    });
 
     res.json({ message: "Password updated successfully" });
   } catch (error) {

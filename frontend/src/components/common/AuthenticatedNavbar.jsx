@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import api from '../../api/axios';
 import { Link, useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -75,6 +76,12 @@ const IconBell = () => (
     </svg>
 );
 
+const IconCheck = () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    </svg>
+);
+
 const IconExpand = () => (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
@@ -84,6 +91,12 @@ const IconExpand = () => (
 const IconCollapse = () => (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+    </svg>
+);
+
+const IconAudit = () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3" />
     </svg>
 );
 
@@ -124,16 +137,42 @@ export default function AuthenticatedNavbar({ children }) {
 
     const [sidebarExpanded, setSidebarExpanded] = useState(true);
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+    const [notificationOpen, setNotificationOpen] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
     const dropdownRef = useRef(null);
+    const notificationRef = useRef(null);
 
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setProfileDropdownOpen(false);
             }
+            if (notificationRef.current && !notificationRef.current.contains(e.target)) {
+                setNotificationOpen(false);
+            }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const loadNotifications = async () => {
+        try {
+            const response = await api.get('/api/notifications');
+            setNotifications(response.data.notifications || []);
+            setUnreadCount(response.data.unreadCount || 0);
+        } catch (error) {
+            console.error('Failed to load notifications', error);
+        }
+    };
+
+    useEffect(() => {
+        loadNotifications();
+        const interval = window.setInterval(() => {
+            loadNotifications();
+        }, 15000);
+
+        return () => window.clearInterval(interval);
     }, []);
 
     const getSidebarItems = () => {
@@ -143,6 +182,7 @@ export default function AuthenticatedNavbar({ children }) {
                 { to: '/admin/products', icon: <IconProducts />, label: 'Products' },
                 { to: '/admin/testimonials', icon: <IconTestimonials />, label: 'Testimonials' },
                 { to: '/admin/inquiries', icon: <IconMails />, label: 'Inquiries' },
+                { to: '/admin/audit-logs', icon: <IconAudit />, label: 'Audit Logs' },
             ];
         } else {
             return [
@@ -156,6 +196,33 @@ export default function AuthenticatedNavbar({ children }) {
     const items = getSidebarItems();
 
     const toggleExpand = () => setSidebarExpanded(prev => !prev);
+
+    const handleNotificationClick = async (notification) => {
+        if (!notification.read) {
+            try {
+                await api.patch(`/api/notifications/${notification._id}/read`);
+                setNotifications((current) => current.map((item) => item._id === notification._id ? { ...item, read: true } : item));
+                setUnreadCount((current) => Math.max(0, current - 1));
+            } catch (error) {
+                console.error('Failed to mark notification read', error);
+            }
+        }
+
+        if (notification.link) {
+            navigate(notification.link);
+            setNotificationOpen(false);
+        }
+    };
+
+    const handleMarkAllAsRead = async () => {
+        try {
+            await api.patch('/api/notifications/mark-all-read');
+            setNotifications((current) => current.map((item) => ({ ...item, read: true })));
+            setUnreadCount(0);
+        } catch (error) {
+            console.error('Failed to mark all notifications as read', error);
+        }
+    };
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -179,10 +246,51 @@ export default function AuthenticatedNavbar({ children }) {
                     </Link>
                 </div>
                 <div className="ml-auto flex items-center gap-4">
-                    <button className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors relative" aria-label="Notifications">
-                        <IconBell />
-                        <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                    </button>
+                    <div className="relative" ref={notificationRef}>
+                        <button
+                            onClick={() => setNotificationOpen((current) => !current)}
+                            className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors relative"
+                            aria-label="Notifications"
+                        >
+                            <IconBell />
+                            {unreadCount > 0 && (
+                                <span className="absolute top-1 right-1 min-w-4 h-4 rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white flex items-center justify-center">
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </span>
+                            )}
+                        </button>
+                        {notificationOpen && (
+                            <div className="absolute right-0 mt-2 w-80 rounded-xl border border-black/10 bg-white p-2 shadow-xl dark:border-white/10 dark:bg-dark-teal z-50">
+                                <div className="mb-2 flex items-center justify-between px-2 py-1">
+                                    <span className="text-sm font-semibold">Notifications</span>
+                                    <button onClick={handleMarkAllAsRead} className="text-xs text-old-gold hover:underline">
+                                        Mark all read
+                                    </button>
+                                </div>
+                                <div className="max-h-80 overflow-y-auto">
+                                    {notifications.length === 0 ? (
+                                        <div className="px-3 py-4 text-center text-sm text-black/60 dark:text-white/60">No notifications yet.</div>
+                                    ) : notifications.map((notification) => (
+                                        <button
+                                            key={notification._id}
+                                            onClick={() => handleNotificationClick(notification)}
+                                            className={`flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left transition ${notification.read ? 'hover:bg-black/5 dark:hover:bg-white/10' : 'bg-old-gold/10 dark:bg-old-gold/20'}`}
+                                        >
+                                            <span className={`mt-1 h-2.5 w-2.5 rounded-full ${notification.read ? 'bg-transparent' : 'bg-old-gold'}`} />
+                                            <span className="flex-1">
+                                                <span className="block text-sm font-medium">{notification.title}</span>
+                                                <span className="mt-1 block text-xs text-black/60 dark:text-white/60">{notification.message}</span>
+                                                <span className="mt-1 block text-[11px] text-black/50 dark:text-white/50">
+                                                    {new Date(notification.createdAt).toLocaleString()}
+                                                </span>
+                                            </span>
+                                            {!notification.read && <IconCheck />}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                     <div className="relative" ref={dropdownRef}>
                         <button
                             onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}

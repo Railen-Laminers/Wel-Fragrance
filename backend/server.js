@@ -8,6 +8,8 @@ const testimonialRoutes = require("./routes/testimonials");
 const inquiryRoutes = require("./routes/inquiries");
 const productRoutes = require("./routes/products");
 const statsRoutes = require("./routes/stats");
+const notificationRoutes = require("./routes/notifications");
+const auditLogsRoutes = require("./routes/auditLogs");
 
 const app = express();
 
@@ -29,6 +31,8 @@ app.use("/api/testimonials", testimonialRoutes);
 app.use("/api/inquiries", inquiryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/admin/stats", statsRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/admin/audit-logs", auditLogsRoutes);
 
 const PORT = process.env.PORT || 5000;
 

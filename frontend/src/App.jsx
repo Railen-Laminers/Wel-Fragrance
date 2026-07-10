@@ -25,6 +25,7 @@ const AdminDashboard = lazy(() => import('./components/pages/private/admin/Admin
 const AdminProducts = lazy(() => import('./components/pages/private/admin/AdminProducts'));
 const AdminTestimonials = lazy(() => import('./components/pages/private/admin/AdminTestimonials'));
 const AdminInquiries = lazy(() => import('./components/pages/private/admin/AdminInquiries'));
+const AdminAuditLogs = lazy(() => import('./components/pages/private/admin/AdminAuditLogs'));
 const CustomerDashboard = lazy(() => import('./components/pages/private/customer/CustomerDashboard'));
 const Profile = lazy(() => import('./components/pages/private/Profile'));
 
@@ -123,6 +124,14 @@ function AnimatedRoutes() {
             element={
               <ProtectedRoute requireAdmin>
                 <AdminInquiries />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/audit-logs"
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminAuditLogs />
               </ProtectedRoute>
             }
           />
