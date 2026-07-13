@@ -165,8 +165,18 @@ export default function Login() {
                         disabled={isSubmitting}
                         className="group relative w-full px-8 py-3 bg-old-gold text-warm-white dark:text-dark-teal font-jost text-xs sm:text-sm tracking-[0.15em] uppercase font-medium overflow-hidden transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        <span className="relative z-10">
-                            {isSubmitting ? 'Signing in…' : 'Sign in'}
+                        <span className="relative z-10 flex items-center justify-center gap-2">
+                            {isSubmitting ? (
+                                <>
+                                    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <circle cx="12" cy="12" r="9" strokeOpacity="0.25" />
+                                        <path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" />
+                                    </svg>
+                                    Signing in…
+                                </>
+                            ) : (
+                                'Sign in'
+                            )}
                         </span>
                         <span className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
                     </button>

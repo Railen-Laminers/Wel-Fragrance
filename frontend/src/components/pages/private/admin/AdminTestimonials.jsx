@@ -17,6 +17,7 @@ export default function AdminTestimonials() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
+  const [pendingActionId, setPendingActionId] = useState(null);
 
   const loadTestimonials = async () => {
     try {
@@ -36,21 +37,29 @@ export default function AdminTestimonials() {
   }, []);
 
   const handleStatusChange = async (id, status) => {
+    setPendingActionId(id);
+    setError('');
     try {
       await updateTestimonialStatus(id, status);
       await loadTestimonials();
     } catch (err) {
       setError(err.response?.data?.message || 'Could not update testimonial status.');
+    } finally {
+      setPendingActionId(null);
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this testimonial submission?')) return;
+    setPendingActionId(id);
+    setError('');
     try {
       await deleteTestimonial(id);
       await loadTestimonials();
     } catch (err) {
       setError(err.response?.data?.message || 'Could not delete testimonial.');
+    } finally {
+      setPendingActionId(null);
     }
   };
 
@@ -143,8 +152,9 @@ export default function AdminTestimonials() {
                     </label>
                     <select
                       value={item.status}
+                      disabled={pendingActionId === item._id}
                       onChange={(event) => handleStatusChange(item._id, event.target.value)}
-                      className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
+                      className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold disabled:cursor-not-allowed disabled:opacity-70 dark:border-white/10 dark:bg-dark-teal"
                     >
                       <option value="Pending">Pending</option>
                       <option value="Approved">Approved</option>
@@ -152,9 +162,20 @@ export default function AdminTestimonials() {
                     </select>
                     <button
                       onClick={() => handleDelete(item._id)}
-                      className="group relative overflow-hidden rounded-lg border border-rose-400/40 px-3 py-2 text-sm text-rose-600 transition-all hover:shadow-[0_0_20px_rgba(244,63,94,0.2)] dark:text-rose-300"
+                      disabled={pendingActionId === item._id}
+                      className="group relative overflow-hidden rounded-lg border border-rose-400/40 px-3 py-2 text-sm text-rose-600 transition-all hover:shadow-[0_0_20px_rgba(244,63,94,0.2)] disabled:cursor-not-allowed disabled:opacity-70 dark:text-rose-300"
                     >
-                      <span className="relative z-10">Delete</span>
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        {pendingActionId === item._id ? (
+                          <>
+                            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="9" strokeOpacity="0.25" />
+                              <path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" />
+                            </svg>
+                            Deleting…
+                          </>
+                        ) : 'Delete'}
+                      </span>
                       <div className="absolute inset-0 bg-rose-50 dark:bg-rose-900/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
                     </button>
                   </div>

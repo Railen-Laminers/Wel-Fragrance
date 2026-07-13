@@ -144,7 +144,8 @@ export default function AdminAuditLogs() {
                                 value={filters.user}
                                 onChange={handleChange}
                                 placeholder="User name or email"
-                                className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
+                                disabled={loading}
+                                className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold disabled:cursor-not-allowed disabled:opacity-70 dark:border-white/10 dark:bg-dark-teal"
                             />
                         </label>
 
@@ -176,11 +177,17 @@ export default function AdminAuditLogs() {
                         {/* Primary button with slide-up */}
                         <button
                             type="submit"
-                            className="group relative overflow-hidden px-4 py-2 bg-old-gold text-warm-white dark:text-dark-teal font-medium text-sm transition-all hover:shadow-[0_0_30px_rgba(199,159,72,0.3)]"
+                            disabled={loading}
+                            className="group relative overflow-hidden px-4 py-2 bg-old-gold text-warm-white dark:text-dark-teal font-medium text-sm transition-all hover:shadow-[0_0_30px_rgba(199,159,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
                         >
                             <span className="relative z-10 flex items-center gap-2">
-                                <IconFilter />
-                                Apply filters
+                                {loading ? (
+                                    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <circle cx="12" cy="12" r="9" strokeOpacity="0.25" />
+                                        <path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" />
+                                    </svg>
+                                ) : <IconFilter />}
+                                {loading ? 'Applying…' : 'Apply filters'}
                             </span>
                             <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
                         </button>
@@ -189,9 +196,10 @@ export default function AdminAuditLogs() {
                         <button
                             type="button"
                             onClick={handleReset}
-                            className="group relative overflow-hidden px-4 py-2 border border-black/10 dark:border-white/10 text-black dark:text-white font-medium text-sm transition-all"
+                            disabled={loading}
+                            className="group relative overflow-hidden px-4 py-2 border border-black/10 dark:border-white/10 text-black dark:text-white font-medium text-sm transition-all disabled:cursor-not-allowed disabled:opacity-70"
                         >
-                            <span className="relative z-10">Reset</span>
+                            <span className="relative z-10">{loading ? 'Resetting…' : 'Reset'}</span>
                             <div className="absolute inset-0 bg-black/5 dark:bg-white/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
                         </button>
                     </div>
@@ -259,19 +267,19 @@ export default function AdminAuditLogs() {
                         <button
                             type="button"
                             onClick={() => loadLogs(page - 1, filters)}
-                            disabled={page <= 1}
+                            disabled={page <= 1 || loading}
                             className="group relative overflow-hidden rounded-lg border border-black/10 dark:border-white/10 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            <span className="relative z-10">Previous</span>
+                            <span className="relative z-10">{loading ? 'Loading…' : 'Previous'}</span>
                             <div className="absolute inset-0 bg-black/5 dark:bg-white/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
                         </button>
                         <button
                             type="button"
                             onClick={() => loadLogs(page + 1, filters)}
-                            disabled={page >= totalPages}
+                            disabled={page >= totalPages || loading}
                             className="group relative overflow-hidden rounded-lg border border-black/10 dark:border-white/10 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            <span className="relative z-10">Next</span>
+                            <span className="relative z-10">{loading ? 'Loading…' : 'Next'}</span>
                             <div className="absolute inset-0 bg-black/5 dark:bg-white/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
                         </button>
                     </div>

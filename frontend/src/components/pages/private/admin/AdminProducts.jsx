@@ -36,6 +36,7 @@ export default function AdminProducts() {
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
     const [isLoaded, setIsLoaded] = useState(false);
+    const [deletingId, setDeletingId] = useState(null);
 
     // Modal state
     const [modalOpen, setModalOpen] = useState(false);
@@ -170,11 +171,15 @@ export default function AdminProducts() {
 
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this product?')) return;
+        setDeletingId(id);
+        setError('');
         try {
             await deleteProduct(id);
             await loadProducts();
         } catch (err) {
             setError(err.response?.data?.message || 'Could not delete product.');
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -514,16 +519,28 @@ export default function AdminProducts() {
                                     <div className="p-4 pt-0 flex gap-2">
                                         <button
                                             onClick={() => handleEdit(product)}
-                                            className="group/btn relative flex-1 overflow-hidden px-3 py-1.5 border border-old-gold/40 text-sm font-medium transition-all hover:shadow-[0_0_20px_rgba(199,159,72,0.2)]"
+                                            disabled={deletingId === product._id}
+                                            className="group/btn relative flex-1 overflow-hidden px-3 py-1.5 border border-old-gold/40 text-sm font-medium transition-all hover:shadow-[0_0_20px_rgba(199,159,72,0.2)] disabled:cursor-not-allowed disabled:opacity-70"
                                         >
                                             <span className="relative z-10">Edit</span>
                                             <div className="absolute inset-0 bg-old-gold/10 transform translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-out" />
                                         </button>
                                         <button
                                             onClick={() => handleDelete(product._id)}
-                                            className="group/btn relative flex-1 overflow-hidden px-3 py-1.5 border border-rose-400/40 text-rose-600 dark:text-rose-300 text-sm font-medium transition-all hover:shadow-[0_0_20px_rgba(244,63,94,0.2)]"
+                                            disabled={deletingId === product._id}
+                                            className="group/btn relative flex-1 overflow-hidden px-3 py-1.5 border border-rose-400/40 text-rose-600 dark:text-rose-300 text-sm font-medium transition-all hover:shadow-[0_0_20px_rgba(244,63,94,0.2)] disabled:cursor-not-allowed disabled:opacity-70"
                                         >
-                                            <span className="relative z-10">Delete</span>
+                                            <span className="relative z-10 flex items-center justify-center gap-2">
+                                                {deletingId === product._id ? (
+                                                    <>
+                                                        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <circle cx="12" cy="12" r="9" strokeOpacity="0.25" />
+                                                            <path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" />
+                                                        </svg>
+                                                        Deleting…
+                                                    </>
+                                                ) : 'Delete'}
+                                            </span>
                                             <div className="absolute inset-0 bg-rose-50 dark:bg-rose-900/20 transform translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500 ease-out" />
                                         </button>
                                     </div>

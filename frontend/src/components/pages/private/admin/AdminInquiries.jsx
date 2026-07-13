@@ -8,6 +8,7 @@ export default function AdminInquiries() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
+  const [pendingActionId, setPendingActionId] = useState(null);
 
   const loadInquiries = async () => {
     try {
@@ -27,22 +28,30 @@ export default function AdminInquiries() {
   }, []);
 
   const handleRead = async (id) => {
+    setPendingActionId(id);
+    setError('');
     try {
       await markInquiryAsRead(id);
       await loadInquiries();
     } catch (err) {
       setError(err.response?.data?.message || 'Could not mark inquiry as read.');
+    } finally {
+      setPendingActionId(null);
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this inquiry submission?')) return;
 
+    setPendingActionId(id);
+    setError('');
     try {
       await deleteInquiry(id);
       await loadInquiries();
     } catch (err) {
       setError(err.response?.data?.message || 'Could not delete inquiry.');
+    } finally {
+      setPendingActionId(null);
     }
   };
 
@@ -111,18 +120,40 @@ export default function AdminInquiries() {
                     {/* Primary action – Mark as read */}
                     <button
                       onClick={() => handleRead(item._id)}
-                      className="group relative overflow-hidden px-3 py-2 bg-old-gold text-warm-white dark:text-dark-teal text-sm font-medium transition-all hover:shadow-[0_0_20px_rgba(199,159,72,0.3)]"
+                      disabled={pendingActionId === item._id}
+                      className="group relative overflow-hidden px-3 py-2 bg-old-gold text-warm-white dark:text-dark-teal text-sm font-medium transition-all hover:shadow-[0_0_20px_rgba(199,159,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                      <span className="relative z-10">Mark as read</span>
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        {pendingActionId === item._id ? (
+                          <>
+                            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="9" strokeOpacity="0.25" />
+                              <path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" />
+                            </svg>
+                            Processing…
+                          </>
+                        ) : 'Mark as read'}
+                      </span>
                       <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
                     </button>
 
                     {/* Destructive action – Delete */}
                     <button
                       onClick={() => handleDelete(item._id)}
-                      className="group relative overflow-hidden px-3 py-2 border border-rose-400/40 text-rose-600 dark:text-rose-300 text-sm font-medium transition-all hover:shadow-[0_0_20px_rgba(244,63,94,0.2)]"
+                      disabled={pendingActionId === item._id}
+                      className="group relative overflow-hidden px-3 py-2 border border-rose-400/40 text-rose-600 dark:text-rose-300 text-sm font-medium transition-all hover:shadow-[0_0_20px_rgba(244,63,94,0.2)] disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                      <span className="relative z-10">Delete</span>
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        {pendingActionId === item._id ? (
+                          <>
+                            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="9" strokeOpacity="0.25" />
+                              <path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" />
+                            </svg>
+                            Deleting…
+                          </>
+                        ) : 'Delete'}
+                      </span>
                       <div className="absolute inset-0 bg-rose-50 dark:bg-rose-900/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
                     </button>
                   </div>
