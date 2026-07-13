@@ -2,12 +2,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import { createProduct, deleteProduct, getAdminProducts, updateProduct } from '../../../../api/products';
+import { showToast } from '../../../../utils/toast';
 import Paradoxie from '@/assets/products/Paradoxie.webp';
 
 const initialForm = {
     name: '',
     notes: '',
-    price: '',
+    price: '', // now a string, allows empty input
     image: '',
     tag: '',
     featured: false,
@@ -30,7 +31,6 @@ export default function AdminProducts() {
     const { user } = useAuth();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     const [form, setForm] = useState(initialForm);
     const [editingId, setEditingId] = useState(null);
     const [imageFile, setImageFile] = useState(null);
@@ -51,9 +51,18 @@ export default function AdminProducts() {
             const data = await getAdminProducts();
             setProducts(data);
         } catch (err) {
-            setError(err.response?.data?.message || 'Unable to load products.');
+            // Silently fail - let page show empty state
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadProductsAfterAction = async () => {
+        try {
+            const data = await getAdminProducts();
+            setProducts(data);
+        } catch {
+            // Silently fail on reload after action
         }
     };
 
@@ -84,7 +93,7 @@ export default function AdminProducts() {
             setForm({
                 name: product.name || '',
                 notes: product.notes || '',
-                price: product.price || '',
+                price: product.price?.toString() || '', // convert to string
                 image: product.image || '',
                 tag: product.tag || '',
                 featured: Boolean(product.featured),
@@ -115,21 +124,22 @@ export default function AdminProducts() {
         }, 300);
     };
 
-    const handleBackdropClick = (e) => {
-        if (e.target === e.currentTarget) closeModal();
-    };
+    // Removed handleBackdropClick – clicking outside does nothing
 
     const validateForm = () => {
         const errors = {};
         if (!form.name.trim()) {
             errors.name = 'Product name is required';
         }
-        // Optionally validate price format (allow empty or numeric with currency symbol?)
-        // We'll just check if price is provided and doesn't contain only spaces
-        if (form.price && !form.price.trim()) {
-            errors.price = 'Price cannot be empty spaces';
+
+        // Validate price: must be a valid positive number
+        const priceValue = parseFloat(form.price);
+        if (form.price.trim() === '') {
+            errors.price = 'Price is required';
+        } else if (isNaN(priceValue) || priceValue < 0) {
+            errors.price = 'Price must be a positive number';
         }
-        // Additional fields could be validated if needed
+
         setValidationErrors(errors);
         return Object.keys(errors).length === 0;
     };
@@ -140,7 +150,12 @@ export default function AdminProducts() {
 
         setSubmitting(true);
         try {
-            let payload = { ...form };
+            // Build payload, converting price to number
+            let payload = {
+                ...form,
+                price: parseFloat(form.price) || 0,
+            };
+
             if (imageFile) {
                 const reader = new FileReader();
                 const dataUrl = await new Promise((resolve) => {
@@ -152,14 +167,16 @@ export default function AdminProducts() {
 
             if (editingId) {
                 await updateProduct(editingId, payload);
+                showToast(`Product "${form.name}" has been updated successfully.`, 'success');
             } else {
                 await createProduct(payload);
+                showToast(`Product "${form.name}" has been created successfully.`, 'success');
             }
 
             closeModal();
-            await loadProducts();
+            await loadProductsAfterAction();
         } catch (err) {
-            setError(err.response?.data?.message || 'Unable to save product.');
+            // Error toast shown by axios interceptor
         } finally {
             setSubmitting(false);
         }
@@ -171,13 +188,17 @@ export default function AdminProducts() {
 
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this product?')) return;
+
+        const product = products.find((p) => p._id === id);
+        const productName = product?.name || 'Product';
+
         setDeletingId(id);
-        setError('');
         try {
             await deleteProduct(id);
-            await loadProducts();
+            showToast(`Product "${productName}" has been removed.`, 'success');
+            await loadProductsAfterAction();
         } catch (err) {
-            setError(err.response?.data?.message || 'Could not delete product.');
+            // Error toast shown by axios interceptor
         } finally {
             setDeletingId(null);
         }
@@ -204,7 +225,7 @@ export default function AdminProducts() {
         return createPortal(
             <div
                 className={`fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md transition-opacity duration-300 ${modalVisible ? 'opacity-100' : 'opacity-0'}`}
-                onClick={handleBackdropClick}
+                // Removed onClick handler – clicking outside does nothing
             >
                 <div
                     className={`relative max-w-2xl w-full max-h-[90vh] bg-warm-white dark:bg-dark-teal border border-old-gold/20 shadow-2xl overflow-y-auto transition-all duration-300 ease-out transform ${modalVisible ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-4'}`}
@@ -248,14 +269,17 @@ export default function AdminProducts() {
                                 {/* Price */}
                                 <div>
                                     <label className="text-sm">
-                                        <span className="mb-1 block text-black/70 dark:text-white/70">Price</span>
+                                        <span className="mb-1 block text-black/70 dark:text-white/70">Price *</span>
                                         <input
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
                                             value={form.price}
                                             onChange={(e) => {
                                                 setForm({ ...form, price: e.target.value });
                                                 if (validationErrors.price) setValidationErrors({ ...validationErrors, price: '' });
                                             }}
-                                            placeholder="e.g. ₱1,200"
+                                            placeholder="e.g. 1200"
                                             className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal ${validationErrors.price ? 'border-rose-500' : 'border-black/10'
                                                 }`}
                                         />
@@ -442,12 +466,6 @@ export default function AdminProducts() {
                         </button>
                     </div>
                 </div>
-
-                {error && (
-                    <div className="mt-8 rounded-lg border border-rose-400/30 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-900/20 dark:text-rose-300">
-                        {error}
-                    </div>
-                )}
 
                 {/* Product Grid */}
                 <div

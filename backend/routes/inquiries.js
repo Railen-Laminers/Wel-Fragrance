@@ -111,6 +111,32 @@ router.patch("/:id/read", protect, adminOnly, async (req, res) => {
   }
 });
 
+router.patch("/:id/unread", protect, adminOnly, async (req, res) => {
+  try {
+    const inquiry = await Inquiry.findById(req.params.id);
+
+    if (!inquiry) {
+      return res.status(404).json({ message: "Inquiry not found" });
+    }
+
+    inquiry.status = "New";
+    await inquiry.save();
+
+    await logActivity({
+      req,
+      user: req.user,
+      action: "Update",
+      module: "Inquiries",
+      description: `Marked inquiry ${inquiry._id} as unread`,
+      resourceId: inquiry._id.toString(),
+    });
+
+    res.json(serializeInquiry(inquiry));
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update inquiry", error: error.message });
+  }
+});
+
 router.delete("/:id", protect, adminOnly, async (req, res) => {
   try {
     const inquiry = await Inquiry.findByIdAndDelete(req.params.id);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../../../api/axios';
+import { showToast } from '../../../../utils/toast';
 
 // Icons
 const IconFilter = () => (
@@ -29,13 +30,11 @@ export default function AdminAuditLogs() {
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     const [isLoaded, setIsLoaded] = useState(false);
 
     const loadLogs = async (nextPage = 1, nextFilters = filters) => {
         try {
             setLoading(true);
-            setError('');
 
             const params = new URLSearchParams({
                 page: String(nextPage),
@@ -54,7 +53,7 @@ export default function AdminAuditLogs() {
             setPage(response.data.page || 1);
             setTotalPages(response.data.totalPages || 1);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to load audit logs.');
+            // Silently fail on load
         } finally {
             setLoading(false);
         }
@@ -204,12 +203,6 @@ export default function AdminAuditLogs() {
                         </button>
                     </div>
                 </form>
-
-                {error && (
-                    <div className="mt-6 rounded-lg border border-rose-400/30 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-900/20 dark:text-rose-300">
-                        {error}
-                    </div>
-                )}
 
                 {/* Table */}
                 <div

@@ -96,13 +96,13 @@ export function AuthProvider({ children }) {
   };
 
   const updateProfile = async (payload) => {
-    const response = await api.put('/api/auth/profile', payload);
+    const response = await api.put('/api/auth/profile', payload, { _skipToast: true });
     persistAuth(response.data.user, token);
     return response.data;
   };
 
   const changePassword = async (payload) => {
-    const response = await api.put('/api/auth/change-password', payload);
+    const response = await api.put('/api/auth/change-password', payload, { _skipToast: true });
     return response.data;
   };
 

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
-import { deleteInquiry, getAdminInquiries, markInquiryAsRead } from '../../../../api/testimonials';
+import { deleteInquiry, getAdminInquiries, markInquiryAsRead, markInquiryAsUnread } from '../../../../api/testimonials';
+import { showToast } from '../../../../utils/toast';
 
 export default function AdminInquiries() {
   const { user } = useAuth();
   const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
   const [pendingActionId, setPendingActionId] = useState(null);
 
@@ -16,9 +16,18 @@ export default function AdminInquiries() {
       const data = await getAdminInquiries();
       setInquiries(data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Unable to load inquiries.');
+      // Silently fail on initial load - let page show empty state
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadInquiriesAfterAction = async () => {
+    try {
+      const data = await getAdminInquiries();
+      setInquiries(data);
+    } catch {
+      // Silently fail on reload after action
     }
   };
 
@@ -28,13 +37,32 @@ export default function AdminInquiries() {
   }, []);
 
   const handleRead = async (id) => {
+    const inquiry = inquiries.find((i) => i._id === id);
+    const fullName = inquiry ? `${inquiry.firstName} ${inquiry.lastName}` : 'Inquiry';
+    
     setPendingActionId(id);
-    setError('');
     try {
       await markInquiryAsRead(id);
-      await loadInquiries();
+      showToast(`Marked ${fullName}'s inquiry as read.`, 'success');
+      await loadInquiriesAfterAction();
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not mark inquiry as read.');
+      // Error toast shown by axios interceptor
+    } finally {
+      setPendingActionId(null);
+    }
+  };
+
+  const handleUnread = async (id) => {
+    const inquiry = inquiries.find((i) => i._id === id);
+    const fullName = inquiry ? `${inquiry.firstName} ${inquiry.lastName}` : 'Inquiry';
+    
+    setPendingActionId(id);
+    try {
+      await markInquiryAsUnread(id);
+      showToast(`Marked ${fullName}'s inquiry as unread.`, 'success');
+      await loadInquiriesAfterAction();
+    } catch (err) {
+      // Error toast shown by axios interceptor
     } finally {
       setPendingActionId(null);
     }
@@ -42,14 +70,17 @@ export default function AdminInquiries() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this inquiry submission?')) return;
-
+    
+    const inquiry = inquiries.find((i) => i._id === id);
+    const fullName = inquiry ? `${inquiry.firstName} ${inquiry.lastName}` : 'Inquiry';
+    
     setPendingActionId(id);
-    setError('');
     try {
       await deleteInquiry(id);
-      await loadInquiries();
+      showToast(`${fullName}'s inquiry has been removed.`, 'success');
+      await loadInquiriesAfterAction();
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not delete inquiry.');
+      // Error toast shown by axios interceptor
     } finally {
       setPendingActionId(null);
     }
@@ -73,12 +104,6 @@ export default function AdminInquiries() {
             Review incoming contact requests, mark them as read, and remove anything that has been handled.
           </p>
         </div>
-
-        {error && (
-          <div className="mt-8 rounded-lg border border-rose-400/30 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-900/20 dark:text-rose-300">
-            {error}
-          </div>
-        )}
 
         {loading ? (
           <div className="mt-8 text-sm text-black/60 dark:text-white/60">Loading inquiries…</div>
@@ -117,11 +142,15 @@ export default function AdminInquiries() {
                   </div>
 
                   <div className="flex flex-col gap-2 lg:min-w-[180px]">
-                    {/* Primary action – Mark as read */}
+                    {/* Toggle button – Mark as Read/Unread */}
                     <button
-                      onClick={() => handleRead(item._id)}
+                      onClick={() => item.status === 'Read' ? handleUnread(item._id) : handleRead(item._id)}
                       disabled={pendingActionId === item._id}
-                      className="group relative overflow-hidden px-3 py-2 bg-old-gold text-warm-white dark:text-dark-teal text-sm font-medium transition-all hover:shadow-[0_0_20px_rgba(199,159,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
+                      className={`group relative overflow-hidden px-3 py-2 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-70 ${
+                        item.status === 'Read'
+                          ? 'border border-emerald-400/40 text-emerald-600 dark:text-emerald-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]'
+                          : 'bg-old-gold text-warm-white dark:text-dark-teal hover:shadow-[0_0_20px_rgba(199,159,72,0.3)]'
+                      }`}
                     >
                       <span className="relative z-10 flex items-center justify-center gap-2">
                         {pendingActionId === item._id ? (
@@ -132,9 +161,20 @@ export default function AdminInquiries() {
                             </svg>
                             Processing…
                           </>
-                        ) : 'Mark as read'}
+                        ) : item.status === 'Read' ? (
+                          <>
+                            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                            </svg>
+                            Mark as Unread
+                          </>
+                        ) : (
+                          'Mark as Read'
+                        )}
                       </span>
-                      <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                      {item.status !== 'Read' && (
+                        <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                      )}
                     </button>
 
                     {/* Destructive action – Delete */}

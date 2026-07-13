@@ -8,6 +8,7 @@ import CursorFollower from './components/common/CursorFollower';
 import GlobalParticles from './components/common/GlobalParticles';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import PublicRoute from './components/common/PublicRoute';
+import ToastProvider from './components/common/ToastProvider';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -163,6 +164,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-transparent transition-colors duration-500 flex flex-col">
       <CursorFollower />
+      <ToastProvider />
       {/* Show public navbar ONLY when NOT authenticated */}
       {!isAuthenticated && <Navbar />}
       <AnimatedRoutes />

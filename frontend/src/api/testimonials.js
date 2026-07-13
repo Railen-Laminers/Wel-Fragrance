@@ -16,12 +16,12 @@ export const submitTestimonial = async (payload) => {
 };
 
 export const updateTestimonialStatus = async (id, status) => {
-  const response = await api.patch(`/api/testimonials/${id}/status`, { status });
+  const response = await api.patch(`/api/testimonials/${id}/status`, { status }, { _skipToast: true });
   return response.data;
 };
 
 export const deleteTestimonial = async (id) => {
-  const response = await api.delete(`/api/testimonials/${id}`);
+  const response = await api.delete(`/api/testimonials/${id}`, { _skipToast: true });
   return response.data;
 };
 
@@ -36,11 +36,16 @@ export const submitInquiry = async (payload) => {
 };
 
 export const markInquiryAsRead = async (id) => {
-  const response = await api.patch(`/api/inquiries/${id}/read`);
+  const response = await api.patch(`/api/inquiries/${id}/read`, {}, { _skipToast: true });
+  return response.data;
+};
+
+export const markInquiryAsUnread = async (id) => {
+  const response = await api.patch(`/api/inquiries/${id}/unread`, {}, { _skipToast: true });
   return response.data;
 };
 
 export const deleteInquiry = async (id) => {
-  const response = await api.delete(`/api/inquiries/${id}`);
+  const response = await api.delete(`/api/inquiries/${id}`, { _skipToast: true });
   return response.data;
 };

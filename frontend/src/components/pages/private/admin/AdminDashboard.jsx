@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import api from '../../../../api/axios';
+import { showToast } from '../../../../utils/toast';
 
 // Icons as inline SVGs
 const ProductIcon = () => (
@@ -25,7 +26,6 @@ const InquiryIcon = () => (
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -35,7 +35,7 @@ export default function AdminDashboard() {
         const res = await api.get('/api/admin/stats');
         setStats(res.data);
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to load statistics.');
+        // Silently fail on load
       } finally {
         setLoading(false);
       }
@@ -87,12 +87,6 @@ export default function AdminDashboard() {
           </div>
           {/* Logout button removed – it’s in the navbar */}
         </div>
-
-        {error && (
-          <div className="mt-8 rounded-lg border border-rose-400/30 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-900/20 dark:text-rose-300">
-            {error}
-          </div>
-        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10">

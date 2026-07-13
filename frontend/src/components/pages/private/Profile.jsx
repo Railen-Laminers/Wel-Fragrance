@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import { showToast } from '../../../utils/toast';
 
 const toListValue = (value) => (Array.isArray(value) ? value.join('\n') : value || '');
 const parseListValue = (value) => value.split('\n').map((item) => item.trim()).filter(Boolean);
@@ -28,8 +29,6 @@ export default function Profile() {
     confirmPassword: '',
   });
 
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [showPasswordFields, setShowPasswordFields] = useState({
@@ -110,8 +109,6 @@ export default function Profile() {
 
   const handleProfileSubmit = async (event) => {
     event.preventDefault();
-    setMessage('');
-    setError('');
     if (!validateProfile()) return;
 
     setSaving(true);
@@ -131,10 +128,11 @@ export default function Profile() {
 
       await updateProfile(payload);
       await refreshUser();
-      setMessage('Profile updated successfully.');
+      const fullName = `${profileForm.firstName} ${profileForm.lastName}`;
+      showToast(`Your profile information has been updated successfully, ${fullName}.`, 'success');
       setProfileErrors({});
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not update profile.');
+      // Error toast shown by axios interceptor
     } finally {
       setSaving(false);
     }
@@ -142,8 +140,6 @@ export default function Profile() {
 
   const handlePasswordSubmit = async (event) => {
     event.preventDefault();
-    setMessage('');
-    setError('');
     if (!validatePassword()) return;
 
     setPasswordSaving(true);
@@ -155,9 +151,9 @@ export default function Profile() {
       });
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
       setPasswordErrors({});
-      setMessage('Password updated successfully.');
+      showToast('Your password has been successfully changed. Please use your new password on your next sign in.', 'success');
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not update password.');
+      // Error toast shown by axios interceptor
     } finally {
       setPasswordSaving(false);
     }
@@ -183,17 +179,6 @@ export default function Profile() {
             Manage your account details and security settings.
           </p>
         </div>
-
-        {(message || error) && (
-          <div
-            className={`mt-8 rounded-lg border px-4 py-3 text-sm ${error
-              ? 'border-rose-400/30 bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'
-              : 'border-emerald-400/30 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
-              }`}
-          >
-            {error || message}
-          </div>
-        )}
 
         <div
           className={`mt-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] transition-all duration-700 delay-200 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'

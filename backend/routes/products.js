@@ -72,7 +72,7 @@ router.post("/", protect, adminOnly, async (req, res) => {
     const product = await Product.create({
       name: payload.name.trim(),
       notes: payload.notes || "",
-      price: payload.price || "",
+      price: Number(payload.price) || 0,
       image: payload.image || "",
       tag: payload.tag || "",
       featured: Boolean(payload.featured),
@@ -109,6 +109,8 @@ router.put("/:id", protect, adminOnly, async (req, res) => {
     allowedUpdates.forEach((field) => {
       if (req.body[field] !== undefined) {
         if (field === "type") {
+          product[field] = Number(req.body[field]);
+        } else if (field === "price") {
           product[field] = Number(req.body[field]);
         } else if (field === "featured" || field === "isActive") {
           product[field] = Boolean(req.body[field]);

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import { deleteTestimonial, getAdminTestimonials, updateTestimonialStatus } from '../../../../api/testimonials';
+import { showToast } from '../../../../utils/toast';
 
 const getImageUrl = (imagePath) => {
   if (!imagePath) return '';
@@ -15,7 +16,6 @@ export default function AdminTestimonials() {
   const { user } = useAuth();
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
   const [pendingActionId, setPendingActionId] = useState(null);
 
@@ -25,9 +25,18 @@ export default function AdminTestimonials() {
       const data = await getAdminTestimonials();
       setTestimonials(data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Unable to load testimonials.');
+      // Silently fail on reload - don't show duplicate toasts
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadTestimonialsAfterAction = async () => {
+    try {
+      const data = await getAdminTestimonials();
+      setTestimonials(data);
+    } catch {
+      // Silently fail on reload after action
     }
   };
 
@@ -37,13 +46,16 @@ export default function AdminTestimonials() {
   }, []);
 
   const handleStatusChange = async (id, status) => {
+    const testimonial = testimonials.find((t) => t._id === id);
+    const fullName = testimonial ? `${testimonial.firstName} ${testimonial.lastName}` : 'Testimonial';
+    
     setPendingActionId(id);
-    setError('');
     try {
       await updateTestimonialStatus(id, status);
-      await loadTestimonials();
+      showToast(`Successfully changed the testimonial status of ${fullName} to ${status}.`, 'success');
+      await loadTestimonialsAfterAction();
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not update testimonial status.');
+      // Error toast shown by axios interceptor
     } finally {
       setPendingActionId(null);
     }
@@ -51,13 +63,17 @@ export default function AdminTestimonials() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this testimonial submission?')) return;
+    
+    const testimonial = testimonials.find((t) => t._id === id);
+    const fullName = testimonial ? `${testimonial.firstName} ${testimonial.lastName}` : 'Testimonial';
+    
     setPendingActionId(id);
-    setError('');
     try {
       await deleteTestimonial(id);
-      await loadTestimonials();
+      showToast(`Testimonial from ${fullName} has been removed.`, 'success');
+      await loadTestimonialsAfterAction();
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not delete testimonial.');
+      // Error toast shown by axios interceptor
     } finally {
       setPendingActionId(null);
     }
@@ -81,12 +97,6 @@ export default function AdminTestimonials() {
             Review submitted stories, approve or reject them, and keep your public testimonials curated.
           </p>
         </div>
-
-        {error && (
-          <div className="mt-8 rounded-lg border border-rose-400/30 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:bg-rose-900/20 dark:text-rose-300">
-            {error}
-          </div>
-        )}
 
         {loading ? (
           <div className="mt-8 text-sm text-black/60 dark:text-white/60">Loading testimonials…</div>
