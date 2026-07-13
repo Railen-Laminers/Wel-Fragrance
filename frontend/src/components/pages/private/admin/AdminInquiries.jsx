@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import { deleteInquiry, getAdminInquiries, markInquiryAsRead, markInquiryAsUnread } from '../../../../api/testimonials';
 import { showToast } from '../../../../utils/toast';
+import ConfirmationModal from '../../../common/ConfirmationModal';
 
 export default function AdminInquiries() {
   const { user } = useAuth();
@@ -9,6 +10,15 @@ export default function AdminInquiries() {
   const [loading, setLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
   const [pendingActionId, setPendingActionId] = useState(null);
+  const [confirmation, setConfirmation] = useState({
+    open: false,
+    title: '',
+    message: '',
+    warning: '',
+    confirmLabel: 'Confirm',
+    onConfirm: null,
+    isProcessing: false,
+  });
 
   const loadInquiries = async () => {
     try {
@@ -69,21 +79,31 @@ export default function AdminInquiries() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this inquiry submission?')) return;
-    
     const inquiry = inquiries.find((i) => i._id === id);
     const fullName = inquiry ? `${inquiry.firstName} ${inquiry.lastName}` : 'Inquiry';
     
-    setPendingActionId(id);
-    try {
-      await deleteInquiry(id);
-      showToast(`${fullName}'s inquiry has been removed.`, 'success');
-      await loadInquiriesAfterAction();
-    } catch (err) {
-      // Error toast shown by axios interceptor
-    } finally {
-      setPendingActionId(null);
-    }
+    setConfirmation({
+      open: true,
+      title: `Delete inquiry from ${fullName}`,
+      message: `This will permanently remove ${fullName}'s inquiry submission. Continue?`,
+      warning: 'This action cannot be undone.',
+      confirmLabel: 'Delete inquiry',
+      isProcessing: false,
+      onConfirm: async () => {
+        setConfirmation((current) => ({ ...current, isProcessing: true }));
+        setPendingActionId(id);
+        try {
+          await deleteInquiry(id);
+          showToast(`${fullName}'s inquiry has been removed.`, 'success');
+          await loadInquiriesAfterAction();
+        } catch (err) {
+          // Error toast shown by axios interceptor
+        } finally {
+          setPendingActionId(null);
+          setConfirmation((current) => ({ ...current, open: false, isProcessing: false }));
+        }
+      },
+    });
   };
 
   return (
@@ -203,6 +223,16 @@ export default function AdminInquiries() {
           </div>
         )}
       </div>
+          <ConfirmationModal
+            open={confirmation.open}
+            title={confirmation.title}
+            message={confirmation.message}
+            warning={confirmation.warning}
+            confirmLabel={confirmation.confirmLabel}
+            isProcessing={confirmation.isProcessing}
+            onCancel={() => setConfirmation((current) => ({ ...current, open: false }))}
+            onConfirm={confirmation.onConfirm}
+          />
     </section>
   );
 }

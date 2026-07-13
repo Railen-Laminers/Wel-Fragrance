@@ -69,4 +69,13 @@ router.get("/", protect, adminOnly, async (req, res) => {
   }
 });
 
+router.delete("/clear", protect, adminOnly, async (req, res) => {
+  try {
+    await AuditLog.deleteMany({});
+    res.json({ message: "All audit logs cleared" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to clear audit logs", error: error.message });
+  }
+});
+
 module.exports = router;

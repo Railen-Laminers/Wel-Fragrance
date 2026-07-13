@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useAuth } from '../../../../context/AuthContext';
 import { createProduct, deleteProduct, getAdminProducts, updateProduct } from '../../../../api/products';
 import { showToast } from '../../../../utils/toast';
+import ConfirmationModal from '../../../common/ConfirmationModal';
 import Paradoxie from '@/assets/products/Paradoxie.webp';
 
 const initialForm = {
@@ -44,6 +45,15 @@ export default function AdminProducts() {
     const [isModalMounted, setIsModalMounted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [validationErrors, setValidationErrors] = useState({});
+    const [confirmation, setConfirmation] = useState({
+        open: false,
+        title: '',
+        message: '',
+        warning: '',
+        confirmLabel: 'Confirm',
+        onConfirm: null,
+        isProcessing: false,
+    });
 
     const loadProducts = async () => {
         try {
@@ -187,21 +197,31 @@ export default function AdminProducts() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Delete this product?')) return;
-
         const product = products.find((p) => p._id === id);
         const productName = product?.name || 'Product';
 
-        setDeletingId(id);
-        try {
-            await deleteProduct(id);
-            showToast(`Product "${productName}" has been removed.`, 'success');
-            await loadProductsAfterAction();
-        } catch (err) {
-            // Error toast shown by axios interceptor
-        } finally {
-            setDeletingId(null);
-        }
+        setConfirmation({
+            open: true,
+            title: `Delete product ${productName}`,
+            message: `This will permanently remove ${productName} from your catalog. Are you sure you want to continue?`,
+            warning: 'This action cannot be undone.',
+            confirmLabel: 'Delete product',
+            isProcessing: false,
+            onConfirm: async () => {
+                setConfirmation((current) => ({ ...current, isProcessing: true }));
+                setDeletingId(id);
+                try {
+                    await deleteProduct(id);
+                    showToast(`Product "${productName}" has been removed.`, 'success');
+                    await loadProductsAfterAction();
+                } catch (err) {
+                    // Error toast shown by axios interceptor
+                } finally {
+                    setDeletingId(null);
+                    setConfirmation((current) => ({ ...current, open: false, isProcessing: false }));
+                }
+            },
+        });
     };
 
     const handleFileChange = (e) => {
@@ -571,6 +591,16 @@ export default function AdminProducts() {
 
             {/* Modal Portal */}
             {renderModal()}
+            <ConfirmationModal
+                open={confirmation.open}
+                title={confirmation.title}
+                message={confirmation.message}
+                warning={confirmation.warning}
+                confirmLabel={confirmation.confirmLabel}
+                isProcessing={confirmation.isProcessing}
+                onCancel={() => setConfirmation((current) => ({ ...current, open: false }))}
+                onConfirm={confirmation.onConfirm}
+            />
         </section>
     );
 }

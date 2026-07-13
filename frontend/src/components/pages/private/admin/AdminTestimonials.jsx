@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import { deleteTestimonial, getAdminTestimonials, updateTestimonialStatus } from '../../../../api/testimonials';
 import { showToast } from '../../../../utils/toast';
+import ConfirmationModal from '../../../common/ConfirmationModal';
 
 const getImageUrl = (imagePath) => {
   if (!imagePath) return '';
@@ -18,6 +19,15 @@ export default function AdminTestimonials() {
   const [loading, setLoading] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
   const [pendingActionId, setPendingActionId] = useState(null);
+  const [confirmation, setConfirmation] = useState({
+    open: false,
+    title: '',
+    message: '',
+    warning: '',
+    confirmLabel: 'Confirm',
+    onConfirm: null,
+    isProcessing: false,
+  });
 
   const loadTestimonials = async () => {
     try {
@@ -62,21 +72,31 @@ export default function AdminTestimonials() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this testimonial submission?')) return;
-    
     const testimonial = testimonials.find((t) => t._id === id);
     const fullName = testimonial ? `${testimonial.firstName} ${testimonial.lastName}` : 'Testimonial';
     
-    setPendingActionId(id);
-    try {
-      await deleteTestimonial(id);
-      showToast(`Testimonial from ${fullName} has been removed.`, 'success');
-      await loadTestimonialsAfterAction();
-    } catch (err) {
-      // Error toast shown by axios interceptor
-    } finally {
-      setPendingActionId(null);
-    }
+    setConfirmation({
+      open: true,
+      title: `Delete testimonial from ${fullName}`,
+      message: `This will permanently remove ${fullName}'s testimonial submission. Continue?`,
+      warning: 'This action cannot be undone.',
+      confirmLabel: 'Delete testimonial',
+      isProcessing: false,
+      onConfirm: async () => {
+        setConfirmation((current) => ({ ...current, isProcessing: true }));
+        setPendingActionId(id);
+        try {
+          await deleteTestimonial(id);
+          showToast(`Testimonial from ${fullName} has been removed.`, 'success');
+          await loadTestimonialsAfterAction();
+        } catch (err) {
+          // Error toast shown by axios interceptor
+        } finally {
+          setPendingActionId(null);
+          setConfirmation((current) => ({ ...current, open: false, isProcessing: false }));
+        }
+      },
+    });
   };
 
   return (
@@ -195,6 +215,16 @@ export default function AdminTestimonials() {
           </div>
         )}
       </div>
+          <ConfirmationModal
+            open={confirmation.open}
+            title={confirmation.title}
+            message={confirmation.message}
+            warning={confirmation.warning}
+            confirmLabel={confirmation.confirmLabel}
+            isProcessing={confirmation.isProcessing}
+            onCancel={() => setConfirmation((current) => ({ ...current, open: false }))}
+            onConfirm={confirmation.onConfirm}
+          />
     </section>
   );
 }

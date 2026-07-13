@@ -76,13 +76,20 @@ const IconBell = () => (
     </svg>
 );
 
-const IconCheck = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+const IconInbox = () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6l4 4h8l4-4z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 11h4" />
+    </svg>
+);
+
+const IconCheck = ({ className = '' }) => (
+    <svg className={`w-4 h-4 ${className}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
     </svg>
 );
 
-const IconExpand = () => (
+const IconExpand = ({ className = '' }) => (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
     </svg>
@@ -159,7 +166,8 @@ export default function AuthenticatedNavbar({ children }) {
     const loadNotifications = async () => {
         try {
             const response = await api.get('/api/notifications');
-            setNotifications(response.data.notifications || []);
+            const unreadNotifications = (response.data.notifications || []).filter((item) => !item.read);
+            setNotifications(unreadNotifications.slice(0, 5));
             setUnreadCount(response.data.unreadCount || 0);
         } catch (error) {
             console.error('Failed to load notifications', error);
@@ -187,6 +195,7 @@ export default function AuthenticatedNavbar({ children }) {
         } else {
             return [
                 { to: '/customer/dashboard', icon: <IconDashboard />, label: 'Dashboard' },
+                { to: '/notifications', icon: <IconInbox />, label: 'Notifications' },
                 { to: '/customer/orders', icon: <IconOrders />, label: 'My Orders' },
                 { to: '/customer/profile', icon: <IconProfile />, label: 'Profile' },
             ];
@@ -201,7 +210,7 @@ export default function AuthenticatedNavbar({ children }) {
         if (!notification.read) {
             try {
                 await api.patch(`/api/notifications/${notification._id}/read`);
-                setNotifications((current) => current.map((item) => item._id === notification._id ? { ...item, read: true } : item));
+                setNotifications((current) => current.filter((item) => item._id !== notification._id));
                 setUnreadCount((current) => Math.max(0, current - 1));
             } catch (error) {
                 console.error('Failed to mark notification read', error);
@@ -217,7 +226,7 @@ export default function AuthenticatedNavbar({ children }) {
     const handleMarkAllAsRead = async () => {
         try {
             await api.patch('/api/notifications/mark-all-read');
-            setNotifications((current) => current.map((item) => ({ ...item, read: true })));
+            setNotifications([]);
             setUnreadCount(0);
         } catch (error) {
             console.error('Failed to mark all notifications as read', error);
@@ -261,32 +270,48 @@ export default function AuthenticatedNavbar({ children }) {
                         </button>
                         {notificationOpen && (
                             <div className="absolute right-0 mt-2 w-80 rounded-xl border border-black/10 bg-white p-2 shadow-xl dark:border-white/10 dark:bg-dark-teal z-50">
-                                <div className="mb-2 flex items-center justify-between px-2 py-1">
-                                    <span className="text-sm font-semibold">Notifications</span>
+                                <div className="mb-4 flex items-center justify-between px-2 py-1">
+                                    <div>
+                                        <p className="text-sm font-semibold">Unread</p>
+                                        <p className="text-xs text-black/50 dark:text-white/50">Latest 5 unread notifications</p>
+                                    </div>
                                     <button onClick={handleMarkAllAsRead} className="text-xs text-old-gold hover:underline">
                                         Mark all read
                                     </button>
                                 </div>
-                                <div className="max-h-80 overflow-y-auto">
+                                <div className="max-h-72 overflow-y-auto space-y-2 px-2 pb-2">
                                     {notifications.length === 0 ? (
-                                        <div className="px-3 py-4 text-center text-sm text-black/60 dark:text-white/60">No notifications yet.</div>
+                                        <div className="rounded-2xl bg-black/5 px-3 py-4 text-center text-sm text-black/60 dark:bg-white/5 dark:text-white/60">
+                                            No new notifications.
+                                        </div>
                                     ) : notifications.map((notification) => (
                                         <button
                                             key={notification._id}
                                             onClick={() => handleNotificationClick(notification)}
-                                            className={`flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left transition ${notification.read ? 'hover:bg-black/5 dark:hover:bg-white/10' : 'bg-old-gold/10 dark:bg-old-gold/20'}`}
+                                            className="flex w-full items-start gap-3 rounded-2xl border border-black/10 bg-white px-3 py-3 text-left transition hover:border-old-gold hover:bg-old-gold/10 dark:border-white/10 dark:bg-dark-teal dark:hover:bg-old-gold/10"
                                         >
-                                            <span className={`mt-1 h-2.5 w-2.5 rounded-full ${notification.read ? 'bg-transparent' : 'bg-old-gold'}`} />
+                                            <span className="mt-1 h-2.5 w-2.5 rounded-full bg-old-gold" />
                                             <span className="flex-1">
-                                                <span className="block text-sm font-medium">{notification.title}</span>
+                                                <span className="block text-sm font-semibold text-black dark:text-white">{notification.title}</span>
                                                 <span className="mt-1 block text-xs text-black/60 dark:text-white/60">{notification.message}</span>
-                                                <span className="mt-1 block text-[11px] text-black/50 dark:text-white/50">
+                                                <span className="mt-2 block text-[11px] uppercase tracking-[0.2em] text-black/40 dark:text-white/40">
                                                     {new Date(notification.createdAt).toLocaleString()}
                                                 </span>
                                             </span>
-                                            {!notification.read && <IconCheck />}
+                                            <IconCheck className="mt-1" />
                                         </button>
                                     ))}
+                                </div>
+                                <div className="border-t border-black/10 px-3 py-2 text-right dark:border-white/10">
+                                    <button
+                                        onClick={() => {
+                                            navigate('/notifications');
+                                            setNotificationOpen(false);
+                                        }}
+                                        className="text-sm font-semibold text-old-gold hover:underline"
+                                    >
+                                        See All
+                                    </button>
                                 </div>
                             </div>
                         )}

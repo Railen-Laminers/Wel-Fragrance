@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../../../api/axios';
 import { showToast } from '../../../../utils/toast';
+import ConfirmationModal from '../../../common/ConfirmationModal';
 
 // Icons
 const IconFilter = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
     </svg>
 );
@@ -31,6 +32,15 @@ export default function AdminAuditLogs() {
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [confirmation, setConfirmation] = useState({
+        open: false,
+        title: '',
+        message: '',
+        warning: '',
+        confirmLabel: 'Confirm',
+        isProcessing: false,
+        onConfirm: null,
+    });
 
     const loadLogs = async (nextPage = 1, nextFilters = filters) => {
         try {
@@ -80,19 +90,52 @@ export default function AdminAuditLogs() {
         loadLogs(1, cleared);
     };
 
+    const handleClearAll = async () => {
+        setConfirmation({
+            open: true,
+            title: 'Clear all audit logs',
+            message: 'This will permanently remove every audit log entry in the system.',
+            warning: 'This action cannot be undone.',
+            confirmLabel: 'Clear all',
+            isProcessing: false,
+            onConfirm: async () => {
+                setConfirmation((current) => ({ ...current, isProcessing: true }));
+                try {
+                    setLoading(true);
+                    await api.delete('/api/admin/audit-logs/clear');
+                    showToast('All audit logs cleared.');
+                    loadLogs(1, filters);
+                } catch (err) {
+                    showToast('Failed to clear audit logs.');
+                } finally {
+                    setLoading(false);
+                    setConfirmation({
+                        open: false,
+                        title: '',
+                        message: '',
+                        warning: '',
+                        confirmLabel: 'Confirm',
+                        isProcessing: false,
+                        onConfirm: null,
+                    });
+                }
+            },
+        });
+    };
+
     return (
-        <section className="min-h-screen px-4 py-8 text-black dark:text-white sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-7xl rounded-lg border border-black/10 bg-white/80 p-6 shadow-xl backdrop-blur transition-opacity duration-700 dark:border-white/10 dark:bg-dark-teal/80 sm:p-8">
+        <section className="min-h-screen px-6 py-24 text-black dark:text-white">
+            <div className="mx-auto max-w-7xl rounded-lg border border-black/10 bg-white/80 p-8 shadow-xl backdrop-blur transition-opacity duration-700 dark:border-white/10 dark:bg-dark-teal/80">
                 {/* Header */}
                 <div>
                     <h1
-                        className={`mt-2 text-3xl font-semibold sm:text-4xl font-cormorant transition-all duration-700 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                        className={`text-3xl font-semibold sm:text-4xl font-cormorant transition-all duration-700 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                             }`}
                     >
                         Audit <span className="text-old-gold">Logs</span>
                     </h1>
                     <p
-                        className={`mt-2 text-sm text-black/70 dark:text-white/70 transition-all duration-700 delay-100 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                        className={`mt-2 max-w-2xl text-base text-black/70 dark:text-white/70 transition-all duration-700 delay-100 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                             }`}
                     >
                         Review administrative and user activity across the platform.
@@ -102,7 +145,7 @@ export default function AdminAuditLogs() {
                 {/* Filters */}
                 <form
                     onSubmit={handleSubmit}
-                    className={`mt-8 grid gap-4 rounded-lg border border-black/10 bg-black/5 p-4 transition-all duration-700 delay-150 ease-out dark:border-white/10 dark:bg-white/5 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                    className={`mt-8 grid gap-4 rounded-lg border border-black/10 bg-black/5 p-5 transition-all duration-700 delay-150 ease-out dark:border-white/10 dark:bg-white/5 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                         }`}
                 >
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -173,11 +216,10 @@ export default function AdminAuditLogs() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
-                        {/* Primary button with slide-up */}
                         <button
                             type="submit"
                             disabled={loading}
-                            className="group relative overflow-hidden px-4 py-2 bg-old-gold text-warm-white dark:text-dark-teal font-medium text-sm transition-all hover:shadow-[0_0_30px_rgba(199,159,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70"
+                            className="group relative overflow-hidden bg-old-gold px-4 py-2 text-sm font-medium text-warm-white transition hover:shadow-[0_0_30px_rgba(199,159,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70 dark:text-dark-teal"
                         >
                             <span className="relative z-10 flex items-center gap-2">
                                 {loading ? (
@@ -188,25 +230,43 @@ export default function AdminAuditLogs() {
                                 ) : <IconFilter />}
                                 {loading ? 'Applying…' : 'Apply filters'}
                             </span>
-                            <div className="absolute inset-0 bg-dark-teal dark:bg-warm-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                            <div className="absolute inset-0 bg-dark-teal transition-transform duration-500 ease-out group-hover:translate-y-0 dark:bg-warm-white translate-y-full" />
                         </button>
 
-                        {/* Secondary button with slide-up */}
                         <button
                             type="button"
                             onClick={handleReset}
                             disabled={loading}
-                            className="group relative overflow-hidden px-4 py-2 border border-black/10 dark:border-white/10 text-black dark:text-white font-medium text-sm transition-all disabled:cursor-not-allowed disabled:opacity-70"
+                            className="group relative overflow-hidden rounded border border-black/10 px-4 py-2 text-sm font-medium text-black transition disabled:cursor-not-allowed disabled:opacity-70 dark:border-white/10 dark:text-white"
                         >
                             <span className="relative z-10">{loading ? 'Resetting…' : 'Reset'}</span>
-                            <div className="absolute inset-0 bg-black/5 dark:bg-white/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                            <div className="absolute inset-0 translate-y-full bg-black/5 transition-transform duration-500 ease-out group-hover:translate-y-0 dark:bg-white/10" />
                         </button>
                     </div>
                 </form>
 
+                {/* Table header with Clear all button */}
+                <div
+                    className={`mt-6 flex items-center justify-between transition-all duration-700 delay-200 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                        }`}
+                >
+                    <div className="text-sm text-black/60 dark:text-white/60">
+                        {total} log entries
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleClearAll}
+                        disabled={loading}
+                        className="group relative overflow-hidden rounded border border-rose-400/40 px-4 py-2 text-sm font-medium text-rose-600 transition hover:shadow-[0_0_20px_rgba(244,63,94,0.2)] disabled:cursor-not-allowed disabled:opacity-70 dark:text-rose-300"
+                    >
+                        <span className="relative z-10">{loading ? 'Processing…' : 'Clear all'}</span>
+                        <div className="absolute inset-0 translate-y-full bg-rose-50 transition-transform duration-500 ease-out group-hover:translate-y-0 dark:bg-rose-900/20" />
+                    </button>
+                </div>
+
                 {/* Table */}
                 <div
-                    className={`mt-6 overflow-x-auto transition-all duration-700 delay-300 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                    className={`mt-3 overflow-x-auto transition-all duration-700 delay-200 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                         }`}
                 >
                     <table className="min-w-full text-left text-sm">
@@ -230,7 +290,7 @@ export default function AdminAuditLogs() {
                                 </tr>
                             ) : (
                                 logs.map((log) => (
-                                    <tr key={log._id} className="border-b border-black/10 align-top dark:border-white/10">
+                                    <tr key={log._id} className="border-b border-black/10 align-top transition hover:bg-black/5 dark:border-white/10 dark:hover:bg-white/5">
                                         <td className="px-3 py-3">
                                             <div className="font-medium">{log.user?.name || 'System'}</div>
                                             <div className="text-xs text-black/60 dark:text-white/60">{log.user?.email || '—'}</div>
@@ -252,7 +312,7 @@ export default function AdminAuditLogs() {
 
                 {/* Pagination */}
                 <div
-                    className={`mt-6 flex flex-wrap items-center justify-between gap-3 transition-all duration-700 delay-500 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    className={`mt-6 flex flex-wrap items-center justify-between gap-3 transition-all duration-700 delay-300 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                         }`}
                 >
                     <p className="text-sm text-black/70 dark:text-white/70">Page {page} of {totalPages}</p>
@@ -261,23 +321,34 @@ export default function AdminAuditLogs() {
                             type="button"
                             onClick={() => loadLogs(page - 1, filters)}
                             disabled={page <= 1 || loading}
-                            className="group relative overflow-hidden rounded-lg border border-black/10 dark:border-white/10 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                            className="group relative overflow-hidden rounded-lg border border-black/10 px-3 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10"
                         >
                             <span className="relative z-10">{loading ? 'Loading…' : 'Previous'}</span>
-                            <div className="absolute inset-0 bg-black/5 dark:bg-white/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                            <div className="absolute inset-0 translate-y-full bg-black/5 transition-transform duration-500 ease-out group-hover:translate-y-0 dark:bg-white/10" />
                         </button>
                         <button
                             type="button"
                             onClick={() => loadLogs(page + 1, filters)}
                             disabled={page >= totalPages || loading}
-                            className="group relative overflow-hidden rounded-lg border border-black/10 dark:border-white/10 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                            className="group relative overflow-hidden rounded-lg border border-black/10 px-3 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10"
                         >
                             <span className="relative z-10">{loading ? 'Loading…' : 'Next'}</span>
-                            <div className="absolute inset-0 bg-black/5 dark:bg-white/10 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
+                            <div className="absolute inset-0 translate-y-full bg-black/5 transition-transform duration-500 ease-out group-hover:translate-y-0 dark:bg-white/10" />
                         </button>
                     </div>
                 </div>
             </div>
+
+            <ConfirmationModal
+                open={confirmation.open}
+                title={confirmation.title}
+                message={confirmation.message}
+                warning={confirmation.warning}
+                confirmLabel={confirmation.confirmLabel}
+                isProcessing={confirmation.isProcessing}
+                onCancel={() => setConfirmation((current) => ({ ...current, open: false }))}
+                onConfirm={confirmation.onConfirm}
+            />
         </section>
     );
 }

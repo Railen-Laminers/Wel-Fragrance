@@ -57,4 +57,27 @@ router.patch("/mark-all-read", protect, async (req, res) => {
   }
 });
 
+router.delete("/clear", protect, async (req, res) => {
+  try {
+    await Notification.deleteMany({ recipient: req.user._id });
+    res.json({ message: "All notifications cleared" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to clear notifications", error: error.message });
+  }
+});
+
+router.delete("/:id", protect, async (req, res) => {
+  try {
+    const notification = await Notification.findOneAndDelete({ _id: req.params.id, recipient: req.user._id });
+
+    if (!notification) {
+      return res.status(404).json({ message: "Notification not found" });
+    }
+
+    res.json({ message: "Notification removed" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to remove notification", error: error.message });
+  }
+});
+
 module.exports = router;

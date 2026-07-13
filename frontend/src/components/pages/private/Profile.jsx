@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { showToast } from '../../../utils/toast';
+import ConfirmationModal from '../../common/ConfirmationModal';
 
 const toListValue = (value) => (Array.isArray(value) ? value.join('\n') : value || '');
 const parseListValue = (value) => value.split('\n').map((item) => item.trim()).filter(Boolean);
@@ -40,6 +41,29 @@ export default function Profile() {
   // Validation errors
   const [profileErrors, setProfileErrors] = useState({});
   const [passwordErrors, setPasswordErrors] = useState({});
+  const [confirmation, setConfirmation] = useState({
+    open: false,
+    title: '',
+    message: '',
+    warning: '',
+    confirmLabel: 'Confirm',
+    isProcessing: false,
+    onConfirm: null,
+    onCancel: null,
+  });
+
+  const resetConfirmation = () => {
+    setConfirmation({
+      open: false,
+      title: '',
+      message: '',
+      warning: '',
+      confirmLabel: 'Confirm',
+      isProcessing: false,
+      onConfirm: null,
+      onCancel: null,
+    });
+  };
 
   useEffect(() => {
     if (user) {
@@ -142,21 +166,46 @@ export default function Profile() {
     event.preventDefault();
     if (!validatePassword()) return;
 
-    setPasswordSaving(true);
-    try {
-      await changePassword({
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword,
-        confirmPassword: passwordForm.confirmPassword,
-      });
-      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setPasswordErrors({});
-      showToast('Your password has been successfully changed. Please use your new password on your next sign in.', 'success');
-    } catch (err) {
-      // Error toast shown by axios interceptor
-    } finally {
-      setPasswordSaving(false);
-    }
+    setConfirmation({
+      open: true,
+      title: 'Confirm password change',
+      message: 'Your password will be updated immediately. Continue with the password change?',
+      warning: 'You will need to use your new password when you sign in next time.',
+      confirmLabel: 'Change password',
+      isProcessing: false,
+      onConfirm: async () => {
+        setConfirmation((current) => ({ ...current, isProcessing: true }));
+        setPasswordSaving(true);
+        try {
+          await changePassword({
+            currentPassword: passwordForm.currentPassword,
+            newPassword: passwordForm.newPassword,
+            confirmPassword: passwordForm.confirmPassword,
+          });
+          setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+          setPasswordErrors({});
+          showToast('Your password has been successfully changed. Please use your new password on your next sign in.', 'success');
+        } catch (err) {
+          // --- MANUAL ERROR HANDLING FOR CURRENT PASSWORD ---
+          const errorMessage = err.response?.data?.message || 'Failed to change password';
+          // Check if the error is about the current password
+          if (errorMessage.toLowerCase().includes('current password')) {
+            // Set field‑level error under “Current Password”
+            setPasswordErrors((prev) => ({ ...prev, currentPassword: errorMessage }));
+            // Show a toast with the same message
+            showToast(errorMessage, 'error');
+          } else {
+            // For any other error, show a generic toast
+            showToast(errorMessage, 'error');
+          }
+          // ----------------------------------------------------
+        } finally {
+          setPasswordSaving(false);
+          resetConfirmation();
+        }
+      },
+      onCancel: () => resetConfirmation(),
+    });
   };
 
   const isAdmin = user?.role === 'admin';
@@ -472,6 +521,17 @@ export default function Profile() {
           </form>
         </div>
       </div>
+
+      <ConfirmationModal
+        open={confirmation.open}
+        title={confirmation.title}
+        message={confirmation.message}
+        warning={confirmation.warning}
+        confirmLabel={confirmation.confirmLabel}
+        isProcessing={confirmation.isProcessing}
+        onConfirm={confirmation.onConfirm}
+        onCancel={confirmation.onCancel}
+      />
     </section>
   );
 }
