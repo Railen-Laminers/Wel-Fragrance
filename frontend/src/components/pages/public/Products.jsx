@@ -251,7 +251,7 @@ export default function Products() {
                                             {product.notes}
                                         </p>
                                         <p className="font-jost text-old-gold text-sm tracking-wider">
-                                            {product.price}
+                                            ₱{product.price}
                                         </p>
                                     </div>
                                 </div>
@@ -355,7 +355,7 @@ export default function Products() {
 
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-2 sm:mt-4">
                                     <span className="font-jost text-old-gold text-xl sm:text-2xl tracking-wider">
-                                        {selectedProduct.price}
+                                        ₱{selectedProduct.price}
                                     </span>
                                     <button className="group relative px-6 sm:px-8 py-3 overflow-hidden bg-old-gold text-warm-white dark:text-dark-teal font-jost text-xs sm:text-sm tracking-[0.15em] uppercase font-medium transition-all hover:shadow-[0_0_30px_rgba(199,159,72,0.3)]">
                                         <span className="relative z-10">Add to Cart</span>

@@ -641,7 +641,7 @@ export default function AdminProducts() {
                                             {product.notes}
                                         </p>
                                         <p className="font-jost text-old-gold text-sm tracking-wider mt-1">
-                                            {product.price}
+                                            ₱{product.price}
                                         </p>
                                     </div>
 

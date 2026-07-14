@@ -525,7 +525,7 @@ function Products() {
                   {product.notes}
                 </p>
                 <p className="font-jost text-old-gold text-sm tracking-wider">
-                  {product.price}
+                  ₱{product.price}
                 </p>
               </div>
             </div>

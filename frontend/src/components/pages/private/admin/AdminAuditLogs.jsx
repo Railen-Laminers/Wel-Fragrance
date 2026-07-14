@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import api from '../../../../api/axios';
 import { showToast } from '../../../../utils/toast';
 import ConfirmationModal from '../../../common/ConfirmationModal';
@@ -18,7 +18,6 @@ export default function AdminAuditLogs() {
     const [filters, setFilters] = useState({
         action: '',
         module: '',
-        user: '',
         dateFrom: '',
         dateTo: '',
     });
@@ -27,6 +26,7 @@ export default function AdminAuditLogs() {
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isLoaded, setIsLoaded] = useState(false);
+    const hasInitializedAnimation = useRef(false);
     const [confirmation, setConfirmation] = useState({
         open: false,
         title: '',
@@ -65,12 +65,15 @@ export default function AdminAuditLogs() {
 
     useEffect(() => {
         loadLogs(1, filters, searchQuery);
-        setTimeout(() => setIsLoaded(true), 100);
-    }, []);
+
+        if (!hasInitializedAnimation.current) {
+            hasInitializedAnimation.current = true;
+            setTimeout(() => setIsLoaded(true), 100);
+        }
+    }, [filters, searchQuery]);
 
     const handleSearchChange = (value) => {
         setSearchQuery(value);
-        loadLogs(1, filters, value);
     };
 
     const handleFilterChange = (name, value) => {
@@ -79,8 +82,7 @@ export default function AdminAuditLogs() {
 
     const clearFilters = () => {
         setSearchQuery('');
-        setFilters({ action: '', module: '', user: '', dateFrom: '', dateTo: '' });
-        loadLogs(1, { action: '', module: '', user: '', dateFrom: '', dateTo: '' }, '');
+        setFilters({ action: '', module: '', dateFrom: '', dateTo: '' });
     };
 
     const handleClearAll = async () => {
@@ -126,6 +128,7 @@ export default function AdminAuditLogs() {
                         onSearchChange={handleSearchChange}
                         filters={filters}
                         onFilterChange={handleFilterChange}
+                        searchPlaceholder="Search by name or email…"
                         filterDefinitions={[
                             {
                                 name: 'action',
@@ -144,12 +147,6 @@ export default function AdminAuditLogs() {
                                     { value: '', label: 'All modules' },
                                     ...MODULE_OPTIONS.map((m) => ({ value: m, label: m })),
                                 ],
-                            },
-                            {
-                                name: 'user',
-                                label: 'User',
-                                type: 'text',
-                                placeholder: 'Name or email',
                             },
                             {
                                 name: 'dateFrom',
