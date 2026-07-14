@@ -2,13 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../../../../api/axios';
 import { showToast } from '../../../../utils/toast';
 import ConfirmationModal from '../../../common/ConfirmationModal';
-
-// Icons
-const IconFilter = () => (
-    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-    </svg>
-);
+import AdminSearchFilters from '../../../common/AdminSearchFilters';
 
 const ACTION_OPTIONS = ['Login', 'Logout', 'Create', 'Update', 'Delete', 'View', 'Approve', 'Reject'];
 const MODULE_OPTIONS = ['Auth', 'Profile', 'Products', 'Testimonials', 'Inquiries', 'Users'];
@@ -20,6 +14,7 @@ const formatDateTime = (value) => {
 
 export default function AdminAuditLogs() {
     const [logs, setLogs] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [filters, setFilters] = useState({
         action: '',
         module: '',
@@ -42,19 +37,18 @@ export default function AdminAuditLogs() {
         onConfirm: null,
     });
 
-    const loadLogs = async (nextPage = 1, nextFilters = filters) => {
+    const loadLogs = async (nextPage = 1, nextFilters = filters, nextSearch = searchQuery) => {
         try {
             setLoading(true);
-
             const params = new URLSearchParams({
                 page: String(nextPage),
                 limit: '10',
             });
-
+            if (nextSearch.trim()) {
+                params.append('search', nextSearch.trim());
+            }
             Object.entries(nextFilters).forEach(([key, value]) => {
-                if (value) {
-                    params.append(key, value);
-                }
+                if (value) params.append(key, value);
             });
 
             const response = await api.get(`/api/admin/audit-logs?${params.toString()}`);
@@ -63,31 +57,30 @@ export default function AdminAuditLogs() {
             setPage(response.data.page || 1);
             setTotalPages(response.data.totalPages || 1);
         } catch (err) {
-            // Silently fail on load
+            // silent
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        loadLogs(1, filters);
+        loadLogs(1, filters, searchQuery);
         setTimeout(() => setIsLoaded(true), 100);
     }, []);
 
-    const handleChange = (event) => {
-        const { name, value } = event.target;
-        setFilters((current) => ({ ...current, [name]: value }));
+    const handleSearchChange = (value) => {
+        setSearchQuery(value);
+        loadLogs(1, filters, value);
     };
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        loadLogs(1, filters);
+    const handleFilterChange = (name, value) => {
+        setFilters((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleReset = () => {
-        const cleared = { action: '', module: '', user: '', dateFrom: '', dateTo: '' };
-        setFilters(cleared);
-        loadLogs(1, cleared);
+    const clearFilters = () => {
+        setSearchQuery('');
+        setFilters({ action: '', module: '', user: '', dateFrom: '', dateTo: '' });
+        loadLogs(1, { action: '', module: '', user: '', dateFrom: '', dateTo: '' }, '');
     };
 
     const handleClearAll = async () => {
@@ -99,25 +92,17 @@ export default function AdminAuditLogs() {
             confirmLabel: 'Clear all',
             isProcessing: false,
             onConfirm: async () => {
-                setConfirmation((current) => ({ ...current, isProcessing: true }));
+                setConfirmation((c) => ({ ...c, isProcessing: true }));
                 try {
                     setLoading(true);
                     await api.delete('/api/admin/audit-logs/clear');
                     showToast('All audit logs cleared.');
-                    loadLogs(1, filters);
+                    loadLogs(1, filters, searchQuery);
                 } catch (err) {
                     showToast('Failed to clear audit logs.');
                 } finally {
                     setLoading(false);
-                    setConfirmation({
-                        open: false,
-                        title: '',
-                        message: '',
-                        warning: '',
-                        confirmLabel: 'Confirm',
-                        isProcessing: false,
-                        onConfirm: null,
-                    });
+                    setConfirmation({ open: false, title: '', message: '', warning: '', confirmLabel: 'Confirm', isProcessing: false, onConfirm: null });
                 }
             },
         });
@@ -126,149 +111,75 @@ export default function AdminAuditLogs() {
     return (
         <section className="min-h-screen px-6 py-24 text-black dark:text-white">
             <div className="mx-auto max-w-7xl rounded-lg border border-black/10 bg-white/80 p-8 shadow-xl backdrop-blur transition-opacity duration-700 dark:border-white/10 dark:bg-dark-teal/80">
-                {/* Header */}
                 <div>
-                    <h1
-                        className={`text-3xl font-semibold sm:text-4xl font-cormorant transition-all duration-700 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                            }`}
-                    >
+                    <h1 className={`text-3xl font-semibold sm:text-4xl font-cormorant transition-all duration-700 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                         Audit <span className="text-old-gold">Logs</span>
                     </h1>
-                    <p
-                        className={`mt-2 max-w-2xl text-base text-black/70 dark:text-white/70 transition-all duration-700 delay-100 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                            }`}
-                    >
+                    <p className={`mt-2 max-w-2xl text-base text-black/70 dark:text-white/70 transition-all duration-700 delay-100 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                         Review administrative and user activity across the platform.
                     </p>
                 </div>
 
-                {/* Filters */}
-                <form
-                    onSubmit={handleSubmit}
-                    className={`mt-8 grid gap-4 rounded-lg border border-black/10 bg-black/5 p-5 transition-all duration-700 delay-150 ease-out dark:border-white/10 dark:bg-white/5 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-                        }`}
-                >
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <label className="text-sm">
-                            <span className="mb-1.5 block text-black/70 dark:text-white/70">Action</span>
-                            <select
-                                name="action"
-                                value={filters.action}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
-                            >
-                                <option value="">All actions</option>
-                                {ACTION_OPTIONS.map((action) => (
-                                    <option key={action} value={action}>{action}</option>
-                                ))}
-                            </select>
-                        </label>
+                <div className={`mt-8 transition-all duration-700 delay-150 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+                    <AdminSearchFilters
+                        searchQuery={searchQuery}
+                        onSearchChange={handleSearchChange}
+                        filters={filters}
+                        onFilterChange={handleFilterChange}
+                        filterDefinitions={[
+                            {
+                                name: 'action',
+                                label: 'Action',
+                                type: 'select',
+                                options: [
+                                    { value: '', label: 'All actions' },
+                                    ...ACTION_OPTIONS.map((a) => ({ value: a, label: a })),
+                                ],
+                            },
+                            {
+                                name: 'module',
+                                label: 'Module',
+                                type: 'select',
+                                options: [
+                                    { value: '', label: 'All modules' },
+                                    ...MODULE_OPTIONS.map((m) => ({ value: m, label: m })),
+                                ],
+                            },
+                            {
+                                name: 'user',
+                                label: 'User',
+                                type: 'text',
+                                placeholder: 'Name or email',
+                            },
+                            {
+                                name: 'dateFrom',
+                                label: 'From',
+                                type: 'date',
+                            },
+                            {
+                                name: 'dateTo',
+                                label: 'To',
+                                type: 'date',
+                            },
+                        ]}
+                        onClear={clearFilters}
+                    />
+                </div>
 
-                        <label className="text-sm">
-                            <span className="mb-1.5 block text-black/70 dark:text-white/70">Module</span>
-                            <select
-                                name="module"
-                                value={filters.module}
-                                onChange={handleChange}
-                                className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
-                            >
-                                <option value="">All modules</option>
-                                {MODULE_OPTIONS.map((module) => (
-                                    <option key={module} value={module}>{module}</option>
-                                ))}
-                            </select>
-                        </label>
-
-                        <label className="text-sm">
-                            <span className="mb-1.5 block text-black/70 dark:text-white/70">User</span>
-                            <input
-                                name="user"
-                                value={filters.user}
-                                onChange={handleChange}
-                                placeholder="User name or email"
-                                disabled={loading}
-                                className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold disabled:cursor-not-allowed disabled:opacity-70 dark:border-white/10 dark:bg-dark-teal"
-                            />
-                        </label>
-
-                        <div className="grid grid-cols-2 gap-2">
-                            <label className="text-sm">
-                                <span className="mb-1.5 block text-black/70 dark:text-white/70">From</span>
-                                <input
-                                    type="date"
-                                    name="dateFrom"
-                                    value={filters.dateFrom}
-                                    onChange={handleChange}
-                                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
-                                />
-                            </label>
-                            <label className="text-sm">
-                                <span className="mb-1.5 block text-black/70 dark:text-white/70">To</span>
-                                <input
-                                    type="date"
-                                    name="dateTo"
-                                    value={filters.dateTo}
-                                    onChange={handleChange}
-                                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-old-gold dark:border-white/10 dark:bg-dark-teal"
-                                />
-                            </label>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3">
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="group relative overflow-hidden bg-old-gold px-4 py-2 text-sm font-medium text-warm-white transition hover:shadow-[0_0_30px_rgba(199,159,72,0.3)] disabled:cursor-not-allowed disabled:opacity-70 dark:text-dark-teal"
-                        >
-                            <span className="relative z-10 flex items-center gap-2">
-                                {loading ? (
-                                    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <circle cx="12" cy="12" r="9" strokeOpacity="0.25" />
-                                        <path d="M21 12a9 9 0 00-9-9" strokeLinecap="round" />
-                                    </svg>
-                                ) : <IconFilter />}
-                                {loading ? 'Applying…' : 'Apply filters'}
-                            </span>
-                            <div className="absolute inset-0 bg-dark-teal transition-transform duration-500 ease-out group-hover:translate-y-0 dark:bg-warm-white translate-y-full" />
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={handleReset}
-                            disabled={loading}
-                            className="group relative overflow-hidden rounded border border-black/10 px-4 py-2 text-sm font-medium text-black transition disabled:cursor-not-allowed disabled:opacity-70 dark:border-white/10 dark:text-white"
-                        >
-                            <span className="relative z-10">{loading ? 'Resetting…' : 'Reset'}</span>
-                            <div className="absolute inset-0 translate-y-full bg-black/5 transition-transform duration-500 ease-out group-hover:translate-y-0 dark:bg-white/10" />
-                        </button>
-                    </div>
-                </form>
-
-                {/* Table header with Clear all button */}
-                <div
-                    className={`mt-6 flex items-center justify-between transition-all duration-700 delay-200 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-                        }`}
-                >
-                    <div className="text-sm text-black/60 dark:text-white/60">
-                        {total} log entries
-                    </div>
+                <div className={`mt-6 flex items-center justify-between transition-all duration-700 delay-200 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+                    <div className="text-sm text-black/60 dark:text-white/60">{total} log entries</div>
                     <button
                         type="button"
                         onClick={handleClearAll}
                         disabled={loading}
-                        className="group relative overflow-hidden rounded border border-rose-400/40 px-4 py-2 text-sm font-medium text-rose-600 transition hover:shadow-[0_0_20px_rgba(244,63,94,0.2)] disabled:cursor-not-allowed disabled:opacity-70 dark:text-rose-300"
+                        className="group relative overflow-hidden border border-rose-400/40 px-4 py-2 text-sm font-medium text-rose-600 transition hover:shadow-[0_0_20px_rgba(244,63,94,0.2)] disabled:cursor-not-allowed disabled:opacity-70 dark:text-rose-300 rounded-sm"
                     >
                         <span className="relative z-10">{loading ? 'Processing…' : 'Clear all'}</span>
                         <div className="absolute inset-0 translate-y-full bg-rose-50 transition-transform duration-500 ease-out group-hover:translate-y-0 dark:bg-rose-900/20" />
                     </button>
                 </div>
 
-                {/* Table */}
-                <div
-                    className={`mt-3 overflow-x-auto transition-all duration-700 delay-200 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-                        }`}
-                >
+                <div className={`mt-3 overflow-x-auto transition-all duration-700 delay-200 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
                     <table className="min-w-full text-left text-sm">
                         <thead>
                             <tr className="border-b border-black/10 text-black/70 dark:border-white/10 dark:text-white/70">
@@ -310,27 +221,23 @@ export default function AdminAuditLogs() {
                     </table>
                 </div>
 
-                {/* Pagination */}
-                <div
-                    className={`mt-6 flex flex-wrap items-center justify-between gap-3 transition-all duration-700 delay-300 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                        }`}
-                >
+                <div className={`mt-6 flex flex-wrap items-center justify-between gap-3 transition-all duration-700 delay-300 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
                     <p className="text-sm text-black/70 dark:text-white/70">Page {page} of {totalPages}</p>
                     <div className="flex gap-2">
                         <button
                             type="button"
-                            onClick={() => loadLogs(page - 1, filters)}
+                            onClick={() => loadLogs(page - 1, filters, searchQuery)}
                             disabled={page <= 1 || loading}
-                            className="group relative overflow-hidden rounded-lg border border-black/10 px-3 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10"
+                            className="group relative overflow-hidden border border-black/10 px-3 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 rounded-sm"
                         >
                             <span className="relative z-10">{loading ? 'Loading…' : 'Previous'}</span>
                             <div className="absolute inset-0 translate-y-full bg-black/5 transition-transform duration-500 ease-out group-hover:translate-y-0 dark:bg-white/10" />
                         </button>
                         <button
                             type="button"
-                            onClick={() => loadLogs(page + 1, filters)}
+                            onClick={() => loadLogs(page + 1, filters, searchQuery)}
                             disabled={page >= totalPages || loading}
-                            className="group relative overflow-hidden rounded-lg border border-black/10 px-3 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10"
+                            className="group relative overflow-hidden border border-black/10 px-3 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 rounded-sm"
                         >
                             <span className="relative z-10">{loading ? 'Loading…' : 'Next'}</span>
                             <div className="absolute inset-0 translate-y-full bg-black/5 transition-transform duration-500 ease-out group-hover:translate-y-0 dark:bg-white/10" />
@@ -346,7 +253,7 @@ export default function AdminAuditLogs() {
                 warning={confirmation.warning}
                 confirmLabel={confirmation.confirmLabel}
                 isProcessing={confirmation.isProcessing}
-                onCancel={() => setConfirmation((current) => ({ ...current, open: false }))}
+                onCancel={() => setConfirmation((c) => ({ ...c, open: false }))}
                 onConfirm={confirmation.onConfirm}
             />
         </section>
