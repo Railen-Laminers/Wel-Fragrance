@@ -1,8 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const Testimonial = require("../models/Testimonial");
+const User = require("../models/User");
 const { protect, adminOnly } = require("../middleware/auth");
 const { logActivity, createNotification } = require("../utils/audit");
+const { sendEmailAsync } = require("../services/emailService");
+const {
+  testimonialConfirmationTemplate,
+  testimonialAdminNotificationTemplate,
+  testimonialStatusUpdateTemplate,
+} = require("../services/emailTemplates");
 
 const serializeTestimonial = (testimonial) => ({
   _id: testimonial._id,
@@ -118,6 +125,31 @@ router.post("/", async (req, res) => {
       type: "info",
     });
 
+    // Send confirmation email to the testimonial submitter (non-blocking)
+    sendEmailAsync(
+      testimonial.email,
+      "Testimonial Received - Wel Fragrance",
+      testimonialConfirmationTemplate(testimonial.firstName, testimonial.lastName, testimonial._id)
+    );
+
+    // Send notification email to admin (non-blocking)
+    // Fetch admin user from database
+    const admin = await User.findOne({ role: "admin" });
+    if (admin && admin.email) {
+      sendEmailAsync(
+        admin.email,
+        "New Testimonial Awaiting Review - Action Required",
+        testimonialAdminNotificationTemplate(
+          testimonial.firstName,
+          testimonial.lastName,
+          testimonial.email,
+          testimonial.rating,
+          testimonial.message,
+          testimonial._id
+        )
+      );
+    }
+
     res.status(201).json(serializeTestimonial(testimonial));
   } catch (error) {
     res.status(500).json({ message: "Failed to submit testimonial", error: error.message });
@@ -170,6 +202,7 @@ router.patch("/:id/status", protect, adminOnly, async (req, res) => {
       return res.status(404).json({ message: "Testimonial not found" });
     }
 
+    const previousStatus = testimonial.status;
     testimonial.status = status;
     await testimonial.save();
 
@@ -181,6 +214,16 @@ router.patch("/:id/status", protect, adminOnly, async (req, res) => {
       description: `Set testimonial ${testimonial._id} to ${status}`,
       resourceId: testimonial._id.toString(),
     });
+
+    // Send status update email to the testimonial submitter (non-blocking)
+    // Only send if status has changed from Pending to something else
+    if (previousStatus === "Pending" && (status === "Approved" || status === "Rejected")) {
+      sendEmailAsync(
+        testimonial.email,
+        `Testimonial ${status} - Wel Fragrance`,
+        testimonialStatusUpdateTemplate(testimonial.firstName, testimonial.lastName, status)
+      );
+    }
 
     res.json(serializeTestimonial(testimonial));
   } catch (error) {

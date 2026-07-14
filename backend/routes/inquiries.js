@@ -1,8 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const Inquiry = require("../models/Inquiry");
+const User = require("../models/User");
 const { protect, adminOnly } = require("../middleware/auth");
 const { logActivity, createNotification } = require("../utils/audit");
+const { sendEmailAsync } = require("../services/emailService");
+const {
+  inquiryConfirmationTemplate,
+  inquiryAdminNotificationTemplate,
+} = require("../services/emailTemplates");
 
 const serializeInquiry = (inquiry) => ({
   _id: inquiry._id,
@@ -78,6 +84,31 @@ router.post("/", async (req, res) => {
       link: "/admin/inquiries",
       type: "info",
     });
+
+    // Send confirmation email to the inquirer (non-blocking)
+    sendEmailAsync(
+      inquiry.email,
+      "Inquiry Received - Wel Fragrance",
+      inquiryConfirmationTemplate(inquiry.firstName, inquiry.lastName, inquiry._id)
+    );
+
+    // Send notification email to admin (non-blocking)
+    // Fetch admin user from database
+    const admin = await User.findOne({ role: "admin" });
+    if (admin && admin.email) {
+      sendEmailAsync(
+        admin.email,
+        "New Inquiry Received - Action Required",
+        inquiryAdminNotificationTemplate(
+          inquiry.firstName,
+          inquiry.lastName,
+          inquiry.email,
+          inquiry.facebookLink,
+          inquiry.message,
+          inquiry._id
+        )
+      );
+    }
 
     res.status(201).json(serializeInquiry(inquiry));
   } catch (error) {
