@@ -1,4 +1,8 @@
 const nodemailer = require("nodemailer");
+const dns = require("dns");
+
+// Force Node.js to resolve DNS to IPv4 first – this prevents ENETUNREACH on Render
+dns.setDefaultResultOrder('ipv4first');
 
 // Create transporter
 const createTransporter = () => {
@@ -16,12 +20,17 @@ const createTransporter = () => {
 
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT),
+    port: parseInt(process.env.SMTP_PORT, 10),
     secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+    requireTLS: true,
     auth: {
       user: process.env.SMTP_USERNAME,
       pass: process.env.SMTP_PASSWORD,
     },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
+    family: 4, // explicit IPv4 – works as a backup
   });
 };
 
